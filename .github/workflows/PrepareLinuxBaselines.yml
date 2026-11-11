@@ -4,7 +4,7 @@ on:
     inputs:
       target:
         type: choice
-        options: [all, native, native-inputs, cross, loongarch, loongarch-oldworld, loongarch-newworld, loongarch-newworld-deps, mips, mips-deps]
+        options: [all, native, native-inputs, cross, loongarch, loongarch-oldworld, loongarch-oldworld-deps, loongarch-newworld, loongarch-newworld-deps, mips, mips-deps]
         default: all
 permissions:
   contents: read
@@ -247,7 +247,7 @@ jobs:
         path: build-temp/logs/
   loongarch-oldworld:
     needs: check-cache-release
-    if: inputs.target == 'all' || inputs.target == 'cross' || inputs.target == 'loongarch-oldworld'
+    if: inputs.target == 'all' || inputs.target == 'cross' || inputs.target == 'loongarch-oldworld' || inputs.target == 'loongarch-oldworld-deps'
     name: Clang C++20 on LoongArch old-world glibc 2.28
     runs-on: ubuntu-22.04
     timeout-minutes: 90
@@ -284,11 +284,34 @@ jobs:
       with:
         path: build-temp/loong28-inspection/downloads
         key: ${{ steps.oldworld-inputs.outputs.cache-primary-key }}
+    - uses: actions/cache/restore@v4
+      if: inputs.target == 'loongarch-oldworld-deps'
+      id: oldworld-graphics
+      with:
+        path: build-temp/baseline-loong64-oldworld
+        key: loong-oldworld-graphics-${{ hashFiles('scripts/build-linux-cross-dependencies.py', 'scripts/linux-baseline/oldworld-graphics.lock.json') }}
+        restore-keys: loong-oldworld-graphics-
+    - name: Build the missing old-world graphics libraries against glibc 2.28
+      if: inputs.target == 'loongarch-oldworld-deps'
+      run: |
+        set -o pipefail
+        cp -a build-temp/loong28-inspection/host-libs build-temp/baseline-loong64-oldworld/
+        sudo -E python3 scripts/build-linux-cross-dependencies.py build-temp/baseline-loong64-oldworld \
+          --cross build-temp/baseline-loong64-oldworld --sysroot build-temp/baseline-loong64-oldworld/sysroot \
+          --llvm build-temp/loong28-inspection/compiler/llvm-toolchain_20.1.8-1_amd64-linux-gnu_debian-10/llvm_install \
+          --recipes scripts/linux-baseline/oldworld-graphics.lock.json \
+          2>&1 | tee build-temp/logs/loong-oldworld-graphics.log
+    - uses: actions/cache/save@v4
+      if: always() && inputs.target == 'loongarch-oldworld-deps' && steps.oldworld-graphics.outputs.cache-hit != 'true'
+      with:
+        path: build-temp/baseline-loong64-oldworld
+        key: ${{ steps.oldworld-graphics.outputs.cache-primary-key }}
     - name: Relocate and package the accepted old-world toolchain
       env:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
         set -o pipefail
+        sudo chown -R "$(id -u):$(id -g)" build-temp/baseline-loong64-oldworld
         bash scripts/linux-baseline/package-cross.sh loong64-oldworld 2>&1 | tee build-temp/logs/loong-oldworld-packaging.log
     - uses: actions/upload-artifact@v4
       with:
@@ -305,7 +328,7 @@ jobs:
     needs: [loongarch-oldworld, loongarch-newworld, mips]
     if: >-
       ${{ !cancelled() &&
-      (inputs.target == 'all' || inputs.target == 'cross' || inputs.target == 'mips' || inputs.target == 'mips-deps' || inputs.target == 'loongarch-oldworld' || inputs.target == 'loongarch-newworld' || inputs.target == 'loongarch-newworld-deps') &&
+      (inputs.target == 'all' || inputs.target == 'cross' || inputs.target == 'mips' || inputs.target == 'mips-deps' || inputs.target == 'loongarch-oldworld' || inputs.target == 'loongarch-oldworld-deps' || inputs.target == 'loongarch-newworld' || inputs.target == 'loongarch-newworld-deps') &&
       (needs.mips.result == 'success' || needs['loongarch-oldworld'].result == 'success' || needs['loongarch-newworld'].result == 'success') &&
       needs.mips.result != 'failure' && needs['loongarch-oldworld'].result != 'failure' && needs['loongarch-newworld'].result != 'failure' }}
     runs-on: ubuntu-22.04

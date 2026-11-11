@@ -20,6 +20,8 @@ def main():
     parser.add_argument("--cross", type=Path)
     parser.add_argument("--sysroot", type=Path)
     parser.add_argument("--llvm", type=Path)
+    parser.add_argument("--recipes", type=Path,
+                        help="Pinned supplemental recipes with an explicit glibc baseline")
     args = parser.parse_args()
     source = Path(__file__).resolve().parent.parent
     prefix = args.prefix.resolve()
@@ -27,12 +29,13 @@ def main():
     sysroot = args.sysroot.resolve() if args.sysroot else prefix / "sysroot-loong64"
     llvm = args.llvm.resolve() if args.llvm else prefix / "llvm"
     triple = "loongarch64-linux-gnu"
-    recipe_path = source / "scripts/sysroots/loong64-sources.lock.json"
+    recipe_path = args.recipes.resolve() if args.recipes else source / "scripts/sysroots/loong64-sources.lock.json"
     recipe_bytes = recipe_path.read_text(encoding="utf-8").encode("utf-8")
     lock = json.loads((source / "scripts/sysroots/loong64.lock.json").read_text())
-    if hashlib.sha256(recipe_bytes).hexdigest() != lock["recipes_sha256"]:
+    if not args.recipes and hashlib.sha256(recipe_bytes).hexdigest() != lock["recipes_sha256"]:
         raise ValueError("Graphics recipes do not match the pinned sysroot")
     recipes = json.loads(recipe_bytes.decode("utf-8"))
+    baseline = recipes["glibc"] if args.recipes else lock["glibc"]
     identity = hashlib.sha256(recipe_bytes + Path(__file__).read_bytes()).hexdigest()
     completed = cross / (".graphics-ready-" + identity)
     all_installed = all(((cross / "host" if r["host"] else sysroot)
@@ -42,10 +45,22 @@ def main():
         print("Using verified old-glibc graphics dependencies")
         return
     run("apt-get", "-o", "Acquire::Retries=5", "install", "-y", "--no-install-recommends",
-        "autoconf", "automake", "libtool", "xutils-dev", "bison", "flex", "gperf", "libexpat1-dev")
+        "autoconf", "automake", "libtool", "xutils-dev", "bison", "flex", "gperf", "libexpat1-dev",
+        "meson", "ninja-build")
     run("python3", source / "scripts/prepare-linux-sysroot.py", recipe_path, prefix, "--sources-only")
     host = cross / "host"
     host.mkdir(parents=True, exist_ok=True)
+    # Vendor sysroots can distribute development metadata over lib and lib64.
+    pkg_dirs = ":".join(str(p) for p in sorted({p.parent for p in sysroot.rglob("*.pc")} |
+                                             {sysroot / "usr/lib" / triple / "pkgconfig"}))
+    pkg_wrapper = cross / "bin/pkg-config"
+    pkg_wrapper.write_text("#!/usr/bin/env bash\n"
+                           'prefix="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"\n'
+                           'export PKG_CONFIG_SYSROOT_DIR="$prefix/' + os.path.relpath(sysroot, cross) + '"\n'
+                           "export PKG_CONFIG_LIBDIR='" + pkg_dirs + "'\n"
+                           'export PKG_CONFIG_PATH="$prefix/host/lib/pkgconfig:$prefix/host/share/pkgconfig"\n'
+                           'exec /usr/bin/pkg-config "$@"\n')
+    pkg_wrapper.chmod(0o755)
     private_libs = cross / "dependencies/lib"
     private_libs.mkdir(parents=True, exist_ok=True)
     work = source / "build-temp/loong64-dependencies" / identity
@@ -59,6 +74,8 @@ def main():
                       PKG_CONFIG_PATH=str(host / "lib/pkgconfig") + ":" + str(host / "share/pkgconfig"), PYTHON="python3")
     target_env["PATH"] = str(host / "bin") + os.pathsep + target_env["PATH"]
     target_env.pop("LD_LIBRARY_PATH", None)
+    if recipes.get("host_library_dir"):
+        target_env["LD_LIBRARY_PATH"] = str(cross / recipes["host_library_dir"])
     options = {
         "libxcb": ["--enable-xkb", "--enable-xinput"],
         "wayland": ["--with-host-scanner", "--disable-documentation", "--disable-dtd-validation",
@@ -102,7 +119,8 @@ def main():
         if name == "libglu":
             # GLU 9.0 predates C++17's removal of the register keyword.
             env["CXXFLAGS"] += " -std=gnu++11"
-        if not (project / "configure").is_file():
+        meson = recipe.get("build_system") == "meson"
+        if not meson and not (project / "configure").is_file():
             run("autoreconf", "-fi", cwd=str(project), env=env)
         for filename in ("config.sub", "config.guess"):
             for path in project.rglob(filename):
@@ -128,18 +146,44 @@ def main():
                           "--libdir=/usr/lib/" + triple, "--with-sysroot=" + str(sysroot),
                           "--enable-shared", "--disable-static"]
         configure += options.get(name, [])
-        print("Building {} against glibc {}".format(name, lock["glibc"]), flush=True)
+        print("Building {} against glibc {}".format(name, baseline), flush=True)
         log = source / "build-temp/logs" / ("loong64-dependency-" + name + ".log")
         log.parent.mkdir(parents=True, exist_ok=True)
         libraries = []
         try:
-            run(*configure, cwd=str(project), env=env)
-            run("make", "-j" + os.environ.get("QT_BUILD_JOBS", "4"), cwd=str(project), env=env)
+            if meson:
+                cross_file = project / "cross.ini"
+                cross_file.write_text("[binaries]\n" + "\n".join(
+                    "{} = '{}'".format(key, value) for key, value in {
+                        "c": cross / "bin/clang", "cpp": cross / "bin/clang++",
+                        "ar": llvm / "bin/llvm-ar", "strip": llvm / "bin/llvm-strip",
+                        "pkgconfig": pkg_wrapper}.items()) +
+                    "\n[host_machine]\nsystem = 'linux'\ncpu_family = 'loongarch64'\n"
+                    "cpu = 'loongarch64'\nendian = 'little'\n"
+                    "[properties]\nneeds_exe_wrapper = true\n")
+                meson_build = project / "build"
+                run("meson", "setup", meson_build, project, "--cross-file=" + str(cross_file),
+                    "--prefix=/usr", "--libdir=lib/" + triple, "--buildtype=debugoptimized",
+                    "--default-library=shared", *recipe["meson_options"], env=env)
+                run("ninja", "-C", meson_build, "-j" + os.environ.get("QT_BUILD_JOBS", "4"), env=env)
+            else:
+                run(*configure, cwd=str(project), env=env)
+                run("make", "-j" + os.environ.get("QT_BUILD_JOBS", "4"), cwd=str(project), env=env)
             if is_host:
                 run("make", "install", cwd=str(project), env=env)
             else:
                 stage = project / "install"
-                run("make", "DESTDIR=" + str(stage), "install", cwd=str(project), env=env)
+                if meson:
+                    run("meson", "install", "-C", meson_build, "--no-rebuild",
+                        env=dict(env, DESTDIR=str(stage)))
+                else:
+                    run("make", "DESTDIR=" + str(stage), "install", cwd=str(project), env=env)
+                audit = ["python3", source / "scripts/package-linux.py", stage, "--audit-only",
+                         "--machine", "LoongArch", "--glibc", baseline,
+                         "--readelf", llvm / "bin/llvm-readelf"]
+                if recipes.get("elf_flags"):
+                    audit += ["--elf-flags", recipes["elf_flags"]]
+                run(*audit)
                 # Shared libraries link through their .so names and pkg-config.
                 # Old libtool versions cannot consume newer .la sysroot escapes.
                 # Do not carry this absolute-path metadata between projects.
@@ -159,12 +203,12 @@ def main():
             if (project / "config.log").is_file():
                 shutil.copy2(str(project / "config.log"), str(log))
         marker.write_text(json.dumps({"version": recipe["version"], "libraries": libraries}) + "\n")
-    modules = "xcb xcb-glx xcb-render xcb-renderutil xcb-image xcb-icccm xcb-keysyms xcb-randr xcb-sync xcb-xinerama xcb-xkb xcb-shm xcb-present xcb-dri3 xkbcommon xkbcommon-x11 wayland-client wayland-server wayland-egl gl egl glesv2 glu".split()
+    modules = recipes.get("required_modules") or "xcb xcb-glx xcb-render xcb-renderutil xcb-image xcb-icccm xcb-keysyms xcb-randr xcb-sync xcb-xinerama xcb-xkb xcb-shm xcb-present xcb-dri3 xkbcommon xkbcommon-x11 wayland-client wayland-server wayland-egl gl egl glesv2 glu".split()
     run(cross / "bin/pkg-config", "--exists", *modules, env=target_env)
     run("python3", source / "scripts/package-linux.py", private_libs, "--audit-only",
-        "--machine", "LoongArch", "--glibc", lock["glibc"],
+        "--machine", "LoongArch", "--glibc", baseline,
         "--readelf", llvm / "bin/llvm-readelf")
-    completed.write_text(lock["glibc"] + "\n")
+    completed.write_text(baseline + "\n")
     print("Old-glibc graphics dependency build and ELF audit passed")
 
 
