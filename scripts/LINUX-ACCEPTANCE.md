@@ -1,0 +1,44 @@
+# Linux pipeline acceptance evidence
+
+Updated 2026-11-11. Acceptance of the full pipeline is still in progress.
+Run numbers identify GitHub Actions runs in `cxxzhang/qt5.15.17`.
+
+| Target | Variant | SDK build and upload | Independent extracted SDK test |
+| --- | --- | --- | --- |
+| x64 | Release | Passed, run `42955634377` | Passed, run `42966673803` |
+| x64 | Debug | Passed, run `42960048140` | Passed, run `42966678486` |
+| MIPS64EL | Release | Compiled; runtime acceptance failed in run `42963764883` | Pending |
+| MIPS64EL | Debug | Pending | Pending |
+| LoongArch64 | Release | Building graphics dependencies | Pending |
+| LoongArch64 | Debug | Pending | Pending |
+| ARM64 | Release / Debug | Deferred until the other Linux targets pass | Pending |
+
+The independent x64 tests used commit `337fb784`, downloaded each SDK from
+its producing run, and ran in a fresh Ubuntu 18.04 container without the
+original Qt build or installation. They checked stripped ELF files, glibc
+requirements, dependency resolution and the separate symbols archive, then
+built and ran a qmake consumer. The consumer exercised C++20 concepts,
+coroutines, span and ranges; an offscreen GUI; QML object creation; system
+font discovery; and a TLS 1.2 handshake with encrypted loopback traffic.
+
+MIPS run `42963764883` passed the static audit of 167 ELF files/archives
+against glibc 2.24 and resolved dependencies of 145 dynamic ELF files using
+the target loader. Its extracted consumer then received SIGBUS while
+running QML. This is a failed acceptance result, not a usable SDK release.
+Crash diagnosis and a fresh build are in progress.
+
+The LoongArch glibc 2.36 sysroot needs source-built graphics dependencies.
+Run `42966136435` compiled and installed libxcb, then stopped because the
+host lacked gperf for xcb-util. The host dependency was added in `aa5fec88`;
+run `42967432245` then passed xcb-util and reached xcb-util-image. It exposed
+libtool following an absolute target library path outside the sysroot. The
+dependency configure commands now pass libtool's explicit `--with-sysroot`;
+the next run must prove the complete dependency chain and Qt SDK.
+
+The fixed upstream toolchain digests were recorded successfully in run
+`42964385726` and committed in `69020f2c`. Configured target baselines and
+local build instructions are in `LINUX-BUILD.md`.
+
+Full acceptance also requires the remaining Linux variants, independent
+cross-target artifact tests, the Linux gates, and the subsequent
+Windows/macOS builds and package collection. These have not passed yet.

@@ -86,7 +86,8 @@ def main():
         configure = [project / "configure", "--prefix=" + (str(host) if is_host else "/usr")]
         if not is_host:
             configure += ["--build=x86_64-linux-gnu", "--host=" + triple,
-                          "--libdir=/usr/lib/" + triple, "--enable-shared", "--disable-static"]
+                          "--libdir=/usr/lib/" + triple, "--with-sysroot=" + str(sysroot),
+                          "--enable-shared", "--disable-static"]
         configure += options.get(name, [])
         print("Building {} against glibc {}".format(name, lock["glibc"]), flush=True)
         log = source / "build-temp/logs" / ("loong64-dependency-" + name + ".log")
