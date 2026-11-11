@@ -119,6 +119,11 @@ mv "$prefix" "$relocated/toolchain"
 rel="$relocated/toolchain"
 env -u LD_LIBRARY_PATH "$rel/bin/clang++" -std=c++20 -pthread "$rel/probe.cpp" \
   '-Wl,-rpath,$ORIGIN/../lib' -o "$rel/probe-sdk/bin/probe"
+if [[ "$arch" == mips64el ]]; then
+  env -u LD_LIBRARY_PATH "$rel/gcc/bin/$triple-g++" --sysroot="$rel/$sysroot_rel" \
+    -std=c++20 -pthread "$rel/probe.cpp" '-Wl,-rpath,$ORIGIN/../lib' \
+    -o "$rel/probe-sdk/bin/gcc-probe"
+fi
 python3 "$root/scripts/package-linux.py" "$rel/probe-sdk" --audit-only \
   --machine "$machine" --glibc "$baseline" --interpreter "$loader" --readelf "$rel/llvm/bin/llvm-readelf"
 sudo python3 "$root/scripts/audit-linux-cross-runtime.py" "$rel/probe-sdk" \
@@ -131,6 +136,8 @@ prefix = Path(sys.argv[1])
 target = TargetRoot(prefix / sys.argv[2], prefix / 'bin/qemu', prefix / 'probe-sdk')
 sdk = target.stage_sdk(prefix / 'probe-sdk')
 target.execute(sdk / 'bin/probe')
+if (sdk / 'bin/gcc-probe').is_file():
+    target.execute(sdk / 'bin/gcc-probe')
 PY
 mv "$rel" "$prefix"
 rmdir "$relocated"

@@ -37,16 +37,16 @@
   "clang": {
     "version": "20.1.8.0",
     "x64": {
-      "api_url": "https://api.github.com/repos/cxxzhang/qt5.15.17/releases/assets/734794935",
+      "api_url": "https://api.github.com/repos/cxxzhang/qt5.15.17/releases/assets/735013026",
       "sha256": "3a25cb4eae724cad96d7e504ce7669a824f61d57d27716fd47d0a9f1fe2d8fdf",
       "upstream_api_url": "https://api.github.com/repos/mayeut/static-clang-images/releases/assets/285677756",
-      "release": "toolchain-llvm-20.1.8-v1"
+      "release": "linux-toolchains-v1"
     },
     "arm64": {
-      "api_url": "https://api.github.com/repos/cxxzhang/qt5.15.17/releases/assets/734794943",
+      "api_url": "https://api.github.com/repos/cxxzhang/qt5.15.17/releases/assets/735012796",
       "sha256": "da56c2b13a0c3e676e010d61a87753a975de18ae9eaa65247ca6a6d22bb95ab4",
       "upstream_api_url": "https://api.github.com/repos/mayeut/static-clang-images/releases/assets/285677753",
-      "release": "toolchain-llvm-20.1.8-v1"
+      "release": "linux-toolchains-v1"
     }
   },
   "libstdcxx": {

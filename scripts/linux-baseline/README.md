@@ -47,10 +47,16 @@ workflows consume pinned repository assets. Native compiler wrappers now
 locate their installed GCC and LLVM relative to their own directory;
 relocation of a complete sysroot bundle still requires separate validation.
 
-The native LLVM mirrors are published in this repository as
-`toolchain-llvm-20.1.8-v1`; `targets.json` pins their API asset IDs and
-original SHA256 values while retaining the upstream API URLs for provenance.
-The mirror validation run was `42989460116`. The original static compiler
+The dedicated `linux-toolchains-v1` tag/release stores validated LLVM,
+GNU support and sysroot bundles separately from Qt SDK releases. Archives
+use content hashes in their names; existing different content is never
+overwritten. Every archive has a SHA256 sidecar and source-run/commit/API
+asset provenance. `targets.json` pins the native LLVM API assets there;
+`toolchains.lock.json` pins complete accepted bundles for SDK jobs. Earlier
+per-build toolchain releases remain historical; new uploads use the one
+dedicated cache release.
+
+The native LLVM mirror validation run was `42989460116`. The original static compiler
 has X86/AArch64 backends but no MIPS/LoongArch backend; cross targets require
 a separately validated compiler and must not silently use this native bundle.
 

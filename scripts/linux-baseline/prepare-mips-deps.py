@@ -7,6 +7,7 @@ from pathlib import Path
 import runpy
 import subprocess
 import sys
+from types import SimpleNamespace
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -32,8 +33,30 @@ def main():
     llvm = ROOT / "build-temp/loong-newworld-inputs/compiler/bin/llvm-readelf"
     # The source distribution's glibc version is not an acceptance claim.
     # Reject any actual ELF that needs a newer libc before copying a byte.
-    subprocess.check_call([sys.executable, str(ROOT / "scripts/package-linux.py"), str(stage),
-                           "--audit-only", "--machine", "MIPS R3000", "--glibc", "2.17", "--readelf", str(llvm)])
+    audit = runpy.run_path(str(ROOT / "scripts/package-linux.py"))["audit"]
+    arguments = SimpleNamespace(sdk=stage, machine="MIPS R3000", host_machine=None,
+                                limit=(2, 17), interpreter=None, readelf=str(llvm))
+    rejected = []
+    count = 0
+    for path in sorted(stage.rglob("*")):
+        if not path.is_file() or path.is_symlink():
+            continue
+        with path.open("rb") as stream:
+            magic = stream.read(8)
+        if not (magic.startswith(b"\x7fELF") or magic == b"!<arch>\n"):
+            continue
+        count += 1
+        try:
+            audit(path, arguments)
+        except ValueError as error:
+            rejected.append(dict(path=str(path.relative_to(stage)), error=str(error)))
+    report = ROOT / "build-temp/logs/mips217-graphics-audit.json"
+    report.parent.mkdir(parents=True, exist_ok=True)
+    report.write_text(json.dumps(dict(checked=count, rejected=rejected), indent=2) + "\n")
+    if rejected:
+        raise ValueError("Graphics ELF baseline rejections: " + json.dumps(rejected))
+    if not count:
+        raise ValueError("No graphical ELF dependencies were audited")
     compilers = list((prefix / "gcc/bin").glob("*-gcc"))
     if len(compilers) != 1:
         raise ValueError("Expected the single source-built MIPS GCC")

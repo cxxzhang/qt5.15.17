@@ -39,92 +39,12 @@
       "pre_depends": ""
     },
     {
-      "name": "libacl1",
-      "version": "2.2.52-3+b1",
-      "architecture": "mips64el",
-      "path": "pool/main/a/acl/libacl1_2.2.52-3+b1_mips64el.deb",
-      "sha256": "077138b9cc9fe15f3bc8852d7817c1b9734db1b44707ddcb1dccf9e0402d1332",
-      "size": 27432,
-      "depends": "libattr1 (>= 1:2.4.46-8), libc6 (>= 2.4)",
-      "pre_depends": ""
-    },
-    {
-      "name": "libattr1",
-      "version": "1:2.4.47-2+b2",
-      "architecture": "mips64el",
-      "path": "pool/main/a/attr/libattr1_2.4.47-2+b2_mips64el.deb",
-      "sha256": "a2d02a6bdcee0929d09adce47e4e0eb4518cdcc3fc618fef20d02fea7041180e",
-      "size": 17962,
-      "depends": "libc6 (>= 2.4)",
-      "pre_depends": ""
-    },
-    {
-      "name": "libaudit-common",
-      "version": "1:2.6.7-2",
-      "architecture": "all",
-      "path": "pool/main/a/audit/libaudit-common_2.6.7-2_all.deb",
-      "sha256": "42c502f6d37d8d7b77e659d23c58b7e13401b52003782276eb891dfb1bf958c2",
-      "size": 18108,
-      "depends": "",
-      "pre_depends": ""
-    },
-    {
-      "name": "libaudit1",
-      "version": "1:2.6.7-2",
-      "architecture": "mips64el",
-      "path": "pool/main/a/audit/libaudit1_2.6.7-2_mips64el.deb",
-      "sha256": "1d63d0ab501d3bcbb88788263e89ad2c406778414163d5c0a189a5379663e319",
-      "size": 49912,
-      "depends": "libaudit-common (>= 1:2.6.7-2), libc6 (>= 2.8), libcap-ng0",
-      "pre_depends": ""
-    },
-    {
-      "name": "libblkid1",
-      "version": "2.29.2-1+deb9u1",
-      "architecture": "mips64el",
-      "path": "pool/main/u/util-linux/libblkid1_2.29.2-1+deb9u1_mips64el.deb",
-      "sha256": "2e7ae153d6a705a03cfa4a9a0ad708f14e961a406d78b8dae51c4bff540e949a",
-      "size": 156776,
-      "depends": "libc6 (>= 2.17), libuuid1 (>= 2.16)",
-      "pre_depends": ""
-    },
-    {
       "name": "libbsd0",
       "version": "0.8.3-1",
       "architecture": "mips64el",
       "path": "pool/main/libb/libbsd/libbsd0_0.8.3-1_mips64el.deb",
       "sha256": "19d19698e82d645dc2b95d7efa0ab9a03208b8eb9ce2e5bdd7bf9baa6852121b",
       "size": 82712,
-      "depends": "libc6 (>= 2.17)",
-      "pre_depends": ""
-    },
-    {
-      "name": "libbz2-1.0",
-      "version": "1.0.6-8.1",
-      "architecture": "mips64el",
-      "path": "pool/main/b/bzip2/libbz2-1.0_1.0.6-8.1_mips64el.deb",
-      "sha256": "14aa9ae63704218b79b0bbb4b26a855d0f70f363db520e9d8b2e9b20246f265c",
-      "size": 45278,
-      "depends": "libc6 (>= 2.4)",
-      "pre_depends": ""
-    },
-    {
-      "name": "libcap-ng0",
-      "version": "0.7.7-3+b1",
-      "architecture": "mips64el",
-      "path": "pool/main/libc/libcap-ng/libcap-ng0_0.7.7-3+b1_mips64el.deb",
-      "sha256": "87b4e138173583e6fc876d16043f0c654f8fd3edff0bf956d7712790af6e9999",
-      "size": 13338,
-      "depends": "libc6 (>= 2.8)",
-      "pre_depends": ""
-    },
-    {
-      "name": "libdb5.3",
-      "version": "5.3.28-12+deb9u1",
-      "architecture": "mips64el",
-      "path": "pool/main/d/db5.3/libdb5.3_5.3.28-12+deb9u1_mips64el.deb",
-      "sha256": "ffaeaddaad243ef69a4742345ac7d70ef74fdd3989aba8ef3631e4e23f4bf8cd",
-      "size": 592696,
       "depends": "libc6 (>= 2.17)",
       "pre_depends": ""
     },
@@ -146,16 +66,6 @@
       "sha256": "ae9a4f6c9b20a72e237b5ff52372d35c3bd9d0b94748e1c658bea5863c3ce846",
       "size": 245240,
       "depends": "libdbus-1-3 (= 1.10.32-0+deb9u1), pkg-config",
-      "pre_depends": ""
-    },
-    {
-      "name": "libdpkg-perl",
-      "version": "1.18.25",
-      "architecture": "all",
-      "path": "pool/main/d/dpkg/libdpkg-perl_1.18.25_all.deb",
-      "sha256": "df0ae8a030720fcc9627d867b8c68f9ac6e244f5d598b5692c7dfa4542251674",
-      "size": 1287170,
-      "depends": "perl, dpkg (>= 1.18.11)",
       "pre_depends": ""
     },
     {
@@ -319,16 +229,6 @@
       "pre_depends": ""
     },
     {
-      "name": "libgdbm3",
-      "version": "1.8.3-14",
-      "architecture": "mips64el",
-      "path": "pool/main/g/gdbm/libgdbm3_1.8.3-14_mips64el.deb",
-      "sha256": "1b8936670f8c24fbb69101c2a79491f0237fb7ad8f4a3b67d76777d7d665c66f",
-      "size": 29364,
-      "depends": "libc6 (>= 2.4), dpkg (>= 1.15.4) | install-info",
-      "pre_depends": ""
-    },
-    {
       "name": "libgl1-mesa-dev",
       "version": "13.0.6-1+b2",
       "architecture": "mips64el",
@@ -376,16 +276,6 @@
       "sha256": "48bfb257f04a560e46f0d5e9a22bc4e328636184d9e56c7e1a928e9e8ac42c75",
       "size": 75554,
       "depends": "libgles2-mesa (= 13.0.6-1+b2), libegl1-mesa-dev",
-      "pre_depends": ""
-    },
-    {
-      "name": "libglib2.0-0",
-      "version": "2.50.3-2+deb9u2",
-      "architecture": "mips64el",
-      "path": "pool/main/g/glib2.0/libglib2.0-0_2.50.3-2+deb9u2_mips64el.deb",
-      "sha256": "03dae032fbf7b49eafb79c5ef09f8aa00c1c8c8771ffb60879a5b71b1c7a3626",
-      "size": 2525634,
-      "depends": "libc6 (>= 2.17), libffi6 (>= 3.2.1-6), libmount1 (>= 2.20.1), libpcre3, libselinux1 (>= 1.32), zlib1g (>= 1:1.2.2)",
       "pre_depends": ""
     },
     {
@@ -449,46 +339,6 @@
       "pre_depends": ""
     },
     {
-      "name": "libmount1",
-      "version": "2.29.2-1+deb9u1",
-      "architecture": "mips64el",
-      "path": "pool/main/u/util-linux/libmount1_2.29.2-1+deb9u1_mips64el.deb",
-      "sha256": "347ba44e2bf6b38b537c588e27ddbc92b1e6bb5d25e4849753aa411cd5da7d5c",
-      "size": 159798,
-      "depends": "libblkid1 (>= 2.17.2), libc6 (>= 2.17), libselinux1 (>= 2.6-3~)",
-      "pre_depends": ""
-    },
-    {
-      "name": "libpam-modules",
-      "version": "1.1.8-3.6",
-      "architecture": "mips64el",
-      "path": "pool/main/p/pam/libpam-modules_1.1.8-3.6_mips64el.deb",
-      "sha256": "b1b63134d44b897221474a0760e1be6592e7abb8c029d36f6521b6314314fdf0",
-      "size": 300064,
-      "depends": "",
-      "pre_depends": "libaudit1 (>= 1:2.2.1), libc6 (>= 2.15), libdb5.3, libpam0g (>= 1.1.3-2), libselinux1 (>= 2.1.9), debconf (>= 0.5) | debconf-2.0, libpam-modules-bin (= 1.1.8-3.6)"
-    },
-    {
-      "name": "libpam-modules-bin",
-      "version": "1.1.8-3.6",
-      "architecture": "mips64el",
-      "path": "pool/main/p/pam/libpam-modules-bin_1.1.8-3.6_mips64el.deb",
-      "sha256": "1d8de6c753eaf1323df30bed2bb2795d922777509f2feb45bcf65ab2612e6f3f",
-      "size": 104890,
-      "depends": "libaudit1 (>= 1:2.2.1), libc6 (>= 2.4), libpam0g (>= 0.99.7.1), libselinux1 (>= 1.32)",
-      "pre_depends": ""
-    },
-    {
-      "name": "libpam0g",
-      "version": "1.1.8-3.6",
-      "architecture": "mips64el",
-      "path": "pool/main/p/pam/libpam0g_1.1.8-3.6_mips64el.deb",
-      "sha256": "bd7d9b254cc8012a4bd272198b5fd9d34860c37712bb8d8e38de6cc5f0a371cf",
-      "size": 122474,
-      "depends": "libaudit1 (>= 1:2.2.1), libc6 (>= 2.8), debconf (>= 0.5) | debconf-2.0",
-      "pre_depends": ""
-    },
-    {
       "name": "libpcre3",
       "version": "2:8.39-3",
       "architecture": "mips64el",
@@ -497,16 +347,6 @@
       "size": 329214,
       "depends": "libc6 (>= 2.4)",
       "pre_depends": "multiarch-support"
-    },
-    {
-      "name": "libperl5.24",
-      "version": "5.24.1-3+deb9u7",
-      "architecture": "mips64el",
-      "path": "pool/main/p/perl/libperl5.24_5.24.1-3+deb9u7_mips64el.deb",
-      "sha256": "ad56ceb1c4ac7f0602eab60ae657a123c9d5cfe74459a1e8f4e0ea81e2424590",
-      "size": 2907220,
-      "depends": "libbz2-1.0, libc6 (>= 2.23), libdb5.3, libgdbm3 (>= 1.8.3), zlib1g (>= 1:1.2.2.3), perl-modules-5.24 (>= 5.24.1-3+deb9u7)",
-      "pre_depends": ""
     },
     {
       "name": "libpng-dev",
@@ -549,36 +389,6 @@
       "pre_depends": ""
     },
     {
-      "name": "libsemanage-common",
-      "version": "2.6-2",
-      "architecture": "all",
-      "path": "pool/main/libs/libsemanage/libsemanage-common_2.6-2_all.deb",
-      "sha256": "f9ccd6a271af92cc2b557d5a3e2725b0d3a44a336704cded5f77e1a7a8503840",
-      "size": 26924,
-      "depends": "",
-      "pre_depends": ""
-    },
-    {
-      "name": "libsemanage1",
-      "version": "2.6-2",
-      "architecture": "mips64el",
-      "path": "pool/main/libs/libsemanage/libsemanage1_2.6-2_mips64el.deb",
-      "sha256": "80ff5a29e48bb3df2e2ef9625043ee8e155da443e1a258a5e16ecd809b3b0163",
-      "size": 92882,
-      "depends": "libsemanage-common (= 2.6-2), libaudit1 (>= 1:2.2.1), libbz2-1.0, libc6 (>= 2.8), libselinux1 (>= 2.6), libsepol1 (>= 2.6), libustr-1.0-1 (>= 1.0.4)",
-      "pre_depends": ""
-    },
-    {
-      "name": "libsepol1",
-      "version": "2.6-2",
-      "architecture": "mips64el",
-      "path": "pool/main/libs/libsepol/libsepol1_2.6-2_mips64el.deb",
-      "sha256": "b40a618a08d5f4fc5170adce10aaa5bb5cb18224f47caa7f8a00e3c8d3818c09",
-      "size": 214442,
-      "depends": "libc6 (>= 2.8)",
-      "pre_depends": ""
-    },
-    {
       "name": "libsystemd0",
       "version": "232-25+deb9u12",
       "architecture": "mips64el",
@@ -587,26 +397,6 @@
       "size": 247602,
       "depends": "",
       "pre_depends": "libc6 (>= 2.17), libgcrypt20 (>= 1.7.0), liblz4-1 (>= 0.0~r113), liblzma5 (>= 5.1.1alpha+20120614), libselinux1 (>= 2.1.9)"
-    },
-    {
-      "name": "libustr-1.0-1",
-      "version": "1.0.4-6",
-      "architecture": "mips64el",
-      "path": "pool/main/u/ustr/libustr-1.0-1_1.0.4-6_mips64el.deb",
-      "sha256": "aed2ad73c4c07855a9c0b8db6206328ba9ce27e446cc7a74c90b6adb16df1323",
-      "size": 66218,
-      "depends": "libc6 (>= 2.4)",
-      "pre_depends": ""
-    },
-    {
-      "name": "libuuid1",
-      "version": "2.29.2-1+deb9u1",
-      "architecture": "mips64el",
-      "path": "pool/main/u/util-linux/libuuid1_2.29.2-1+deb9u1_mips64el.deb",
-      "sha256": "852e7b5080596865a2d7a14c889d4abf60fa1d10aa28d1c16b00c628ae0d442f",
-      "size": 70334,
-      "depends": "passwd, libc6 (>= 2.4)",
-      "pre_depends": ""
     },
     {
       "name": "libwayland-bin",
@@ -1428,5 +1218,52 @@
       "depends": "zlib1g (= 1:1.2.8.dfsg-5), libc6-dev | libc-dev",
       "pre_depends": ""
     }
+  ],
+  "excluded_maintenance_packages": [
+    "coreutils",
+    "debconf",
+    "dpkg",
+    "libdpkg-perl",
+    "multiarch-support",
+    "passwd",
+    "perl",
+    "perl-base",
+    "perl-modules-5.24",
+    "pkg-config",
+    "tar",
+    "ucf"
+  ],
+  "roots": [
+    "libfontconfig1-dev",
+    "libdbus-1-dev",
+    "libdrm-dev",
+    "libgl1-mesa-dev",
+    "libegl1-mesa-dev",
+    "libgles2-mesa-dev",
+    "libglu1-mesa-dev",
+    "libx11-dev",
+    "libx11-xcb-dev",
+    "libxcb1-dev",
+    "libxcb-glx0-dev",
+    "libxcb-render0-dev",
+    "libxcb-render-util0-dev",
+    "libxcb-shape0-dev",
+    "libxcb-xfixes0-dev",
+    "libxcb-image0-dev",
+    "libxcb-icccm4-dev",
+    "libxcb-keysyms1-dev",
+    "libxcb-randr0-dev",
+    "libxcb-sync-dev",
+    "libxcb-xinerama0-dev",
+    "libxcb-xkb-dev",
+    "libxcb-shm0-dev",
+    "libxcb-present-dev",
+    "libxcb-dri3-dev",
+    "libxcb-util0-dev",
+    "libxkbcommon-dev",
+    "libxkbcommon-x11-dev",
+    "libwayland-dev",
+    "wayland-protocols",
+    "libfreetype6-dev"
   ]
 }
