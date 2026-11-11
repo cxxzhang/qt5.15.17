@@ -220,6 +220,7 @@ jobs:
       with:
         path: build-temp/toolchain
         key: bionic-qt-${{ matrix.arch }}-${{ hashFiles('scripts/setup-linux-toolchain.sh') }}
+        restore-keys: bionic-qt-${{ matrix.arch }}-
     - name: Prepare Ubuntu 18.04 toolchain
       env:
         TARGET: ${{ matrix.arch }}

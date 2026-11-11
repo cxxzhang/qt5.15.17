@@ -20,6 +20,7 @@ jobs:
       with:
         path: build-temp/toolchain
         key: bionic-qt-x64-${{ hashFiles('scripts/setup-linux-toolchain.sh') }}
+        restore-keys: bionic-qt-x64-
     - uses: actions/cache/restore@v4
       id: cross-deps
       with:

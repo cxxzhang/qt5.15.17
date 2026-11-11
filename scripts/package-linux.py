@@ -66,7 +66,7 @@ def audit_native_dependencies(path, args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("sdk", type=Path)
-    parser.add_argument("symbols", type=Path)
+    parser.add_argument("symbols", type=Path, nargs="?")
     parser.add_argument("--machine", required=True)
     parser.add_argument("--glibc", required=True)
     parser.add_argument("--host-machine")
@@ -76,7 +76,13 @@ def main():
     parser.add_argument("--objcopy", default="objcopy")
     parser.add_argument("--strip", default="strip")
     parser.add_argument("--native-dependencies", action="store_true")
+    parser.add_argument("--audit-only", action="store_true")
+    parser.add_argument("--require-stripped", action="store_true")
     args = parser.parse_args()
+    if not args.audit_only and args.symbols is None:
+        parser.error("symbols is required unless --audit-only is used")
+    if args.require_stripped and not args.audit_only:
+        parser.error("--require-stripped requires --audit-only")
     args.limit = tuple(map(int, args.glibc.split(".")))
     args.host_limit = tuple(map(int, args.host_glibc.split(".")))
     os.environ["LC_ALL"] = "C"
@@ -93,9 +99,15 @@ def main():
         relocatable = audit(path, args)
         if args.native_dependencies:
             audit_native_dependencies(path, args)
+        if args.require_stripped and re.search(r"\.(?:z?debug_info|gnu_debugdata)\s",
+                                               run(args.readelf, "-SW", str(path))):
+            raise ValueError("{}: debug information survived strip".format(path))
         files.append((path, relocatable, magic == b"!<arch>\n"))
     if not files:
         raise ValueError("No ELF files in {}".format(args.sdk))
+    if args.audit_only:
+        print("Audited {} ELF files/archives (glibc <= {})".format(len(files), args.glibc))
+        return
     args.symbols.mkdir(parents=True, exist_ok=False)
     for path, relocatable, archive in files:
         debug = args.symbols / path.relative_to(args.sdk)

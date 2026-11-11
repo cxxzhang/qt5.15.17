@@ -22,6 +22,9 @@ expect_rejection --machine invalid --glibc 99.0
 grep -q 'unexpected ELF architecture' "$work/error.log"
 expect_rejection --machine "$machine" --glibc 1.0
 grep -q 'exceeds glibc baseline' "$work/error.log"
+expect_rejection --machine "$machine" --glibc 99.0 --audit-only --require-stripped
+grep -q 'debug information survived strip' "$work/error.log"
+test ! -e "$work/symbols"
 python3 "$root/scripts/package-linux.py" "$work/sdk" "$work/symbols" \
   --machine "$machine" --glibc 99.0 --native-dependencies
 test -s "$work/symbols/probe.debug"
@@ -36,6 +39,10 @@ cc "$work/static-main.c" "$work/sdk/libprobe.a" -o "$work/static-consumer"
 "$work/static-consumer"
 readelf -SW "$work/sdk/libprobe.a" >"$work/archive-sections"
 ! grep -q '\.debug_info ' "$work/archive-sections"
+sha256sum "$work/sdk/probe" "$work/sdk/libprobe.a" >"$work/stripped-checksums"
+python3 "$root/scripts/package-linux.py" "$work/sdk" \
+  --machine "$machine" --glibc 99.0 --audit-only --require-stripped --native-dependencies
+sha256sum -c "$work/stripped-checksums"
 
 # A library that exists only at link time must block publication.
 mkdir "$work/broken"

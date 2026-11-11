@@ -25,7 +25,7 @@ jobs="$(nproc)"
 (( jobs <= 4 )) || jobs=4
 fetch() { curl --fail --location --retry 5 --output "$2" "$1"; }
 
-if [[ ! -f "$prefix/gcc/.ready" ]]; then
+if [[ ! -f "$prefix/gcc/.ready" ]] || [[ "$("$prefix/gcc/bin/gcc" -dumpfullversion)" != 13.3.0 ]]; then
   fetch https://gcc.gnu.org/pub/gcc/releases/gcc-13.3.0/gcc-13.3.0.tar.xz "$work/gcc.tar.xz"
   tar -xf "$work/gcc.tar.xz" -C "$work"
   mkdir "$work/gcc-build"
@@ -41,7 +41,9 @@ if [[ ! -f "$prefix/gcc/.ready" ]]; then
 fi
 
 llvm_release=https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8
-if [[ ! -f "$prefix/llvm/.ready" ]]; then
+if [[ ! -f "$prefix/llvm/.ready" || ! -x "$prefix/llvm/bin/llvm-readelf" \
+      || ! -x "$prefix/llvm/bin/llvm-objcopy" || ! -x "$prefix/llvm/bin/llvm-strip" ]] \
+   || ! "$prefix/llvm/bin/clang" --version | head -n1 | grep -q '18\.1\.8'; then
   mkdir -p "$prefix/llvm"
   if [[ "$arch" == x64 ]]; then
     fetch "$llvm_release/clang%2Bllvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04.tar.xz" "$work/llvm.tar.xz"
@@ -58,8 +60,9 @@ if [[ ! -f "$prefix/llvm/.ready" ]]; then
       -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$prefix/llvm" \
       -DLLVM_ENABLE_PROJECTS=clang -DLLVM_TARGETS_TO_BUILD=AArch64 \
       -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_BENCHMARKS=OFF \
-      -DLLVM_BUILD_TOOLS=OFF -DCLANG_INCLUDE_TESTS=OFF -DLLVM_PARALLEL_LINK_JOBS=1
-    cmake --build "$work/llvm-build" --target install-clang install-clang-resource-headers -j "$jobs"
+      -DLLVM_BUILD_TOOLS=ON -DCLANG_INCLUDE_TESTS=OFF -DLLVM_PARALLEL_LINK_JOBS=1
+    cmake --build "$work/llvm-build" --target install-clang install-clang-resource-headers \
+      install-llvm-readobj install-llvm-readelf install-llvm-objcopy install-llvm-strip -j "$jobs"
     ln -sfn clang "$prefix/llvm/bin/clang++"
   fi
   "$prefix/llvm/bin/clang" --version

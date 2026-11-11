@@ -28,6 +28,12 @@ runtime_dir="$(dirname "$("$CXX" -print-file-name=libstdc++.so.6)")"
 export LD_LIBRARY_PATH="$runtime_dir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 "$CC" --version
 getconf GNU_LIBC_VERSION
+readelf="$("$CXX" -print-prog-name=llvm-readelf)"
+objcopy="$("$CXX" -print-prog-name=llvm-objcopy)"
+strip="$("$CXX" -print-prog-name=llvm-strip)"
+for tool in "$readelf" "$objcopy" "$strip"; do
+  "$tool" --version
+done
 
 tar -xf "$source_dir/openssl/openssl-1.1.1w.tar.gz" -C "$build"
 ssl="$build/openssl"
@@ -58,17 +64,25 @@ for runtime in libstdc++.so.6 libgcc_s.so.1; do
   [[ -f "$runtime_path" ]]
   cp -L "$runtime_path" "$install/lib/$runtime"
 done
+
+# Split debug information before changing the ELF segment layout. In
+# particular, old objcopy cannot split some patchelf-expanded executables.
+symbols="$build/symbols"
+python3 "$source_dir/scripts/package-linux.py" "$install" "$symbols" \
+  --machine "$machine" --glibc "$baseline" \
+  --readelf "$readelf" --objcopy "$objcopy" --strip "$strip"
+
 # Use the matching runtime after extracting the SDK to a different directory.
 while IFS= read -r -d '' elf; do
-  if readelf -h "$elf" >/dev/null 2>&1 && patchelf --print-needed "$elf" >/dev/null 2>&1; then
+  if "$readelf" -h "$elf" >/dev/null 2>&1 && patchelf --print-needed "$elf" >/dev/null 2>&1; then
     rel="$(realpath --relative-to="$(dirname "$elf")" "$install/lib")"
     patchelf --set-rpath "\$ORIGIN/$rel" "$elf"
   fi
 done < <(find "$install" -type f -print0)
 
-symbols="$build/symbols"
-python3 "$source_dir/scripts/package-linux.py" "$install" "$symbols" \
-  --machine "$machine" --glibc "$baseline" --native-dependencies
+python3 "$source_dir/scripts/package-linux.py" "$install" \
+  --machine "$machine" --glibc "$baseline" --native-dependencies \
+  --audit-only --require-stripped --readelf "$readelf"
 name="qt5.15.17_${tag//-/_}"
 tar -C "$install" -czf "$source_dir/Output/$name.tar.gz" .
 tar -C "$symbols" -czf "$source_dir/Output/$name-symbols.tar.gz" .
