@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import socket
 import stat
 import subprocess
 
@@ -85,13 +86,37 @@ class TargetRoot:
             raise ValueError("{}: unresolved runtime dependency\n{}".format(program, result.stdout))
         return result.stdout
 
-    def execute(self, program, extra_env=None):
+    def execute(self, program, extra_env=None, debug_symbols=None):
         env = clean_environment()
         if extra_env:
             env.update(extra_env)
         result = subprocess.run(self.command(self.guest_path(program)), env=env)
         if result.returncode:
             subprocess.run(self.command("-E", "LD_DEBUG=libs", self.guest_path(program)), env=env)
+            if result.returncode < 0 and shutil.which("gdb-multiarch"):
+                if debug_symbols and debug_symbols.is_dir():
+                    for symbol in debug_symbols.rglob("*.debug"):
+                        relative = symbol.relative_to(debug_symbols)
+                        directory = self.base / "sdk" / relative.parent / ".debug"
+                        directory.mkdir(parents=True, exist_ok=True)
+                        # The host debugger follows this link; the guest never uses it.
+                        (directory / relative.name).symlink_to(symbol.resolve())
+                with socket.socket() as listener:
+                    listener.bind(("127.0.0.1", 0))
+                    port = listener.getsockname()[1]
+                emulator = subprocess.Popen(self.command("-g", str(port), self.guest_path(program)), env=env)
+                try:
+                    subprocess.run([
+                        "gdb-multiarch", "-q", "-nx", "-batch", str(program),
+                        "-ex", "set pagination off", "-ex", "set sysroot " + str(self.root),
+                        "-ex", "set remotetimeout 15", "-ex", "target remote 127.0.0.1:" + str(port),
+                        "-ex", "continue", "-ex", "thread apply all bt", "-ex", "info sharedlibrary",
+                        "-ex", "info registers", "-ex", "x/12i $pc-24"], env=env, timeout=60)
+                except subprocess.TimeoutExpired:
+                    print("Target crash debugger timed out", flush=True)
+                finally:
+                    emulator.kill()
+                    emulator.wait()
             raise subprocess.CalledProcessError(result.returncode, result.args)
 
 
@@ -128,7 +153,8 @@ def main():
             parser.error("smoke requires --sdk")
         sdk = root.stage_sdk(args.sdk)
         subprocess.check_call(["patchelf", "--set-rpath", "$ORIGIN/../sdk/lib", str(program)])
-        root.execute(program, {"QT_QPA_PLATFORM": "offscreen", "QML2_IMPORT_PATH": root.guest_path(sdk / "qml")})
+        root.execute(program, {"QT_QPA_PLATFORM": "offscreen", "QML2_IMPORT_PATH": root.guest_path(sdk / "qml")},
+                     debug_symbols=args.sdk.parent / "symbols")
         print("Extracted target SDK consumer passed inside its baseline filesystem")
 
 

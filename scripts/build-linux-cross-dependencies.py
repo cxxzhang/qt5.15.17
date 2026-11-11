@@ -38,7 +38,7 @@ def main():
         print("Using verified old-glibc graphics dependencies")
         return
     run("apt-get", "-o", "Acquire::Retries=5", "install", "-y", "--no-install-recommends",
-        "autoconf", "automake", "libtool", "xutils-dev", "bison", "flex")
+        "autoconf", "automake", "libtool", "xutils-dev", "bison", "flex", "gperf")
     run("python3", source / "scripts/prepare-linux-sysroot.py", recipe_path, prefix, "--sources-only")
     host = cross / "host"
     host.mkdir(parents=True, exist_ok=True)
