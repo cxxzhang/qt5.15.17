@@ -4,7 +4,7 @@ on:
     inputs:
       target:
         type: choice
-        options: [all, native, cross]
+        options: [all, native, cross, loongarch, mips]
         default: all
 permissions:
   contents: read
@@ -21,7 +21,7 @@ jobs:
         - arch: arm64
           runner: ubuntu-22.04-arm
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 60
+    timeout-minutes: 180
     steps:
     - uses: actions/checkout@v4
     - uses: actions/cache/restore@v4
@@ -54,7 +54,7 @@ jobs:
         name: diagnostics-baseline-217-${{ matrix.arch }}
         path: build-temp/logs/
   mips:
-    if: inputs.target == 'all' || inputs.target == 'cross'
+    if: inputs.target == 'all' || inputs.target == 'cross' || inputs.target == 'mips'
     name: Build MIPS64EL glibc 2.17 sysroot
     runs-on: ubuntu-22.04
     timeout-minutes: 180
@@ -66,6 +66,7 @@ jobs:
         path: build-temp/baseline-mips64el
         key: mips217-gnu-${{ hashFiles('scripts/linux-baseline/prepare-mips.sh') }}
     - uses: actions/cache/restore@v4
+      id: mips-downloads
       with:
         path: build-temp/baseline-downloads
         key: baseline-gnu-downloads-${{ hashFiles('scripts/linux-baseline/prepare-mips.sh') }}
@@ -79,6 +80,11 @@ jobs:
         mkdir -p build-temp/logs
         bash scripts/linux-baseline/prepare-mips.sh 2>&1 | tee build-temp/logs/mips217-toolchain.log
     - uses: actions/cache/save@v4
+      if: always() && steps.mips-downloads.outputs.cache-hit != 'true'
+      with:
+        path: build-temp/baseline-downloads
+        key: ${{ steps.mips-downloads.outputs.cache-primary-key }}
+    - uses: actions/cache/save@v4
       if: steps.mips-cache.outputs.cache-hit != 'true'
       with:
         path: build-temp/baseline-mips64el
@@ -89,7 +95,7 @@ jobs:
         name: diagnostics-baseline-mips217
         path: build-temp/logs/
   loongarch:
-    if: inputs.target == 'all' || inputs.target == 'cross'
+    if: inputs.target == 'all' || inputs.target == 'cross' || inputs.target == 'loongarch'
     name: Inspect LoongArch glibc 2.28 ABI inputs
     runs-on: ubuntu-22.04
     timeout-minutes: 60

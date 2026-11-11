@@ -20,7 +20,8 @@ libraries and must exercise the actual extracted SDK.
 The initial native toolchain preparation runs x64 and ARM64 concurrently
 inside manylinux2014/glibc 2.17 containers. It records the exact container
 digest before execution, downloads checksum-pinned static Clang 20.1.8,
-builds libstdc++ 13.3 against that old libc, and compiles, audits and runs
+builds full GCC 13.3 (using GCC) and its libstdc++ against that old libc,
+then uses Clang to compile, audit and run
 the C++20/thread probe with the selected private C++ runtime.
 
 Container digest recording is a preparation step. Final SDK builds must
@@ -31,6 +32,15 @@ Acceptance requires Release and Debug SDKs, separate matching symbols,
 ELF architecture/ABI/version/dependency checks, relocated Qt consumers,
 and execution in the baseline environment. ARM64 is authorized to run
 concurrently with the other Linux targets.
+
+`MirrorLinuxLLVM.yml` verifies both original static LLVM archives on their
+native glibc 2.17 runners before publishing a separate immutable compiler
+mirror release. It preserves upstream archives, embedded licenses, SHA256
+and provenance. This mirror is not Qt SDK acceptance. GNU toolchains and
+sysroots must also pass their runtime checks and be released before SDK
+workflows consume pinned repository assets. Native compiler wrappers now
+locate their installed GCC and LLVM relative to their own directory;
+relocation of a complete sysroot bundle still requires separate validation.
 
 After these targets pass, build every configured Windows/macOS platform,
 verify the complete selected asset set, then publish the first release

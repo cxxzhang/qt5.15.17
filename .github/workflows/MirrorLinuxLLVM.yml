@@ -1,0 +1,60 @@
+name: Mirror verified Linux LLVM
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - arch: x64
+          runner: ubuntu-22.04
+        - arch: arm64
+          runner: ubuntu-22.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v4
+    - name: Check original archive and native compiler on glibc 2.17
+      env:
+        ARCH: ${{ matrix.arch }}
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        image=$(python3 -c 'import json,os; print(json.load(open("scripts/linux-baseline/targets.json"))["targets"][os.environ["ARCH"]]["image"])')
+        docker run --rm -e GITHUB_TOKEN -v "$PWD:/workspace" -w /workspace "$image" bash scripts/linux-baseline/mirror-llvm.sh "$ARCH"
+    - uses: actions/upload-artifact@v4
+      with:
+        name: llvm-mirror-${{ matrix.arch }}
+        compression-level: 0
+        path: |
+          build-temp/llvm-mirror-${{ matrix.arch }}/*.tar.xz
+          build-temp/llvm-mirror-${{ matrix.arch }}/*.txt
+          build-temp/llvm-mirror-${{ matrix.arch }}/*.json
+  publish:
+    needs: verify
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: llvm-mirror-*
+        merge-multiple: true
+        path: mirror
+    - name: Publish immutable toolchain mirror
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
+        COMMIT: ${{ github.sha }}
+      run: |
+        cd mirror
+        cat sha256-*.txt > SHA256SUMS
+        sha256sum -c SHA256SUMS
+        cat > notes.md <<'EOF'
+        Original static LLVM/Clang 20.1.8 archives from mayeut/static-clang-images v20.1.8.0, mirrored byte-for-byte. Both native compilers were launched inside pinned glibc 2.17 containers. License files remain inside the original archives; per-architecture provenance records identify them and the upstream API assets.
+
+        This is a compiler mirror, not an accepted Qt SDK or a complete target sysroot/GNU toolchain. Target ABI and Qt runtime acceptance are separate requirements.
+        EOF
+        gh release create toolchain-llvm-20.1.8-v1 --target "$COMMIT" --latest=false --title 'Linux LLVM 20.1.8 mirror v1' --notes-file notes.md *.tar.xz provenance-*.json version-*.txt SHA256SUMS

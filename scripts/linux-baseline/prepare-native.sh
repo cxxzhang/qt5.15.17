@@ -48,8 +48,35 @@ for tool in clang clang++ llvm-ar llvm-ranlib llvm-nm llvm-strip llvm-readelf ld
 done
 "$compiler/clang++" --version
 gcc_triple="$(gcc -dumpmachine)"
-gcc_root="${DEVTOOLSET_ROOTPATH:-}/usr"
-test -d "$gcc_root/lib/gcc"
+gcc_root="$prefix/gcc"
+# Build GCC with GCC: libstdc++ uses GCC-specific target builtins. Qt and
+# consumers below still use Clang exclusively. Install the full GNU toolchain
+# so it can be released instead of depending on the image's /opt/rh tree.
+if [[ ! -f "$gcc_root/.ready" ]]; then
+  fetch libstdcxx "$work/gcc.tar.xz"
+  tar -xf "$work/gcc.tar.xz" -C "$work"
+  (
+    cd "$work/gcc-13.3.0"
+    ./contrib/download_prerequisites
+  )
+  mkdir "$work/build"
+  (
+    cd "$work/build"
+    "$work/gcc-13.3.0/configure" --prefix="$gcc_root" \
+      --disable-bootstrap --disable-multilib --disable-libsanitizer \
+      --disable-libquadmath --disable-libgomp --disable-libssp \
+      --disable-libvtv --disable-nls --enable-languages=c,c++ \
+      --with-pkgversion='Qt Linux baseline GNU support 13.3.0'
+    make -j"${BASELINE_JOBS:-4}"
+    make install
+    cp config.log "$root/build-temp/logs/$arch-gcc-config.log"
+    cp "$work/gcc-13.3.0/contrib/prerequisites.sha512" "$gcc_root/"
+    cp "$work/gcc-13.3.0/COPYING" "$work/gcc-13.3.0/COPYING3" \
+      "$work/gcc-13.3.0/COPYING.RUNTIME" "$gcc_root/"
+  )
+  touch "$gcc_root/.ready"
+fi
+test "$("$gcc_root/bin/gcc" -dumpfullversion)" = 13.3.0
 mkdir -p "$prefix/bin"
 for name in clang clang++; do
   cat >"$prefix/bin/$name" <<EOF
@@ -57,59 +84,21 @@ for name in clang clang++; do
 for argument in "\$@"; do
   [[ "\$argument" != -print-multi-os-directory ]] || { echo .; exit 0; }
 done
-exec "$compiler/$name" --target="$gcc_triple" --gcc-toolchain="$gcc_root" --gcc-triple="$gcc_triple" -fuse-ld=lld "\$@"
+prefix="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")/.." && pwd)"
+exec "\$prefix/clang/bin/$name" --target="$gcc_triple" --gcc-toolchain="\$prefix/gcc" --gcc-triple="$gcc_triple" -fuse-ld=lld "\$@"
 EOF
   chmod +x "$prefix/bin/$name"
 done
-if [[ ! -f "$prefix/runtime/.ready" ]]; then
-  fetch libstdcxx "$work/gcc.tar.xz"
-  tar -xf "$work/gcc.tar.xz" -C "$work"
-  ln -s gthr-posix.h "$work/gcc-13.3.0/libgcc/gthr-default.h"
-  python3 - "$work/gcc-13.3.0/libstdc++-v3/src/c++11/Makefile.in" <<'PY'
-from pathlib import Path
-import sys
-path = Path(sys.argv[1])
-text = path.read_text()
-assert text.count('-gno-as-loc-support') == 2
-path.write_text(text.replace('-gno-as-loc-support', '-g0'))
-PY
-  mkdir "$work/build"
-  (
-    cd "$work/build"
-    CC="$prefix/bin/clang" CXX="$prefix/bin/clang++" \
-    CFLAGS='-O2 -g -fPIC' CXXFLAGS='-O2 -g -fsized-deallocation' \
-    LDFLAGS='-Wl,--undefined-version' \
-    AR="$compiler/llvm-ar" RANLIB="$compiler/llvm-ranlib" \
-    NM="$compiler/llvm-nm" LD="$compiler/ld.lld" STRIP="$compiler/llvm-strip" \
-      "$work/gcc-13.3.0/libstdc++-v3/configure" \
-      --build="$gcc_triple" --host="$gcc_triple" --prefix="$prefix/runtime" \
-      --with-gxx-include-dir="$prefix/runtime/include/c++/13.3.0" \
-      --disable-multilib --disable-libstdcxx-pch --disable-static --enable-shared \
-      --enable-libstdcxx-threads
-    grep -q '^#define _GLIBCXX_HAS_GTHREADS 1' config.h
-    make -j4
-    make install
-  )
-  touch "$prefix/runtime/.ready"
-fi
-stdlib="$(find "$prefix/runtime" -name libstdc++.so.6 -print -quit)"
+stdlib="$("$gcc_root/bin/g++" -print-file-name=libstdc++.so.6)"
 test -n "$stdlib"
 runtime_lib="$(dirname "$stdlib")"
-config_header="$(find "$prefix/runtime/include" -path '*/bits/c++config.h' -print -quit)"
-test -n "$config_header"
-target_include="$(dirname "$(dirname "$config_header")")"
-cat >"$prefix/bin/clang++" <<EOF
-#!/usr/bin/env bash
-for argument in "\$@"; do
-  [[ "\$argument" != -print-multi-os-directory ]] || { echo .; exit 0; }
-done
-exec "$compiler/clang++" --target="$gcc_triple" --gcc-toolchain="$gcc_root" --gcc-triple="$gcc_triple" -fuse-ld=lld \
-  -nostdinc++ -isystem "$prefix/runtime/include/c++/13.3.0" \
-  -isystem "$target_include" -L"$runtime_lib" "\$@"
-EOF
 mkdir -p "$prefix/probe-sdk/bin" "$prefix/probe-sdk/lib"
 cp -L "$stdlib" "$prefix/probe-sdk/lib/libstdc++.so.6"
-cp -L "$("$prefix/bin/clang" -print-file-name=libgcc_s.so.1)" "$prefix/probe-sdk/lib/"
+cp -L "$("$gcc_root/bin/gcc" -print-file-name=libgcc_s.so.1)" "$prefix/probe-sdk/lib/"
+# DT_RUNPATH on the executable is not inherited by libstdc++'s libgcc
+# dependency. Each private shared runtime must resolve its own siblings.
+patchelf --set-rpath '$ORIGIN' "$prefix/probe-sdk/lib/libstdc++.so.6"
+patchelf --set-rpath '$ORIGIN' "$prefix/probe-sdk/lib/libgcc_s.so.1"
 cat >"$prefix/probe.cpp" <<'CPP'
 #include <algorithm>
 #include <concepts>
