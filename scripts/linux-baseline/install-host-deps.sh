@@ -3,11 +3,15 @@
 set -euo pipefail
 test "$(id -u)" = 0
 test "$#" -gt 0
-installed=true
+missing=()
 for package in "$@"; do
-  [[ "$(dpkg-query -W -f='${Status}' "$package" 2>/dev/null || true)" == 'install ok installed' ]] || installed=false
+  if [[ "$package" == pkg-config ]] && command -v pkg-config >/dev/null && pkg-config --version >/dev/null; then
+    # Ubuntu runners can supply the executable through pkgconf instead.
+    continue
+  fi
+  [[ "$(dpkg-query -W -f='${Status}' "$package" 2>/dev/null || true)" == 'install ok installed' ]] || missing+=("$package")
 done
-if "$installed"; then
+if [[ "${#missing[@]}" == 0 ]]; then
   echo "Requested host dependencies are already installed"
   exit 0
 fi
@@ -32,7 +36,7 @@ for path in Path('/etc/apt/sources.list.d').glob('*'):
             path.write_text(updated)
 PY
 for attempt in 1 2; do
-  if apt-get "${options[@]}" update && apt-get "${options[@]}" install -y --no-install-recommends "$@"; then
+  if apt-get "${options[@]}" update && apt-get "${options[@]}" install -y --no-install-recommends "${missing[@]}"; then
     exit 0
   fi
 done
