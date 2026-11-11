@@ -10,7 +10,12 @@ satisfy the new requested limits.
 | ARM64 | 2.17 | AArch64 |
 | MIPS64EL | 2.17 | little-endian n64 |
 | LoongArch old world | 2.28 | ELF flags 0x3, `/lib64/ld.so.1` |
-| LoongArch new world | 2.28 | ELF flags 0x43, `/lib64/ld-linux-loongarch-lp64d.so.1` |
+| LoongArch new world | 2.36 | ELF flags 0x43, `/lib64/ld-linux-loongarch-lp64d.so.1` |
+
+On 2026-11-11 the user authorized glibc 2.36 for the new-world target
+when 2.28 is unavailable. The old-world limit remains 2.28. The upstream
+new-world ABI starts at 2.36; merely rebuilding glibc 2.28 does not add
+that architecture port. Never substitute the inspected 2.38 candidate.
 
 `targets.json` is the target specification. All five targets retain Clang
 and libstdc++; none may pass by raising the glibc limit or changing ELF

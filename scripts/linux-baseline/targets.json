@@ -26,11 +26,12 @@
       "interpreter": "/lib64/ld.so.1"
     },
     "loong64-newworld": {
-      "glibc": "2.28",
+      "glibc": "2.36",
       "machine": "LoongArch",
       "triple": "loongarch64-linux-gnu",
       "elf_flags": 67,
-      "interpreter": "/lib64/ld-linux-loongarch-lp64d.so.1"
+      "interpreter": "/lib64/ld-linux-loongarch-lp64d.so.1",
+      "baseline_reason": "User authorized upstream new-world 2.36 fallback on 2026-11-11; glibc 2.28 has no upstream new-world port"
     }
   },
   "clang": {

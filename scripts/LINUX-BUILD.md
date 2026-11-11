@@ -1,7 +1,7 @@
 # Linux Qt SDK builds
 
 The current requested glibc limits are x64/ARM64/MIPS64EL 2.17 and both
-LoongArch worlds 2.28. See `linux-baseline/README.md` for the replacement
+LoongArch old world 2.28 and new world 2.36 (authorized fallback). See `linux-baseline/README.md` for the replacement
 pipeline. The instructions and results below describe the superseded
 2.27/2.24/2.36 implementation and are retained as historical reference.
 

@@ -1,7 +1,8 @@
 # Historical Linux baseline evidence (superseded)
 
 The user replaced these baselines on 2026-11-11. These successful builds
-do not count as acceptance of the requested glibc 2.17/2.28 SDKs. The
+do not count as acceptance of the complete requested SDK set (glibc 2.17,
+old-world 2.28 and authorized new-world 2.36 fallback). The
 current target specification is `linux-baseline/targets.json` and its
 acceptance scope is described in `linux-baseline/README.md`.
 

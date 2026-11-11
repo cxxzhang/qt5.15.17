@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: 固定旧 glibc 基线
-系统 SHALL 使用固定版本 Clang 与 libstdc++ 构建 Linux SDK。x64、ARM64、MIPS64EL 的运行 glibc 要求不得超过 2.17；龙芯旧世界和新世界分别构建，运行 glibc 要求均不得超过 2.28。不得升级基线或修改 ELF 版本元数据来通过验收。
+系统 SHALL 使用固定版本 Clang 与 libstdc++ 构建 Linux SDK。x64、ARM64、MIPS64EL 的运行 glibc 要求不得超过 2.17；龙芯旧世界和新世界分别构建，旧世界不得超过 2.28，新世界按用户 2026-11-11 授权的后备方案不得超过 2.36。不得擅自升级基线或修改 ELF 版本元数据来通过验收。
 
 #### Scenario: 原生目标兼容旧系统
 - **WHEN** 构建 x64、ARM64 或 MIPS64EL 产物
@@ -9,7 +9,7 @@
 
 #### Scenario: 独立交叉目标基线
 - **WHEN** 构建 LoongArch64 旧世界或新世界
-- **THEN** 系统分别使用固定且经校验的工具链与目标 sysroot，检查对应 ELF ABI、加载器及 glibc 2.28 上限，并执行实际目标运行探针。
+- **THEN** 系统分别使用固定且经校验的工具链与目标 sysroot，检查对应 ELF ABI、加载器及旧世界 glibc 2.28、新世界 glibc 2.36 上限，并执行实际目标运行探针。
 
 ### Requirement: C++20 SDK 消费能力
 系统 SHALL 使用统一的 libstdc++ 工具链验证 C++20 应用消费 Qt SDK，并记录已验证的功能及运行库要求。

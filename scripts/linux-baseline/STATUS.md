@@ -1,7 +1,8 @@
 # Linux baseline progress (2026-11-11)
 
-The requested limits remain x64/ARM64/MIPS64EL glibc 2.17 and both
-LoongArch ABIs glibc 2.28. No Qt SDK has been accepted against all five
+The requested limits are x64/ARM64/MIPS64EL glibc 2.17, LoongArch old world
+glibc 2.28 and new world glibc 2.36 (fallback authorized on 2026-11-11).
+No Qt SDK has been accepted against all five
 requested targets. Validate Linux first; Windows/macOS builds follow later.
 
 ## Published compiler inputs
@@ -49,20 +50,23 @@ a Clang C++20/thread probe with `/lib64/ld.so.1` in a real target chroot.
 Its wrappers are still preparation paths and must be made relocatable and
 tested before releasing a complete toolchain.
 
-## LoongArch new world: requested baseline unresolved
+## LoongArch new world: authorized glibc 2.36 fallback
 
 Inspection run `42990459326` records the separate official candidate
 `debian_bullseye_loongarch64-sysroot.tar.bz2` (SHA256
 `f5f7eb75744935f228afe7298c66e9faf3c52e3134787906290d5d479d8bb252`).
 Its real libc is `usr/lib64/libc.so.6`, ELF flags 0x43, exporting
-GLIBC_2.36 and GLIBC_2.38. It does not satisfy the requested 2.28 baseline.
+GLIBC_2.36 and GLIBC_2.38. It exceeds both the original 2.28 limit and
+the now-authorized 2.36 fallback, so it still cannot be used.
 The libc inspection now handles regular `libc.so.6` as well as older
 `libc-VERSION.so` filenames.
 
-The requested deployment distribution/version needs clarification to identify
-whether a vendor-specific new-world glibc 2.28 environment exists. Do not
-raise the accepted limit, relabel old-world libraries, or edit ELF flags or
-symbol version metadata to make this target pass.
+The user authorized glibc 2.36 when a new-world 2.28 build is unavailable.
+`targets.json` now records 2.36 for this target only. The existing pinned
+`scripts/sysroots/loong64.lock.json` is a real 2.36 new-world input and can
+be reused after validation and publication to this repository. Do not use
+the inspected 2.38 sysroot, relabel old-world libraries, or edit ELF flags
+or symbol version metadata to make the target pass.
 
 ## Remaining integration
 
