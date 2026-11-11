@@ -17,6 +17,11 @@ print(entry['api_url'], entry['sha256'], entry['filename'])
 PY
 )
 test -n "$url" && test -n "$checksum" && test -n "$filename"
+if [[ -f "$destination/.accepted-$checksum" ]]; then
+  test -x "$destination/bin/clang++"
+  echo "$arch: reusing the accepted repository toolchain from cache"
+  exit 0
+fi
 cache="$root/build-temp/accepted-toolchain-downloads"
 mkdir -p "$cache" "$destination"
 archive="$cache/$filename"

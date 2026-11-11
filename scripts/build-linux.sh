@@ -58,6 +58,7 @@ bash "$source_dir/configure" -prefix "$install" -confirm-license -opensource "-$
   -qt-libjpeg -qt-libmd4c -qt-sqlite -no-zstd -no-icu \
   -feature-xcb -feature-wayland-client -feature-wayland-server \
   -platform linux-clang "QMAKE_CC=$CC" "QMAKE_CXX=$CXX" "QMAKE_LFLAGS=" \
+  'QMAKE_CFLAGS+=-Wno-unused-command-line-argument' 'QMAKE_CXXFLAGS+=-Wno-unused-command-line-argument' \
   -I "$OPENSSL_INCDIR" -L "$OPENSSL_LIBDIR"
 make -j"$jobs"
 make install

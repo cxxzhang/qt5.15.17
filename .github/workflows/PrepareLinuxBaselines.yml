@@ -305,7 +305,11 @@ jobs:
         path: build-temp/logs/
   publish-cross:
     needs: [loongarch-oldworld, loongarch-newworld, mips]
-    if: ${{ !cancelled() && inputs.target != 'mips-deps' && contains(needs.*.result, 'success') && !contains(needs.*.result, 'failure') }}
+    if: >-
+      ${{ !cancelled() &&
+      (inputs.target == 'all' || inputs.target == 'cross' || inputs.target == 'mips' || inputs.target == 'loongarch-oldworld' || inputs.target == 'loongarch-newworld') &&
+      (needs.mips.result == 'success' || needs['loongarch-oldworld'].result == 'success' || needs['loongarch-newworld'].result == 'success') &&
+      needs.mips.result != 'failure' && needs['loongarch-oldworld'].result != 'failure' && needs['loongarch-newworld'].result != 'failure' }}
     runs-on: ubuntu-22.04
     permissions:
       contents: write

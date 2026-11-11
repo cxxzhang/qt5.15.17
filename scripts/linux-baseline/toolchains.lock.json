@@ -1,5 +1,32 @@
 {
   "schema": 1,
   "repository": "cxxzhang/qt5.15.17",
-  "targets": {}
+  "targets": {
+    "arm64": {
+      "schema": 1,
+      "tag": "linux-toolchains-v1",
+      "filename": "toolchain-linux-arm64-glibc217-155156e66469.tar.xz",
+      "original_filename": "toolchain-linux-arm64-glibc217.tar.xz",
+      "sha256": "155156e6646998b8c4486bf67be619faaa4eaaedb9a62c7cdf56de996bea57d3",
+      "size": 474472936,
+      "asset_id": 735029150,
+      "api_url": "https://api.github.com/repos/cxxzhang/qt5.15.17/releases/assets/735029150",
+      "source_commit": "5968078f2caf117ecd799618eb0562fec464cd52",
+      "source_run": "42999963506",
+      "source_repository": "cxxzhang/qt5.15.17"
+    },
+    "x64": {
+      "schema": 1,
+      "tag": "linux-toolchains-v1",
+      "filename": "toolchain-linux-x64-glibc217-ccb32371de5d.tar.xz",
+      "original_filename": "toolchain-linux-x64-glibc217.tar.xz",
+      "sha256": "ccb32371de5ddf0b604a48ea6f5d1ce6248b8ec52a686fa1e76f8cd06c27ef11",
+      "size": 500812584,
+      "asset_id": 735030471,
+      "api_url": "https://api.github.com/repos/cxxzhang/qt5.15.17/releases/assets/735030471",
+      "source_commit": "5968078f2caf117ecd799618eb0562fec464cd52",
+      "source_run": "42999963506",
+      "source_repository": "cxxzhang/qt5.15.17"
+    }
+  }
 }
