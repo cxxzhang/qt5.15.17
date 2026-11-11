@@ -119,8 +119,7 @@ jobs:
     - name: Check ELF publishing gates and host runtime dependencies
       run: |
         bash scripts/test-package-linux.sh
-        sudo apt-get -o Acquire::Retries=5 update
-        sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends build-essential pkg-config patchelf libtinfo5 libxml2 libedit2
+        sudo bash scripts/linux-baseline/install-host-deps.sh build-essential pkg-config patchelf libtinfo5 libxml2 libedit2
     - name: Read accepted source archive identities
       id: toolchain-pin
       env:

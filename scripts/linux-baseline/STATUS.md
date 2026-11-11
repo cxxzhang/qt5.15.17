@@ -90,6 +90,13 @@ Windows/macOS chain before the authorized SDK release.
 
 ## Workspace protection
 
+Cross retry `43038651680` failed both variants before toolchain download or
+Qt compilation: the Ubuntu runner could not resolve azure.archive.ubuntu.com
+while fetching pkg-config/libtinfo5. The new host-only dependency installer
+limits retry time and retries through archive.ubuntu.com. It changes only
+runner APT sources; target sysroots and accepted archive pins stay intact.
+Native qflags retry has been dispatched for ARM64 Debug at `bb320ac`.
+
 Native ARM64 Debug in run `43036480483` completed Qt build/install,
 stripped/audited 177 ELF/archive files and verified 155 ELF debug links plus
 22 static archive symbol files. Its GNU report checks 151 files with no
