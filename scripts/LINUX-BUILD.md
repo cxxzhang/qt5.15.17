@@ -63,6 +63,8 @@ SDK archive to a different directory and runs the relocated qmake to build
 and execute a Qt GUI/network consumer with TLS support. The consumer uses
 C++20 concepts, coroutines, span and ranges. This verifies those features;
 it does not claim complete C++20 library coverage.
+Before upload, it also verifies the separate symbol archive against the
+extracted SDK's debuglink filenames and CRCs.
 
 The consumer performs a TLS 1.2 handshake and exchanges encrypted data over
 the loopback interface. `scripts/smoke-tls/` contains its public self-signed

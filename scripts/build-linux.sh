@@ -92,5 +92,6 @@ tar -C "$symbols" -czf "$source_dir/Output/$name-symbols.tar.gz" .
 relocated="$build/relocated-sdk"
 mkdir "$relocated"
 tar -xzf "$source_dir/Output/$name.tar.gz" -C "$relocated"
+python3 "$source_dir/scripts/verify-linux-symbols.py" "$relocated" "$source_dir/Output/$name-symbols.tar.gz"
 [[ "$(env -u LD_LIBRARY_PATH "$relocated/bin/qmake" -query QT_VERSION)" == 5.15.17 ]]
 bash "$source_dir/scripts/smoke-linux.sh" "$relocated" "$build/smoke"

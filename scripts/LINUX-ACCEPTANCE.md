@@ -5,15 +5,15 @@ Run numbers identify GitHub Actions runs in `cxxzhang/qt5.15.17`.
 
 | Target | Variant | SDK build and upload | Independent extracted SDK test |
 | --- | --- | --- | --- |
-| x64 | Release | Passed, run `42955634377` | Passed, run `42966673803` |
-| x64 | Debug | Passed, run `42960048140` | Passed, run `42966678486` |
-| MIPS64EL | Release | Passed MIPS job in run `42969467526` | Passed, run `42972856514` |
-| MIPS64EL | Debug | Pending | Pending |
-| LoongArch64 | Release | Graphics dependencies passed; Qt architecture patch pending verification | Pending |
-| LoongArch64 | Debug | First Qt build in progress | Pending |
+| x64 | Release | Passed, run `42955634377` | Passed including symbol CRCs, run `42974969212` |
+| x64 | Debug | Passed, run `42960048140` | Passed including symbol CRCs, run `42974973376` |
+| MIPS64EL | Release | Passed MIPS job in run `42969467526` | Passed including symbol CRCs, run `42974977181` |
+| MIPS64EL | Debug | Passed, run `42971194327` | Passed including symbol CRCs, run `42975112648` |
+| LoongArch64 | Release | Building in run `42973269864` | Pending |
+| LoongArch64 | Debug | Passed, run `42973273900` | Passed including symbol CRCs, run `42976507788` |
 | ARM64 | Release / Debug | Deferred until the other Linux targets pass | Pending |
 
-The independent x64 tests used commit `337fb784`, downloaded each SDK from
+The independent x64 tests used commit `84c37952`, downloaded each SDK from
 its producing run, and ran in a fresh Ubuntu 18.04 container without the
 original Qt build or installation. They checked stripped ELF files, glibc
 requirements, dependency resolution and the separate symbols archive, then
@@ -34,7 +34,9 @@ and TLS exchange. The parent workflow failed its separate, older LoongArch
 job; this does not represent a successful full Linux matrix. Independent
 MIPS artifact verification passed in run `42972856514`, auditing 167 ELF
 files/archives and resolving 145 dynamic ELF files before the C++20/GUI/QML/
-fonts/TLS consumer passed. The Debug build is still in progress.
+fonts/TLS consumer passed. Debug then passed its producing workflow and
+independent acceptance. Both variants subsequently passed the extended
+symbol archive CRC checks, as recorded in the table.
 
 The LoongArch glibc 2.36 sysroot needs source-built graphics dependencies.
 Run `42966136435` compiled and installed libxcb, then stopped because the
@@ -55,6 +57,9 @@ passed all graphics dependencies and their glibc 2.36 audit and entered the
 Qt SDK build. Qt's bundled Double-Conversion did not recognize LoongArch;
 the Qt architecture patch now includes the same LoongArch detection as
 upstream Double-Conversion. The next run must prove the complete Qt SDK.
+Debug then passed the complete build and independent extracted SDK test,
+including the target loader audit, symbol CRCs, decimal formatting and
+the C++20/GUI/QML/fonts/TLS consumer. Release is still compiling.
 
 The fixed upstream toolchain digests were recorded successfully in run
 `42964385726` and committed in `69020f2c`. Configured target baselines and
