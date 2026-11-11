@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import re
 import struct
 import zipfile
 
@@ -61,6 +62,22 @@ def collect(packages, proofs, scope, run, commit):
                                 filename + ': incorrect DLL architecture ' + name)
                         count += 1
                     require(count > 0, filename + ': no DLLs')
+                    proof_name = 'share/ci-windows-toolchain.json'
+                    require(proof_name in names, filename + ': missing VC-LTL toolchain proof')
+                    proof = json.loads(sdk.read(proof_name))
+                    require(proof.get('vc_ltl_active') is True and proof.get('target_arch') == arch
+                            and proof.get('variant') == ('debug' if debug else 'release')
+                            and proof.get('toolset_version', '').startswith('14.44.')
+                            and proof.get('visual_studio_version') in ('17.0', '18.0')
+                            and proof.get('runtime_version') == {'x86': '5.1.2600.0', 'x64': '5.2.3790.0', 'arm64': '10.0.10240.0'}[arch]
+                            and proof.get('platform') == {'x86': 'Win32', 'x64': 'x64', 'arm64': 'arm64'}[arch],
+                            filename + ': invalid VC-LTL toolchain proof')
+                    require({'VC-LTL header precedence', 'VC-LTL library precedence',
+                             'release and debug CRT libraries present', 'matching target platform'}
+                            <= set(proof.get('checks', [])), filename + ': incomplete VC-LTL checks')
+                    require(str(proof.get('source_run', '')).isdigit()
+                            and re.fullmatch('[0-9a-f]{40}', proof.get('source_commit') or '') is not None,
+                            filename + ': missing VC-LTL compilation provenance')
         for target, architectures, consumers in (
                 ('x64', {'x86_64'}, ('x86_64',)), ('arm64', {'arm64'}, ('arm64',)),
                 ('universal', {'x86_64', 'arm64'}, ('x86_64', 'arm64'))):

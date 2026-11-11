@@ -64,9 +64,36 @@ if exist "%cd%\..\VC-LTL\_msvcrt.h" set VC_LTL_Root=%cd%\..\VC-LTL&& goto LoadCo
 ::¶ÁÈ¡×¢²á±í HKCU\Code\VC-LTL@Root
 for /f "tokens=1,2*" %%i in ('reg query "HKCU\Code\VC-LTL" /v Root ') do set VC_LTL_Root=%%k
 
-if "%VC_LTL_Root%" == "" goto:eof
+if "%VC_LTL_Root%" == "" (
+    echo VC-LTL was not found. Refusing to build without the configured CRT.
+    exit /b 1
+)
 
 
 :LoadConfig
 
+if not exist "%VC_LTL_Root%\config\config.cmd" exit /b 1
+if /i "%VSCMD_ARG_TGT_ARCH%" == "x86" set "Platform=x86"
+if /i "%VSCMD_ARG_TGT_ARCH%" == "x64" set "Platform=x64"
+if /i "%VSCMD_ARG_TGT_ARCH%" == "amd64" set "Platform=x64"
+if /i "%VSCMD_ARG_TGT_ARCH%" == "arm64" set "Platform=arm64"
+
+:: VS 2026 can host the same MSVC 14.44 tools as VS 2022. Limit the adapter
+:: to that toolset, and restore the real IDE version after vendor setup.
+set "QT_SDK_LTL_REAL_VS_VERSION=%VisualStudioVersion%"
+if "%VisualStudioVersion%" == "18.0" (
+    if not "%VCToolsVersion:~0,5%" == "14.44" (
+        echo VC-LTL on VS 2026 requires the validated MSVC 14.44 toolset.
+        exit /b 1
+    )
+    echo Loading VC-LTL for MSVC 14.44 through the VS 2022 configuration path.
+    set "VisualStudioVersion=17.0"
+)
+set "VC_LTL_Helper_Load="
+set "InternalLTLCRTVersion="
+set "LTLPlatform="
 call "%VC_LTL_Root%\config\config.cmd"
+set "VisualStudioVersion=%QT_SDK_LTL_REAL_VS_VERSION%"
+set "QT_SDK_LTL_REAL_VS_VERSION="
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\scripts\verify-vc-ltl.ps1"
+exit /b %ERRORLEVEL%

@@ -23,6 +23,7 @@ where cl
 
 set WindowsTargetPlatformMinVersion=5.1.2600.0
 call "%~dp0.github\workflows\VC-LTL helper for nmake.cmd"
+if %ERRORLEVEL% NEQ 0 exit /B %ERRORLEVEL%
 
 set InstallDir="%~dp0Output\x86d"
 
@@ -75,10 +76,14 @@ set PATH=%~dp0qtbase\bin;%PATH%
 cd /d "%~dp0"
 
 call configure -prefix %InstallDir% -confirm-license -opensource -debug -force-debug-info -opengl dynamic -no-directwrite -mp -nomake examples -nomake tests -recheck-all -debug -openssl-linked
+if %ERRORLEVEL% NEQ 0 exit /B %ERRORLEVEL%
 nmake
 
 if %ERRORLEVEL% NEQ 0 exit /B %ERRORLEVEL%
 nmake install
+if %ERRORLEVEL% NEQ 0 exit /B %ERRORLEVEL%
+powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%scripts\verify-vc-ltl.ps1" -InstallDir %InstallDir% -Variant debug
+if %ERRORLEVEL% NEQ 0 exit /B %ERRORLEVEL%
 
 goto :script_end
 

@@ -96,7 +96,8 @@ class NativeInputs(unittest.TestCase):
         self.assertEqual(original, restore.native_configuration(config.replace('run: package', 'run: changed-package'), 'windows-x64'))
     def identity(self, **changes):
         files = {'qtbase': 'qt', 'configure': 'config', 'onekey-build-windows-x64.bat': 'win',
-                 'onekey-build-macos-x64.sh': 'mac', '.github/workflows/BuildBinaries.yml': 'workflow'}
+                 'onekey-build-macos-x64.sh': 'mac', '.github/workflows/BuildBinaries.yml': 'workflow',
+                 'scripts/verify-vc-ltl.ps1': 'crt-verifier'}
         files.update(changes)
         tree = [dict(path=name, sha=value, type='commit' if name == 'qtbase' else 'blob') for name, value in files.items()]
         with mock.patch.object(restore, 'api', return_value=dict(tree=tree)):
@@ -110,6 +111,9 @@ class NativeInputs(unittest.TestCase):
 
     def test_native_script_change_invalidates_reuse(self):
         self.assertNotEqual(self.identity(), self.identity(**{'onekey-build-windows-x64.bat': 'changed'}))
+
+    def test_windows_runtime_verifier_change_invalidates_reuse(self):
+        self.assertNotEqual(self.identity(), self.identity(**{'scripts/verify-vc-ltl.ps1': 'changed'}))
 
     def test_packaging_workflow_change_retains_compile_identity(self):
         self.assertEqual(self.identity(), self.identity(**{'.github/workflows/BuildBinaries.yml': 'changed'}))
@@ -148,6 +152,14 @@ class ReleaseGate(unittest.TestCase):
                     sdk.writestr('lib/Qt5Core' + suffix + '.lib', b'fixture')
                     for module in ('Core', 'Gui', 'Network', 'Qml'):
                         sdk.writestr('bin/Qt5' + module + suffix + '.dll', pe)
+                    sdk.writestr('share/ci-windows-toolchain.json', json.dumps(dict(
+                        vc_ltl_active=True, target_arch=arch, variant='debug' if debug else 'release',
+                        toolset_version='14.44.35207', visual_studio_version='18.0',
+                        runtime_version={'x86': '5.1.2600.0', 'x64': '5.2.3790.0', 'arm64': '10.0.10240.0'}[arch],
+                        platform={'x86': 'Win32', 'x64': 'x64', 'arm64': 'arm64'}[arch],
+                        source_run='122', source_commit='f' * 40,
+                        checks=['VC-LTL header precedence', 'VC-LTL library precedence',
+                                'release and debug CRT libraries present', 'matching target platform'])))
         for target, arches in (('x64', ['x86_64']), ('arm64', ['arm64']), ('universal', ['x86_64', 'arm64'])):
             path = self.packages / ('qt5.15.17_macos_' + target + '.tar.gz')
             path.write_bytes(b'fixture')
@@ -173,6 +185,33 @@ class ReleaseGate(unittest.TestCase):
         (self.packages / 'qt5.15.17_windows_arm64.zip').unlink()
         with self.assertRaises(FileNotFoundError):
             self.run_gate()
+
+    def test_missing_windows_compatibility_runtime_proof(self):
+        path = self.packages / 'qt5.15.17_windows_x64.zip'
+        with zipfile.ZipFile(path) as sdk:
+            contents = {n: sdk.read(n) for n in sdk.namelist() if n != 'share/ci-windows-toolchain.json'}
+        with zipfile.ZipFile(path, 'w') as sdk:
+            for name, data in contents.items():
+                sdk.writestr(name, data)
+        with self.assertRaisesRegex(ValueError, 'missing VC-LTL'):
+            self.run_gate()
+
+    def test_windows_runtime_proof_rejection(self):
+        path = self.packages / 'qt5.15.17_windows_x64.zip'
+        proof_name = 'share/ci-windows-toolchain.json'
+        with zipfile.ZipFile(path) as sdk:
+            contents = {n: sdk.read(n) for n in sdk.namelist()}
+        original = json.loads(contents[proof_name])
+        for change in ({'vc_ltl_active': False}, {'target_arch': 'x86'}, {'variant': 'debug'},
+                       {'runtime_version': '10.0.10240.0'}, {'toolset_version': '14.51.0'},
+                       {'checks': []}, {'source_run': None}):
+            with self.subTest(change=change):
+                proof = {**original, **change}
+                with zipfile.ZipFile(path, 'w') as sdk:
+                    for name, data in contents.items():
+                        sdk.writestr(name, json.dumps(proof) if name == proof_name else data)
+                with self.assertRaisesRegex(ValueError, 'VC-LTL'):
+                    self.run_gate()
 
     def test_wrong_windows_architecture(self):
         source = self.packages / 'qt5.15.17_windows_x86.zip'

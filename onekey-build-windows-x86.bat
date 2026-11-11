@@ -15,10 +15,14 @@ for /f "usebackq tokens=*" %%i in (`"%VSWHERE_EXE%" -latest -products * -require
   set "VisualStudioInstallDir=%%i"
 )
 
-call "%VisualStudioInstallDir%\VC\Auxiliary\Build\vcvarsall.bat" amd64_x86
+call "%VisualStudioInstallDir%\Common7\Tools\VsDevCmd.bat" -no_logo -arch=x86 -host_arch=amd64 -vcvars_ver=14.44
+if %ERRORLEVEL% NEQ 0 exit /B %ERRORLEVEL%
+if not "%VCToolsVersion:~0,5%"=="14.44" exit /B 1
+echo Using validated MSVC %VCToolsVersion% for the Windows SDK
 
 set WindowsTargetPlatformMinVersion=5.1.2600.0
 call "%~dp0.github\workflows\VC-LTL helper for nmake.cmd"
+if %ERRORLEVEL% NEQ 0 exit /B %ERRORLEVEL%
 
 set InstallDir="%~dp0Output\x86"
 
@@ -71,10 +75,14 @@ set PATH=%~dp0qtbase\bin;%PATH%
 cd /d "%~dp0"
 
 call configure -prefix %InstallDir% -confirm-license -opensource -force-debug-info -opengl dynamic -no-directwrite -mp -nomake examples -nomake tests -recheck-all -release -openssl-linked
+if %ERRORLEVEL% NEQ 0 exit /B %ERRORLEVEL%
 nmake
 
 if %ERRORLEVEL% NEQ 0 exit /B %ERRORLEVEL%
 nmake install
+if %ERRORLEVEL% NEQ 0 exit /B %ERRORLEVEL%
+powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%scripts\verify-vc-ltl.ps1" -InstallDir %InstallDir% -Variant release
+if %ERRORLEVEL% NEQ 0 exit /B %ERRORLEVEL%
 
 goto :script_end
 

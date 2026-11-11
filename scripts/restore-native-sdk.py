@@ -76,7 +76,7 @@ def inputs(commit, kind, job=None):
             selected |= (name == script if script else name.startswith('onekey-build-windows-')) or name == 'apply-patches.bat'
             selected |= name == 'Patches/0001-qtbase-support-xp.patch'
             selected |= name in ('.github/workflows/setup-vc-ltl.bat', '.github/workflows/VC-LTL helper for nmake.cmd')
-            selected |= name == 'scripts/force-runtime.ps1'
+            selected |= name in ('scripts/force-runtime.ps1', 'scripts/verify-vc-ltl.ps1')
         else:
             script = 'onekey-build-' + job + '.sh' if job else None
             selected |= name == script if script else name.startswith('onekey-build-macos-')

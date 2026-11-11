@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "scope": "Windows toolchain initialization correction; full SDK CI acceptance pending",
+  "observed_run": "43090765536",
+  "observed_commit": "10718949e30b8a7d2d462ee81f70ee596bca3252",
+  "observed_job": "130770737550",
+  "observed_message": "VC-LTL only supports Visual Studio 2015, 2017, 2019 and 2022.",
+  "observed_at": "2026-11-11T19:59:21.5584101Z",
+  "publication_attempt": "cancelled before publication because compatibility CRT setup was skipped",
+  "toolset": "14.44.35207",
+  "local_ide": "VS2022 with VisualStudioVersion=18.0 exercising the gated compatibility adapter",
+  "local_windows_sdk": "10.0.22621.0",
+  "passed_local_checks": [
+    "x64 /MT C++17 string/thread compile and execution",
+    "x64 /MTd C++17 string/thread compile and execution",
+    "x86 /MT C++17 string/thread compile and execution",
+    "x86 /MTd C++17 string/thread compile and execution",
+    "disabled VC-LTL initialization returns failure",
+    "unvalidated VS18/MSVC14.51 initialization returns failure",
+    "project library/include prefix remains supported",
+    "a preceding shadow CRT library is rejected"
+  ],
+  "local_log_sha256": {
+    "check-vc-ltl.log": "abbedd14151cca053c34fd1e0931acfe7cb02c8ec3b82b1605d539dd78d97c8a",
+    "check-vc-ltl-x86.log": "d130a0ee8d7d9223fe8b901b5b23d0f7b116e485dc06c6bdd6f7f096c3a0d769",
+    "check-vc-ltl-disabled.log": "a3e88f554bb091392b0038fa440ce59b3d4460fbc57f7bcea961997979f3395e",
+    "check-vc-ltl-unsupported.log": "503ae2bc22867196117b859f216a478312cb47f46b4de8fe25abb75013b2c472",
+    "check-prefix.log": "245882bf2aefd861333c8215ba9b944050d139e6e0f9eb1928c46e9f6a0a90dd",
+    "check-prefix-shadow.log": "0cf6d52a69e9b18f1806be41e10d65addc298335e0d22b9099923f20c4490400"
+  },
+  "infrastructure_checks": {
+    "release_gate_tests": 21,
+    "linux_gate_tests": 7,
+    "actionlint": "passed",
+    "powershell_ast": "passed"
+  },
+  "pending": [
+    "full Windows x86/x64/ARM64 Release and Debug CI builds",
+    "installed SDK toolchain proofs and exact release archive gates",
+    "actual complete multi-platform SDK publication and server digest audit"
+  ]
+}
