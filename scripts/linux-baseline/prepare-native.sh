@@ -23,7 +23,7 @@ entry = config['clang'][sys.argv[3]] if sys.argv[2] == 'clang' else config['libs
 print(entry.get('api_url', entry.get('url')), entry['sha256'])
 PY
   )
-  local headers=()
+  local headers=(-H 'User-Agent: qt-baseline-builder')
   if [[ "$url" == https://api.github.com/* ]]; then
     headers+=(-H 'Accept: application/octet-stream')
     [[ -z "${GITHUB_TOKEN:-}" ]] || headers+=(-H "Authorization: Bearer $GITHUB_TOKEN")
@@ -44,6 +44,9 @@ mkdir -p "$prefix/bin"
 for name in clang clang++; do
   cat >"$prefix/bin/$name" <<EOF
 #!/usr/bin/env bash
+for argument in "\$@"; do
+  [[ "\$argument" != -print-multi-os-directory ]] || { echo .; exit 0; }
+done
 exec "$compiler/$name" --target="$gcc_triple" --gcc-toolchain="$gcc_root" --gcc-triple="$gcc_triple" -fuse-ld=lld "\$@"
 EOF
   chmod +x "$prefix/bin/$name"
@@ -87,6 +90,9 @@ test -n "$config_header"
 target_include="$(dirname "$(dirname "$config_header")")"
 cat >"$prefix/bin/clang++" <<EOF
 #!/usr/bin/env bash
+for argument in "\$@"; do
+  [[ "\$argument" != -print-multi-os-directory ]] || { echo .; exit 0; }
+done
 exec "$compiler/clang++" --target="$gcc_triple" --gcc-toolchain="$gcc_root" --gcc-triple="$gcc_triple" -fuse-ld=lld \
   -nostdinc++ -isystem "$prefix/runtime/include/c++/13.3.0" \
   -isystem "$target_include" -L"$runtime_lib" "\$@"
