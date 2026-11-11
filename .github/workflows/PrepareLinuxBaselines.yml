@@ -168,12 +168,25 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
         set -o pipefail
+        mkdir -p build-temp/logs
         bash scripts/linux-baseline/probe-mips.sh 2>&1 | tee build-temp/logs/mips217-probe.log
     - uses: actions/cache/save@v4
       if: always() && steps.mips-vendor.outputs.cache-hit != 'true'
       with:
         path: build-temp/loong-newworld-inputs/downloads
         key: ${{ steps.mips-vendor.outputs.cache-primary-key }}
+    - name: Relocate and package the accepted MIPS toolchain
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        set -o pipefail
+        bash scripts/linux-baseline/package-cross.sh mips64el 2>&1 | tee build-temp/logs/mips217-packaging.log
+    - uses: actions/upload-artifact@v4
+      with:
+        name: cross-toolchain-mips64el
+        compression-level: 0
+        path: Output/toolchains/
+        if-no-files-found: error
     - uses: actions/upload-artifact@v4
       if: always()
       with:
@@ -246,12 +259,14 @@ jobs:
         path: build-temp/loong28-inspection/downloads
         key: ${{ steps.oldworld-inputs.outputs.cache-primary-key }}
     - name: Relocate and package the accepted old-world toolchain
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
       run: |
         set -o pipefail
-        bash scripts/linux-baseline/package-loongarch-oldworld.sh 2>&1 | tee build-temp/logs/loong-oldworld-packaging.log
+        bash scripts/linux-baseline/package-cross.sh loong64-oldworld 2>&1 | tee build-temp/logs/loong-oldworld-packaging.log
     - uses: actions/upload-artifact@v4
       with:
-        name: oldworld-toolchain
+        name: cross-toolchain-loong64-oldworld
         compression-level: 0
         path: Output/toolchains/
         if-no-files-found: error
@@ -260,17 +275,19 @@ jobs:
       with:
         name: diagnostics-baseline-loong-oldworld-228
         path: build-temp/logs/
-  publish-oldworld:
-    needs: loongarch-oldworld
+  publish-cross:
+    needs: [loongarch-oldworld, loongarch-newworld, mips]
+    if: ${{ !cancelled() && contains(needs.*.result, 'success') && !contains(needs.*.result, 'failure') }}
     runs-on: ubuntu-22.04
     permissions:
       contents: write
     steps:
     - uses: actions/download-artifact@v4
       with:
-        name: oldworld-toolchain
+        pattern: cross-toolchain-*
+        merge-multiple: true
         path: toolchains
-    - name: Release the accepted old-world toolchain
+    - name: Release the selected accepted cross toolchains
       env:
         GH_TOKEN: ${{ github.token }}
         GH_REPO: ${{ github.repository }}
@@ -281,11 +298,11 @@ jobs:
         cat *.sha256 > SHA256SUMS
         sha256sum -c SHA256SUMS
         cat > notes.md <<'EOF'
-        LoongArch old-world glibc 2.28 cross toolchain: Clang 20.1.8, a real vendor old-world sysroot with GNU GCC 8 support files, and Clang-built private libstdc++ 13.3.0 with GNU symbol versions. Passed C++20/thread/format execution and private-runtime resolution in a real target chroot, then repeated compilation, dependency checks and execution after relocation. Tested host: Ubuntu 22.04 x86_64; private libffi6 included.
+        Accepted cross toolchain archives selected by this run. Each archive includes toolchain.json describing its actual target, GNU support layout, loader, target glibc and tested host. Each passed Clang C++20/thread/format execution and private-runtime resolution in a real target chroot, then repeated compilation, dependency checks and execution after relocation. Tested host: Ubuntu 22.04 x86_64. Source pins, GNU/LLVM notices and build scripts are included.
 
-        This toolchain is exclusively old-world ELF ABI 0x3 with /lib64/ld.so.1. It is not a new-world target and is not a Qt SDK acceptance result. Source pins, GNU and LLVM notices, and build scripts are included.
+        LoongArch old world is glibc 2.28 with ELF ABI 0x3; new world is the user-authorized glibc 2.36 with ELF ABI 0x43. MIPS64EL n64 is glibc 2.17. Only targets whose archives are actually listed are included. This is not a Qt SDK acceptance result.
         EOF
-        gh release create "toolchain-loong64-oldworld-228-$RUN_ID" --target "$COMMIT" --latest=false --title "LoongArch old-world glibc 2.28 toolchain ($RUN_ID)" --notes-file notes.md *.tar.xz SHA256SUMS
+        gh release create "toolchain-linux-cross-$RUN_ID" --target "$COMMIT" --latest=false --title "Accepted Linux cross toolchains ($RUN_ID)" --notes-file notes.md *.tar.xz SHA256SUMS
   loongarch-newworld:
     if: inputs.target == 'all' || inputs.target == 'cross' || inputs.target == 'loongarch-newworld'
     name: Clang C++20 on LoongArch new-world glibc 2.36
@@ -323,6 +340,18 @@ jobs:
       with:
         path: build-temp/loong-newworld-inputs/downloads
         key: ${{ steps.newworld-inputs.outputs.cache-primary-key }}
+    - name: Relocate and package the accepted new-world toolchain
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        set -o pipefail
+        bash scripts/linux-baseline/package-cross.sh loong64-newworld 2>&1 | tee build-temp/logs/loong-newworld-packaging.log
+    - uses: actions/upload-artifact@v4
+      with:
+        name: cross-toolchain-loong64-newworld
+        compression-level: 0
+        path: Output/toolchains/
+        if-no-files-found: error
     - uses: actions/upload-artifact@v4
       if: always()
       with:
