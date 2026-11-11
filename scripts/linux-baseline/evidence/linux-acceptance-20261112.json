@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "accepted": true,
+  "source_run": "43062567326",
+  "source_commit": "b1cdae6ef59dfb5daf45e56cfdb9d87a023ff69e",
+  "sdks": [
+    {
+      "target": "x64",
+      "variant": "release",
+      "glibc": "2.17",
+      "gnu_runtime_policy": "baseline-system",
+      "maximum_required_gnu": {
+        "GLIBCXX": "GLIBCXX_3.4.19",
+        "CXXABI": "CXXABI_1.3.7",
+        "GCC": "GCC_3.0"
+      },
+      "toolchain_sha256": "4bc4e39e583a80feaa0ba791ce1b1a5512bbee7d18f90d9d2d3ec754d49f0e98",
+      "archives": {
+        "qt5.15.17_linux_x64.tar.gz": "1e45a041e5d8eafab009e706f6b7460729f81771562e510a1a52d5142fca56a3",
+        "qt5.15.17_linux_x64-symbols.tar.gz": "2f45735ceb47fe0acb43d377550b9741adba85d449f558b4fd15268b65314c4e"
+      }
+    },
+    {
+      "target": "x64",
+      "variant": "debug",
+      "glibc": "2.17",
+      "gnu_runtime_policy": "baseline-system",
+      "maximum_required_gnu": {
+        "GLIBCXX": "GLIBCXX_3.4.19",
+        "CXXABI": "CXXABI_1.3.7",
+        "GCC": "GCC_3.0"
+      },
+      "toolchain_sha256": "4bc4e39e583a80feaa0ba791ce1b1a5512bbee7d18f90d9d2d3ec754d49f0e98",
+      "archives": {
+        "qt5.15.17_linux_x64_debug.tar.gz": "5cdfc52fa5e7f66338ebff3d9c35727d899d39b9fbf6620487734a7d6cf45028",
+        "qt5.15.17_linux_x64_debug-symbols.tar.gz": "d4c2d45d1e0b7ecc06285ab88854354b21488592e9cbe2b0509d6c6cfe98c352"
+      }
+    },
+    {
+      "target": "arm64",
+      "variant": "release",
+      "glibc": "2.17",
+      "gnu_runtime_policy": "baseline-system",
+      "maximum_required_gnu": {
+        "GLIBCXX": "GLIBCXX_3.4.19",
+        "CXXABI": "CXXABI_1.3.7",
+        "GCC": "GCC_4.2.0"
+      },
+      "toolchain_sha256": "6e501bb9d592c2771bd29243fe7f49b42eef4fa46d6203feff2ac55322302292",
+      "archives": {
+        "qt5.15.17_linux_arm64.tar.gz": "26524787d4c142001f2ffaa6e243d82a4aee8a27ec5e7e7740ebc7a28fe3fb15",
+        "qt5.15.17_linux_arm64-symbols.tar.gz": "22c4aee9836f2ae7c2bedd084e8c6d246ef67b1c5b1c3fb0b59cb238ecfb57bf"
+      }
+    },
+    {
+      "target": "arm64",
+      "variant": "debug",
+      "glibc": "2.17",
+      "gnu_runtime_policy": "baseline-system",
+      "maximum_required_gnu": {
+        "GLIBCXX": "GLIBCXX_3.4.19",
+        "CXXABI": "CXXABI_1.3.7",
+        "GCC": "GCC_4.2.0"
+      },
+      "toolchain_sha256": "6e501bb9d592c2771bd29243fe7f49b42eef4fa46d6203feff2ac55322302292",
+      "archives": {
+        "qt5.15.17_linux_arm64_debug.tar.gz": "6aac76731324281d9d43641bd0db36a1b37a4a5fada5997288e45bfdc2adf99f",
+        "qt5.15.17_linux_arm64_debug-symbols.tar.gz": "27e14eb7e0eea819c35bdc78935658bbf5375c247eb9ab8ceb1006e085beccfa"
+      }
+    },
+    {
+      "target": "mips64el",
+      "variant": "release",
+      "glibc": "2.17",
+      "gnu_runtime_policy": "baseline-system",
+      "maximum_required_gnu": {
+        "GLIBCXX": "GLIBCXX_3.4.20",
+        "CXXABI": "CXXABI_1.3.7",
+        "GCC": "GCC_4.2.0"
+      },
+      "toolchain_sha256": "0d584de4cad9971f156b1b8c780dfb81c689490c343a7e272c7e9d2924ced40b",
+      "archives": {
+        "qt5.15.17_linux_mips64el.tar.gz": "6be3b7e4fc4da929b213c75d5e28f7629191e78defdfe016f4ff38e84ba75e27",
+        "qt5.15.17_linux_mips64el-symbols.tar.gz": "30f9ba12495d2bab9ef0eea0dd5c8ff028f1c0a962f45ad12506958a48e4f58e"
+      }
+    },
+    {
+      "target": "mips64el",
+      "variant": "debug",
+      "glibc": "2.17",
+      "gnu_runtime_policy": "baseline-system",
+      "maximum_required_gnu": {
+        "GLIBCXX": "GLIBCXX_3.4.20",
+        "CXXABI": "CXXABI_1.3.7",
+        "GCC": "GCC_4.2.0"
+      },
+      "toolchain_sha256": "0d584de4cad9971f156b1b8c780dfb81c689490c343a7e272c7e9d2924ced40b",
+      "archives": {
+        "qt5.15.17_linux_mips64el_debug.tar.gz": "99ec0c81f1136f72fc822cc3b53000ab5288512d3eb3836883d56ec23a72d819",
+        "qt5.15.17_linux_mips64el_debug-symbols.tar.gz": "3cc95f7339d1e8c433e600a311bbf6ef7c9fc783161277cee2c14ef14bf51c6c"
+      }
+    },
+    {
+      "target": "loong64-oldworld",
+      "variant": "release",
+      "glibc": "2.28",
+      "gnu_runtime_policy": "baseline-system",
+      "maximum_required_gnu": {
+        "GLIBCXX": "GLIBCXX_3.4.21",
+        "CXXABI": "CXXABI_1.3.7",
+        "GCC": "GCC_4.2.0"
+      },
+      "toolchain_sha256": "61698744d55f79f771e357cacf65ffed067d59ea86de5b609c11d8f4243ab90a",
+      "archives": {
+        "qt5.15.17_linux_loong64_oldworld.tar.gz": "3872de465b87e822ff7ce0fe4bf3f83fc0ceadb93ace79d2c030db2c409f741e",
+        "qt5.15.17_linux_loong64_oldworld-symbols.tar.gz": "490c7ac6baafba20280eee5fced588127936af7957fa19441c8fe3505044d8b7"
+      }
+    },
+    {
+      "target": "loong64-oldworld",
+      "variant": "debug",
+      "glibc": "2.28",
+      "gnu_runtime_policy": "baseline-system",
+      "maximum_required_gnu": {
+        "GLIBCXX": "GLIBCXX_3.4.21",
+        "CXXABI": "CXXABI_1.3.7",
+        "GCC": "GCC_4.2.0"
+      },
+      "toolchain_sha256": "61698744d55f79f771e357cacf65ffed067d59ea86de5b609c11d8f4243ab90a",
+      "archives": {
+        "qt5.15.17_linux_loong64_oldworld_debug.tar.gz": "21af267ae0d9d7110c837ea01e6d4594756c334a432569a6bb99e73eb4dad5f3",
+        "qt5.15.17_linux_loong64_oldworld_debug-symbols.tar.gz": "1d68afec310d276460af1f6fbd4b7851cc23a5513c2262ab1fd52190732ab85c"
+      }
+    },
+    {
+      "target": "loong64-newworld",
+      "variant": "release",
+      "glibc": "2.36",
+      "gnu_runtime_policy": "baseline-system",
+      "maximum_required_gnu": {
+        "GLIBCXX": "GLIBCXX_3.4.30",
+        "CXXABI": "CXXABI_1.3.13",
+        "GCC": "GCC_4.5.0"
+      },
+      "toolchain_sha256": "8c09d4629b3fdd214bb64d097ee8a6ac7abd68204f75903cab07eb50a26ace7f",
+      "archives": {
+        "qt5.15.17_linux_loong64_newworld.tar.gz": "ff622df2242c4d8f88be564756f0cf8359fc50c8437497ac08d958a0ed00dea0",
+        "qt5.15.17_linux_loong64_newworld-symbols.tar.gz": "ff48ac28de5ce5b3bfa94f377504c63c8c26f4773b369cdb3a4992f7ef6282d3"
+      }
+    },
+    {
+      "target": "loong64-newworld",
+      "variant": "debug",
+      "glibc": "2.36",
+      "gnu_runtime_policy": "baseline-system",
+      "maximum_required_gnu": {
+        "GLIBCXX": "GLIBCXX_3.4.30",
+        "CXXABI": "CXXABI_1.3.13",
+        "GCC": "GCC_4.5.0"
+      },
+      "toolchain_sha256": "8c09d4629b3fdd214bb64d097ee8a6ac7abd68204f75903cab07eb50a26ace7f",
+      "archives": {
+        "qt5.15.17_linux_loong64_newworld_debug.tar.gz": "923317de7ac8e4a4199fe9dce20486f218e96e6d1dbd2ab93e876fd82891e51d",
+        "qt5.15.17_linux_loong64_newworld_debug-symbols.tar.gz": "b3265441f39738942b5dfa8b1e15a17c6370ae530db758c1464a01ddf55dd303"
+      }
+    }
+  ]
+}

@@ -1,4 +1,14 @@
-# Linux baseline progress (2026-11-11)
+# Linux baseline acceptance (2026-11-12, Asia/Singapore)
+
+All five Linux targets passed Release and Debug acceptance in run
+`43062567326`, source `b1cdae6ef59dfb5daf45e56cfdb9d87a023ff69e`.
+All ten independent extracted verifiers and all four modern GCC/Clang
+consumer jobs succeeded. The exact matrix, toolchain identities, GNU import
+ceilings and twenty archive hashes are preserved in
+`evidence/linux-acceptance-20261112.json`; see `ACCEPTANCE.md`.
+
+Windows/macOS and the first rebuilt SDK release remain the next stage.
+The sections below are historical investigation notes, not current status.
 
 ## Current requirements
 
