@@ -46,7 +46,7 @@ def main():
     if completed.is_file() and all_installed:
         print("Using verified old-glibc graphics dependencies")
         return
-    run("apt-get", "-o", "Acquire::Retries=5", "install", "-y", "--no-install-recommends",
+    run("bash", source / "scripts/linux-baseline/install-host-deps.sh",
         "autoconf", "automake", "libtool", "xutils-dev", "bison", "flex", "gperf", "libexpat1-dev",
         "meson", "ninja-build")
     run("python3", source / "scripts/prepare-linux-sysroot.py", recipe_path, prefix, "--sources-only")
