@@ -65,8 +65,8 @@ EOF
   make -j2
 )
 if [[ -n "${QT_CROSS_QEMU:-}" ]]; then
-  env -u LD_LIBRARY_PATH QT_QPA_PLATFORM=offscreen QML2_IMPORT_PATH="$sdk/qml" \
-    "$QT_CROSS_QEMU" -L "${QT_CROSS_SYSROOT:?target sysroot required}" "$work/smoke"
+  python3 "$(dirname "${BASH_SOURCE[0]}")/linux_cross_runtime.py" smoke \
+    "${QT_CROSS_SYSROOT:?target sysroot required}" "$QT_CROSS_QEMU" "$work/smoke" --sdk "$sdk"
 else
   env -u LD_LIBRARY_PATH QT_QPA_PLATFORM=offscreen QML2_IMPORT_PATH="$sdk/qml" "$work/smoke"
 fi

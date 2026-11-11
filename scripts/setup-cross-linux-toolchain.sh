@@ -120,13 +120,18 @@ PY
       --disable-multilib --disable-libstdcxx-pch --disable-static --enable-shared \
       --enable-libstdcxx-threads
     grep -q '^#define _GLIBCXX_HAS_GTHREADS 1' config.h
-    # Cross-host configuration otherwise installs below runtime/<triple>/lib,
-    # overriding --libdir. Keep the runtime at the driver's explicit path.
-    make -j"${QT_BUILD_JOBS:-4}" "toolexeclibdir=$cross/runtime/lib"
-    make install "toolexeclibdir=$cross/runtime/lib"
+    make -j"${QT_BUILD_JOBS:-4}"
+    make install
   )
   touch "$cross/runtime/.ready"
 fi
+# GCC's recursive make overrides --libdir for a cross-host build. Expose
+# its canonical target library directory at the driver's stable lib path.
+[[ -f "$cross/runtime/$triple/lib/libstdc++.so.6" ]]
+if [[ ! -e "$cross/runtime/lib" ]]; then
+  ln -s "$triple/lib" "$cross/runtime/lib"
+fi
+[[ -f "$cross/runtime/lib/libstdc++.so.6" ]]
 write_driver clang++
 
 fetch_qemu() {
@@ -166,6 +171,7 @@ cat >"$cross/probe.cpp" <<'EOF'
 #include <algorithm>
 #include <mutex>
 #include <thread>
+static_assert(_GLIBCXX_RELEASE == 13, "The probe must use the selected GCC 13 headers");
 struct Done {
     struct promise_type {
         Done get_return_object() { return {}; }
@@ -189,21 +195,14 @@ int main() {
 }
 EOF
 "$cross/bin/clang++" -std=c++20 -pthread "$cross/probe.cpp" \
-  -Wl,-rpath,"$cross/runtime/lib" -o "$cross/probe"
-if env -u LD_LIBRARY_PATH -u GITHUB_TOKEN "$cross/bin/qemu" -L "$sysroot" "$cross/probe"; then
-  echo "$arch: target C++20 and POSIX thread probe passed"
-else
-  probe_status=$?
-  # Capture the target loader's actual search paths and syscall failures.
-  # A failed probe remains a failure after collecting diagnostics.
-  env -u LD_LIBRARY_PATH -u GITHUB_TOKEN "$cross/bin/qemu" -strace -L "$sysroot" \
-    -E LD_DEBUG=libs "$cross/probe" || true
-  find "$sysroot" -name 'libm.so.6' -o -name 'ld-linux-*.so*'
-  if [[ "$arch" == loong64 ]]; then
-    env -u GITHUB_TOKEN "$cross/bin/qemu" -L "$sysroot" "$sysroot/lib64/ld-linux-loongarch-lp64d.so.1" --list-diagnostics || true
-  fi
-  exit "$probe_status"
-fi
+  '-Wl,-rpath,$ORIGIN/lib' -o "$cross/probe"
+case "$arch" in
+  loong64) loader=/lib64/ld-linux-loongarch-lp64d.so.1 ;;
+  mips64el) loader=/lib64/ld.so.1 ;;
+esac
+python3 "$root/scripts/linux_cross_runtime.py" probe "$sysroot" "$cross/bin/qemu" "$cross/probe" \
+  --loader "$loader" --stdlib "$cross/runtime/lib/libstdc++.so.6" \
+  --libgcc "$("$cross/bin/clang" -print-file-name=libgcc_s.so.1)"
 if [[ "$arch" == loong64 ]] && python3 -c 'import json,sys; sys.exit("recipes_sha256" not in json.load(open(sys.argv[1])))' "$root/scripts/sysroots/$arch.lock.json"; then
   python3 "$root/scripts/build-linux-cross-dependencies.py" "$prefix"
 fi

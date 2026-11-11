@@ -2,10 +2,10 @@
 """Resolve each packaged ELF's dependencies with its real baseline loader."""
 
 import argparse
-import os
 from pathlib import Path
 import re
 import subprocess
+from linux_cross_runtime import TargetRoot, clean_environment
 
 
 def main():
@@ -16,9 +16,10 @@ def main():
     parser.add_argument("--loader", required=True)
     parser.add_argument("--readelf", default="readelf")
     args = parser.parse_args()
-    env = dict(os.environ, LC_ALL="C")
-    for key in ("LD_LIBRARY_PATH", "LD_PRELOAD", "LD_AUDIT"):
-        env.pop(key, None)
+    args.sdk = args.sdk.resolve()
+    target = TargetRoot(args.sysroot, args.qemu, args.sdk)
+    staged = target.stage_sdk(args.sdk)
+    env = clean_environment()
     count = 0
     for path in sorted(args.sdk.rglob("*")):
         if path.is_symlink() or not path.is_file():
@@ -35,16 +36,17 @@ def main():
             command = ["ldd", "-v", str(path)]
             runtime = args.sdk / "host/lib"
         else:
-            command = [str(args.qemu), "-L", str(args.sysroot),
-                       str(args.sysroot / args.loader.lstrip("/")), "--list", str(path)]
-            runtime = args.sdk / "lib"
+            command = target.command(args.loader, "--list", target.guest_path(staged / path.relative_to(args.sdk)))
+            runtime = Path(target.guest_path(staged / "lib"))
         result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                 universal_newlines=True, env=env)
         if result.returncode or "not found" in result.stdout:
             raise ValueError("{}: unresolved runtime dependency\n{}".format(path, result.stdout))
         for name in ("libstdc++.so.6", "libgcc_s.so.1"):
             match = re.search(r"^\s*" + re.escape(name) + r"\s+=>\s+(\S+)", result.stdout, re.M)
-            if match and Path(match[1]).resolve() != (runtime / name).resolve():
+            resolved = Path(match[1]).resolve() if match and host else Path(match[1]) if match else None
+            expected = (runtime / name).resolve() if host else runtime / name
+            if match and resolved != expected:
                 raise ValueError("{}: {} resolved outside the SDK: {}".format(path, name, match[1]))
         count += 1
     if not count:

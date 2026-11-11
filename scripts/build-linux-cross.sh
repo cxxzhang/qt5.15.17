@@ -38,6 +38,7 @@ fi
 
 spec="linux-clang-$arch"
 mkdir -p "$source_dir/qtbase/mkspecs/$spec"
+cp "$source_dir/qtbase/mkspecs/linux-clang/qplatformdefs.h" "$source_dir/qtbase/mkspecs/$spec/"
 cat >"$source_dir/qtbase/mkspecs/$spec/qmake.conf" <<EOF
 include(../linux-clang/qmake.conf)
 QMAKE_CC = $cross/bin/clang
