@@ -39,6 +39,15 @@ EOF
 }
 write_driver clang
 write_driver clang++
+cat >"$cross/bin/pkg-config" <<EOF
+#!/usr/bin/env bash
+export PKG_CONFIG_SYSROOT_DIR="$sysroot"
+export PKG_CONFIG_LIBDIR="$sysroot/usr/lib/$triple/pkgconfig:$sysroot/usr/lib/pkgconfig:$sysroot/usr/share/pkgconfig"
+# Only the architecture-independent XML/Python generator is a host package.
+export PKG_CONFIG_PATH="$cross/host/share/pkgconfig"
+exec /usr/bin/pkg-config "\$@"
+EOF
+chmod +x "$cross/bin/pkg-config"
 
 # Build the same libstdc++ generation against each target's own old glibc.
 # The distro GCC installation supplies its compatible libgcc and crt objects;
@@ -55,6 +64,8 @@ if [[ ! -f "$cross/runtime/.ready" ]]; then
   mkdir -p "$root/build-temp/logs"
   trap 'cp "$work/build/config.log" "$root/build-temp/logs/$arch-libstdcxx-config.log" 2>/dev/null || true; rm -rf "$work"' EXIT
   tar -xf "$archive" -C "$work"
+  mkdir -p "$cross/share"
+  cp "$work/gcc-13.3.0/config.sub" "$work/gcc-13.3.0/config.guess" "$cross/share/"
   # A standalone libstdc++ build has no preceding libgcc configure step to
   # select the POSIX gthread backend. Supply that header before feature tests.
   ln -s gthr-posix.h "$work/gcc-13.3.0/libgcc/gthr-default.h"
@@ -73,7 +84,10 @@ PY
     cd "$work/build"
     CC="$cross/bin/clang" CXX="$cross/bin/clang++" \
     CFLAGS='-O2 -g -fPIC' CXXFLAGS='-O2 -g -fsized-deallocation' \
+    LDFLAGS='-Wl,--undefined-version' \
     AR="$prefix/llvm/bin/llvm-ar" RANLIB="$prefix/llvm/bin/llvm-ranlib" \
+    NM="$prefix/llvm/bin/llvm-nm" LD="$prefix/llvm/bin/ld.lld" \
+    STRIP="$prefix/llvm/bin/llvm-strip" \
     "$work/gcc-13.3.0/libstdc++-v3/configure" \
       --build=x86_64-linux-gnu --host="$triple" --target="$triple" \
       --with-cross-host=x86_64-linux-gnu --prefix="$cross/runtime" \
@@ -82,8 +96,10 @@ PY
       --disable-multilib --disable-libstdcxx-pch --disable-static --enable-shared \
       --enable-libstdcxx-threads
     grep -q '^#define _GLIBCXX_HAS_GTHREADS 1' config.h
-    make -j"${QT_BUILD_JOBS:-4}"
-    make install
+    # Cross-host configuration otherwise installs below runtime/<triple>/lib,
+    # overriding --libdir. Keep the runtime at the driver's explicit path.
+    make -j"${QT_BUILD_JOBS:-4}" "toolexeclibdir=$cross/runtime/lib"
+    make install "toolexeclibdir=$cross/runtime/lib"
   )
   touch "$cross/runtime/.ready"
 fi
@@ -151,5 +167,8 @@ EOF
 "$cross/bin/clang++" -std=c++20 -pthread "$cross/probe.cpp" \
   -Wl,-rpath,"$cross/runtime/lib" -o "$cross/probe"
 env -u LD_LIBRARY_PATH "$cross/bin/qemu" -L "$sysroot" "$cross/probe"
+if [[ "$arch" == loong64 ]] && python3 -c 'import json,sys; sys.exit("recipes_sha256" not in json.load(open(sys.argv[1])))' "$root/scripts/sysroots/$arch.lock.json"; then
+  python3 "$root/scripts/build-linux-cross-dependencies.py" "$prefix"
+fi
 touch "$cross/.ready"
 chown -R --reference="$root" "$cross" "$sysroot" "$prefix/downloads"

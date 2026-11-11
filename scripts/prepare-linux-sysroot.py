@@ -21,11 +21,12 @@ def digest(path):
 
 
 def fetch(package, base_url, cache):
-    destination = cache / (package["sha256"] + ".deb")
+    suffix = ".deb" if package["path"].endswith(".deb") else "-" + Path(package["path"]).name
+    destination = cache / (package["sha256"] + suffix)
     if destination.is_file() and digest(destination) == package["sha256"]:
         return destination
     partial = destination.with_suffix(".partial")
-    url = base_url + "/" + package["path"]
+    url = package.get("base_url", base_url) + "/" + package["path"]
     for attempt in range(4):
         try:
             request = urllib.request.Request(url, headers={"User-Agent": "qt-linux-sysroot"})
@@ -64,9 +65,17 @@ def main():
     parser.add_argument("lock", type=Path)
     parser.add_argument("prefix", type=Path)
     parser.add_argument("--download-only", action="store_true")
+    parser.add_argument("--sources-only", action="store_true")
     args = parser.parse_args()
     raw = args.lock.read_bytes()
     lock = json.loads(raw.decode("utf-8"))
+    if args.sources_only:
+        cache = args.prefix / "downloads" / "sources"
+        cache.mkdir(parents=True, exist_ok=True)
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            paths = list(pool.map(lambda p: fetch(p, lock["base_url"], cache), lock["sources"]))
+        print("Verified {} pinned source archives".format(len(paths)))
+        return
     marker_name = ".sysroot-" + hashlib.sha256(raw).hexdigest()
     pending_name = ".unpacking-" + hashlib.sha256(raw).hexdigest()
     root = args.prefix / ("sysroot-" + lock["architecture"])

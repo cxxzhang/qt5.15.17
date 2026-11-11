@@ -92,6 +92,11 @@ def main():
     parser.add_argument("base_url")
     parser.add_argument("output", type=Path)
     parser.add_argument("--supplement", type=Path)
+    parser.add_argument("--recipes", type=Path,
+                        help="Source-built replacements for gaps in an old port")
+    parser.add_argument("--headers-index", type=Path,
+                        help="Supplement only architecture-independent Linux headers")
+    parser.add_argument("--headers-base-url")
     args = parser.parse_args()
     data = args.index.read_bytes()
     packages = {fields["Package"]: fields for fields in paragraphs(lzma.decompress(data).decode("utf-8"))
@@ -100,6 +105,20 @@ def main():
         supplement = args.supplement.read_bytes()
         packages.update({fields["Package"]: fields for fields in paragraphs(lzma.decompress(supplement).decode("utf-8"))
                          if fields.get("Architecture") in (args.arch, "all") and "Filename" in fields})
+    if args.headers_index:
+        if not args.headers_base_url:
+            parser.error("--headers-index requires --headers-base-url")
+        headers_data = args.headers_index.read_bytes()
+        headers = next(fields for fields in paragraphs(lzma.decompress(headers_data).decode("utf-8"))
+                       if fields.get("Package") == "linux-libc-dev" and fields.get("Architecture") == "all")
+        headers["Base-URL"] = args.headers_base_url.rstrip("/")
+        packages["linux-libc-dev"] = headers
+    if args.recipes:
+        recipes_data = args.recipes.read_bytes()
+        recipes = json.loads(recipes_data.decode("utf-8"))
+        for provided in recipes["provided_packages"]:
+            packages[provided["name"]] = {"Package": provided["name"], "Version": provided["version"],
+                                           "Recipe": provided["recipe"], "Depends": provided["depends"]}
     roots = list(ROOTS)
     freetype = "libfreetype6-dev" if "libfreetype6-dev" in packages else "libfreetype-dev"
     gcc_versions = [version for version in range(13, 5, -1)
@@ -112,7 +131,12 @@ def main():
                   "libgcc-{}-dev".format(gcc_version)])
     baseline = re.match(r"([0-9]+\.[0-9]+)", packages["libc6"]["Version"])[1]
     records = []
+    built_packages = []
     for fields in resolve(packages, roots):
+        if "Recipe" in fields:
+            built_packages.append({"name": fields["Package"], "version": fields["Version"],
+                                   "recipe": fields["Recipe"]})
+            continue
         sha = fields.get("SHA256", "")
         if not re.fullmatch(r"[a-f0-9]{64}", sha):
             raise ValueError("Missing SHA256: " + fields["Package"])
@@ -121,11 +145,18 @@ def main():
                         "sha256": sha, "size": int(fields["Size"]),
                         "depends": fields.get("Depends", ""),
                         "pre_depends": fields.get("Pre-Depends", "")})
+        if "Base-URL" in fields:
+            records[-1]["base_url"] = fields["Base-URL"]
     result = {"architecture": args.arch, "glibc": baseline, "gcc_version": gcc_version,
               "base_url": args.base_url.rstrip("/"), "index_sha256": hashlib.sha256(data).hexdigest(),
               "roots": roots, "packages": records}
     if args.supplement:
         result["supplement_sha256"] = hashlib.sha256(supplement).hexdigest()
+    if args.headers_index:
+        result["headers_index_sha256"] = hashlib.sha256(headers_data).hexdigest()
+    if args.recipes:
+        result["recipes_sha256"] = hashlib.sha256(recipes_data).hexdigest()
+        result["built_packages"] = built_packages
     args.output.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print("Locked {} packages, {:.1f} MiB".format(len(records), sum(p["size"] for p in records) / 2**20))
 

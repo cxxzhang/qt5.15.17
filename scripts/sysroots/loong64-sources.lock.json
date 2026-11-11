@@ -1,0 +1,463 @@
+{
+  "base_url": "https://archive.debian.org/debian",
+  "source_index_sha256": "5a02994205ec1fce06743fe91964eb475afa58cf303e0a04af936b17f71f5748",
+  "sources": [
+    {
+      "name": "xcb-proto",
+      "version": "1.13-1",
+      "host": true,
+      "path": "pool/main/x/xcb-proto/xcb-proto_1.13.orig.tar.gz",
+      "sha256": "0698e8f596e4c0dbad71d3dc754d95eb0edbb42df5464e0f782621216fa33ba7",
+      "size": 191771
+    },
+    {
+      "name": "libxcb",
+      "version": "1.13.1-2",
+      "host": false,
+      "path": "pool/main/libx/libxcb/libxcb_1.13.1.orig.tar.gz",
+      "sha256": "f09a76971437780a602303170fd51b5f7474051722bc39d566a272d2c4bde1b5",
+      "size": 636748
+    },
+    {
+      "name": "xcb-util",
+      "version": "0.3.8-3",
+      "host": false,
+      "path": "pool/main/x/xcb-util/xcb-util_0.3.8.orig.tar.gz",
+      "sha256": "e9e7f68d60ddd1bab6da714399dd1d91c78cb900c88427d3b8436a013178b3be",
+      "size": 344803
+    },
+    {
+      "name": "xcb-util-image",
+      "version": "0.4.0-1",
+      "host": false,
+      "path": "pool/main/x/xcb-util-image/xcb-util-image_0.4.0.orig.tar.bz2",
+      "sha256": "2db96a37d78831d643538dd1b595d7d712e04bdccf8896a5e18ce0f398ea2ffc",
+      "size": 327891
+    },
+    {
+      "name": "xcb-util-keysyms",
+      "version": "0.4.0-1",
+      "host": false,
+      "path": "pool/main/x/xcb-util-keysyms/xcb-util-keysyms_0.4.0.orig.tar.bz2",
+      "sha256": "0ef8490ff1dede52b7de533158547f8b454b241aa3e4dcca369507f66f216dd9",
+      "size": 289880
+    },
+    {
+      "name": "xcb-util-renderutil",
+      "version": "0.3.9-1",
+      "host": false,
+      "path": "pool/main/x/xcb-util-renderutil/xcb-util-renderutil_0.3.9.orig.tar.bz2",
+      "sha256": "c6e97e48fb1286d6394dddb1c1732f00227c70bd1bedb7d1acabefdd340bea5b",
+      "size": 292898
+    },
+    {
+      "name": "xcb-util-wm",
+      "version": "0.4.1-1.1",
+      "host": false,
+      "path": "pool/main/x/xcb-util-wm/xcb-util-wm_0.4.1.orig.tar.gz",
+      "sha256": "038b39c4bdc04a792d62d163ba7908f4bb3373057208c07110be73c1b04b8334",
+      "size": 395835
+    },
+    {
+      "name": "wayland",
+      "version": "1.16.0-1",
+      "host": false,
+      "path": "pool/main/w/wayland/wayland_1.16.0-1.tar.gz",
+      "sha256": "6c3ed6fdf6906aab51e94119b86589d21f497e03d28c8fc3a7a16e286798b55e",
+      "size": 324833
+    },
+    {
+      "name": "libxkbcommon",
+      "version": "0.8.2-1",
+      "host": false,
+      "path": "pool/main/libx/libxkbcommon/libxkbcommon_0.8.2-1.tar.gz",
+      "sha256": "373fb14dcc3913f894b86221d6e6473dadbc52e14c277b4b42d1af7d7fe37a1a",
+      "size": 614828
+    },
+    {
+      "name": "libglvnd",
+      "version": "1.7.0-1",
+      "host": false,
+      "path": "pool/main/libg/libglvnd/libglvnd_1.7.0.orig.tar.gz",
+      "sha256": "073e7292788d4d3eeb45ea6c7bdcce9bfdb3b3eef8d7dbd47f2f30dce046ef98",
+      "size": 839809,
+      "base_url": "https://snapshot.debian.org/archive/debian/20240601T000000Z"
+    },
+    {
+      "name": "libglu",
+      "version": "9.0.0-2.1",
+      "host": false,
+      "path": "pool/main/libg/libglu/libglu_9.0.0.orig.tar.gz",
+      "sha256": "4387476a1933f36fec1531178ea204057bbeb04cc2d8396c9ea32720a1f7e264",
+      "size": 626786
+    }
+  ],
+  "provided_packages": [
+    {
+      "name": "libxcb1",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libc6, libxau6, libxdmcp6"
+    },
+    {
+      "name": "libxcb1-dev",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1, libxau-dev, libxdmcp-dev"
+    },
+    {
+      "name": "libxcb-glx0",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-glx0-dev",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1-dev, libxcb-glx0"
+    },
+    {
+      "name": "libxcb-render0",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-render0-dev",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1-dev, libxcb-render0"
+    },
+    {
+      "name": "libxcb-shape0",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-shape0-dev",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1-dev, libxcb-shape0"
+    },
+    {
+      "name": "libxcb-xfixes0",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-xfixes0-dev",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1-dev, libxcb-xfixes0"
+    },
+    {
+      "name": "libxcb-randr0",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-randr0-dev",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1-dev, libxcb-randr0"
+    },
+    {
+      "name": "libxcb-sync1",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-sync-dev",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1-dev, libxcb-sync1"
+    },
+    {
+      "name": "libxcb-xinerama0",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-xinerama0-dev",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1-dev, libxcb-xinerama0"
+    },
+    {
+      "name": "libxcb-xkb1",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-xkb-dev",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1-dev, libxcb-xkb1"
+    },
+    {
+      "name": "libxcb-shm0",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-shm0-dev",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1-dev, libxcb-shm0"
+    },
+    {
+      "name": "libxcb-present0",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-present-dev",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1-dev, libxcb-present0"
+    },
+    {
+      "name": "libxcb-dri3-0",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-dri3-dev",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1-dev, libxcb-dri3-0"
+    },
+    {
+      "name": "libxcb-dri2-0",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-dri2-0-dev",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1-dev, libxcb-dri2-0"
+    },
+    {
+      "name": "libxcb-xinput0",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-xinput0-dev",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1-dev, libxcb-xinput0"
+    },
+    {
+      "name": "libxcb-composite0",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-composite0-dev",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1-dev, libxcb-composite0"
+    },
+    {
+      "name": "libxcb-damage0",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-damage0-dev",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1-dev, libxcb-damage0"
+    },
+    {
+      "name": "libxcb-screensaver0",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-screensaver0-dev",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1-dev, libxcb-screensaver0"
+    },
+    {
+      "name": "libxcb-xtest0",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-xtest0-dev",
+      "version": "1.13.1-2",
+      "recipe": "libxcb",
+      "depends": "libxcb1-dev, libxcb-xtest0"
+    },
+    {
+      "name": "libxcb-util0",
+      "version": "0.3.8-3",
+      "recipe": "xcb-util",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-util0-dev",
+      "version": "0.3.8-3",
+      "recipe": "xcb-util",
+      "depends": "libxcb1-dev, libxcb-util0"
+    },
+    {
+      "name": "libxcb-image0",
+      "version": "0.4.0-1",
+      "recipe": "xcb-util-image",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-image0-dev",
+      "version": "0.4.0-1",
+      "recipe": "xcb-util-image",
+      "depends": "libxcb1-dev, libxcb-image0"
+    },
+    {
+      "name": "libxcb-keysyms1",
+      "version": "0.4.0-1",
+      "recipe": "xcb-util-keysyms",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-keysyms1-dev",
+      "version": "0.4.0-1",
+      "recipe": "xcb-util-keysyms",
+      "depends": "libxcb1-dev, libxcb-keysyms1"
+    },
+    {
+      "name": "libxcb-render-util0",
+      "version": "0.3.9-1",
+      "recipe": "xcb-util-renderutil",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-render-util0-dev",
+      "version": "0.3.9-1",
+      "recipe": "xcb-util-renderutil",
+      "depends": "libxcb1-dev, libxcb-render-util0"
+    },
+    {
+      "name": "libxcb-icccm4",
+      "version": "0.4.1-1.1",
+      "recipe": "xcb-util-wm",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-icccm4-dev",
+      "version": "0.4.1-1.1",
+      "recipe": "xcb-util-wm",
+      "depends": "libxcb1-dev, libxcb-icccm4"
+    },
+    {
+      "name": "libxcb-ewmh2",
+      "version": "0.4.1-1.1",
+      "recipe": "xcb-util-wm",
+      "depends": "libxcb1"
+    },
+    {
+      "name": "libxcb-ewmh2-dev",
+      "version": "0.4.1-1.1",
+      "recipe": "xcb-util-wm",
+      "depends": "libxcb1-dev, libxcb-ewmh2"
+    },
+    {
+      "name": "libxkbcommon0",
+      "version": "0.8.2-1",
+      "recipe": "libxkbcommon",
+      "depends": "libc6, xkb-data"
+    },
+    {
+      "name": "libxkbcommon-dev",
+      "version": "0.8.2-1",
+      "recipe": "libxkbcommon",
+      "depends": "libxkbcommon0"
+    },
+    {
+      "name": "libxkbcommon-x11-0",
+      "version": "0.8.2-1",
+      "recipe": "libxkbcommon",
+      "depends": "libxkbcommon0, libxcb-xkb1"
+    },
+    {
+      "name": "libxkbcommon-x11-dev",
+      "version": "0.8.2-1",
+      "recipe": "libxkbcommon",
+      "depends": "libxkbcommon-dev, libxcb-xkb-dev"
+    },
+    {
+      "name": "libwayland-client0",
+      "version": "1.16.0-1",
+      "recipe": "wayland",
+      "depends": "libc6, libffi-dev, libexpat1-dev"
+    },
+    {
+      "name": "libwayland-server0",
+      "version": "1.16.0-1",
+      "recipe": "wayland",
+      "depends": "libc6, libffi-dev, libexpat1-dev"
+    },
+    {
+      "name": "libwayland-cursor0",
+      "version": "1.16.0-1",
+      "recipe": "wayland",
+      "depends": "libc6, libffi-dev, libexpat1-dev"
+    },
+    {
+      "name": "libwayland-egl1",
+      "version": "1.16.0-1",
+      "recipe": "wayland",
+      "depends": "libc6, libffi-dev, libexpat1-dev"
+    },
+    {
+      "name": "libwayland-dev",
+      "version": "1.16.0-1",
+      "recipe": "wayland",
+      "depends": "libwayland-client0, libwayland-server0, libwayland-cursor0, libwayland-egl1"
+    },
+    {
+      "name": "libgl1-mesa-dev",
+      "version": "1.7.0-1",
+      "recipe": "libglvnd",
+      "depends": "libx11-dev, libxext-dev"
+    },
+    {
+      "name": "libegl1-mesa-dev",
+      "version": "1.7.0-1",
+      "recipe": "libglvnd",
+      "depends": "libx11-dev, libxext-dev"
+    },
+    {
+      "name": "libgles2-mesa-dev",
+      "version": "1.7.0-1",
+      "recipe": "libglvnd",
+      "depends": "libx11-dev, libxext-dev"
+    },
+    {
+      "name": "libglu1-mesa-dev",
+      "version": "9.0.0-2.1",
+      "recipe": "libglu",
+      "depends": "libgl1-mesa-dev"
+    }
+  ]
+}

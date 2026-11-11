@@ -27,12 +27,12 @@ jobs:
         path: |
           build-temp/toolchain/sysroot-${{ matrix.arch }}
           build-temp/toolchain/downloads
-        key: cross-deps-${{ matrix.arch }}-${{ hashFiles('scripts/prepare-linux-sysroot.py', format('scripts/sysroots/{0}.lock.json', matrix.arch)) }}
+        key: cross-deps-${{ matrix.arch }}-${{ hashFiles('scripts/prepare-linux-sysroot.py', 'scripts/build-linux-cross-dependencies.py', format('scripts/sysroots/{0}.lock.json', matrix.arch)) }}
     - uses: actions/cache/restore@v4
       id: cross-cache
       with:
         path: build-temp/toolchain/cross-${{ matrix.arch }}
-        key: cross-bionic-${{ matrix.arch }}-${{ hashFiles('scripts/setup-cross-linux-toolchain.sh', format('scripts/sysroots/{0}.lock.json', matrix.arch)) }}
+        key: cross-bionic-${{ matrix.arch }}-${{ hashFiles('scripts/setup-cross-linux-toolchain.sh', 'scripts/build-linux-cross-dependencies.py', format('scripts/sysroots/{0}.lock.json', matrix.arch)) }}
     - name: Build and execute target C++20 probe
       env:
         TARGET: ${{ matrix.arch }}
