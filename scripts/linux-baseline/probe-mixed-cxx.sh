@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Exercise an older GNU-built shared C++ library with the selected Clang
-# consumer and private newer runtime, using the same explicitly selected ABI.
+# consumer and selected GNU runtime, using the same explicitly selected ABI.
 set -euo pipefail
 prefix="${1:?baseline prefix required}"
 legacy_cxx="${LEGACY_CXX:-$(command -v g++)}"

@@ -147,7 +147,7 @@ def main():
             if not match or match[1] != expected:
                 raise ValueError("Probe did not load its selected private runtime: " + dependencies)
         root.execute(program)
-        print("Target-root C++20/thread probe loaded the selected libstdc++ and libgcc")
+        print("Target-root thread/string/exception probe loaded the selected libstdc++ and libgcc")
     else:
         if not args.sdk:
             parser.error("smoke requires --sdk")

@@ -36,7 +36,9 @@ def main():
         raise ValueError("Graphics recipes do not match the pinned sysroot")
     recipes = json.loads(recipe_bytes.decode("utf-8"))
     baseline = recipes["glibc"] if args.recipes else lock["glibc"]
-    identity = hashlib.sha256(recipe_bytes + Path(__file__).read_bytes()).hexdigest()
+    identity = hashlib.sha256(recipe_bytes + Path(__file__).read_bytes()
+                              + (cross / 'bin/clang').read_bytes()
+                              + (cross / 'bin/clang++').read_bytes()).hexdigest()
     completed = cross / (".graphics-ready-" + identity)
     all_installed = all(((cross / "host" if r["host"] else sysroot)
                          / (".source-" + r["name"] + "-" + identity)).is_file()

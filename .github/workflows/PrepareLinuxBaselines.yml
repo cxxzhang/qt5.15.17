@@ -307,8 +307,15 @@ jobs:
       id: oldworld-graphics
       with:
         path: build-temp/baseline-loong64-oldworld
-        key: loong-oldworld-system-graphics-${{ hashFiles('scripts/build-linux-cross-dependencies.py', 'scripts/linux-baseline/oldworld-graphics.lock.json') }}
+        key: loong-oldworld-system-graphics-${{ hashFiles('scripts/build-linux-cross-dependencies.py', 'scripts/linux-baseline/oldworld-graphics.lock.json', 'scripts/linux-baseline/prepare-loongarch-oldworld.sh') }}
         restore-keys: loong-oldworld-system-graphics-
+    - name: Refresh old-world drivers after restoring graphical dependencies
+      if: inputs.target == 'loongarch-oldworld-deps'
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        set -o pipefail
+        bash scripts/linux-baseline/prepare-loongarch-oldworld.sh 2>&1 | tee build-temp/logs/loong-oldworld-refreshed-drivers.log
     - name: Build the missing old-world graphics libraries against glibc 2.28
       if: inputs.target == 'loongarch-oldworld-deps'
       run: |
@@ -415,8 +422,15 @@ jobs:
       id: newworld-graphics
       with:
         path: build-temp/baseline-loong64-newworld
-        key: loong-newworld-system-graphics-${{ hashFiles('scripts/build-linux-cross-dependencies.py', 'scripts/sysroots/loong64-sources.lock.json') }}
+        key: loong-newworld-system-graphics-${{ hashFiles('scripts/build-linux-cross-dependencies.py', 'scripts/sysroots/loong64-sources.lock.json', 'scripts/linux-baseline/prepare-loongarch-oldworld.sh') }}
         restore-keys: loong-newworld-system-graphics-
+    - name: Refresh new-world drivers after restoring graphical dependencies
+      if: inputs.target == 'loongarch-newworld-deps'
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        set -o pipefail
+        bash scripts/linux-baseline/prepare-loongarch-oldworld.sh newworld 2>&1 | tee build-temp/logs/loong-newworld-refreshed-drivers.log
     - name: Build the pinned glibc 2.36 graphics dependency sources
       if: inputs.target == 'loongarch-newworld-deps'
       run: |
