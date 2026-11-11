@@ -1,4 +1,4 @@
-name: Verify an extracted native Linux SDK
+name: Verify an extracted Linux SDK
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
         required: true
       arch:
         type: choice
-        options: [x64, arm64]
+        options: [x64, arm64, loong64, mips64el]
         default: x64
       variant:
         type: choice
@@ -29,13 +29,25 @@ jobs:
       with:
         github-token: ${{ github.token }}
         run-id: ${{ inputs.source_run }}
-        name: qt5.15.17_linux_${{ inputs.arch }}${{ inputs.variant == 'debug' && '_debug' || '' }}
+        name: ${{ (inputs.arch == 'loong64' || inputs.arch == 'mips64el') && format('qt5.15.17_linux_{0}_{1}', inputs.arch, inputs.variant) || format('qt5.15.17_linux_{0}{1}', inputs.arch, inputs.variant == 'debug' && '_debug' || '') }}
         path: artifacts
     - uses: actions/cache/restore@v4
       with:
         path: build-temp/toolchain
-        key: bionic-qt-${{ inputs.arch }}-${{ hashFiles('scripts/setup-linux-toolchain.sh') }}
-        restore-keys: bionic-qt-${{ inputs.arch }}-
+        key: bionic-qt-${{ inputs.arch == 'arm64' && 'arm64' || 'x64' }}-${{ hashFiles('scripts/setup-linux-toolchain.sh') }}
+        restore-keys: bionic-qt-${{ inputs.arch == 'arm64' && 'arm64' || 'x64' }}-
+    - uses: actions/cache/restore@v4
+      if: inputs.arch == 'loong64' || inputs.arch == 'mips64el'
+      with:
+        path: |
+          build-temp/toolchain/sysroot-${{ inputs.arch }}
+          build-temp/toolchain/downloads
+        key: cross-deps-${{ inputs.arch }}-${{ hashFiles('scripts/prepare-linux-sysroot.py', 'scripts/build-linux-cross-dependencies.py', format('scripts/sysroots/{0}.lock.json', inputs.arch)) }}
+    - uses: actions/cache/restore@v4
+      if: inputs.arch == 'loong64' || inputs.arch == 'mips64el'
+      with:
+        path: build-temp/toolchain/cross-${{ inputs.arch }}
+        key: cross-bionic-${{ inputs.arch }}-${{ hashFiles('scripts/setup-cross-linux-toolchain.sh', 'scripts/build-linux-cross-dependencies.py', format('scripts/sysroots/{0}.lock.json', inputs.arch)) }}
     - name: Audit and consume the package in a new Ubuntu 18.04 container
       env:
         TARGET: ${{ inputs.arch }}
@@ -43,26 +55,9 @@ jobs:
       run: |
         set -o pipefail
         mkdir -p build-temp/logs
-        docker run --rm -v "$PWD:/workspace" -w /workspace ubuntu:18.04 bash -ec '
-          bash scripts/setup-linux-toolchain.sh "$1"
-          export PATH=/workspace/build-temp/toolchain/bin:$PATH
-          tag="qt5.15.17_linux_$1"
-          [[ "$2" != debug ]] || tag+=_debug
-          test ! -e "/workspace/Output/linux-$1"
-          mkdir /opt/extracted-sdk
-          tar -xzf "artifacts/$tag.tar.gz" -C /opt/extracted-sdk
-          tar -tzf "artifacts/$tag-symbols.tar.gz" >/tmp/debug-files
-          test -s /tmp/debug-files
-          grep -q '\.debug$' /tmp/debug-files
-          case "$1" in
-            x64) machine="Advanced Micro Devices X86-64" ;;
-            arm64) machine=AArch64 ;;
-          esac
-          python3 scripts/package-linux.py /opt/extracted-sdk --audit-only --require-stripped \
-            --machine "$machine" --glibc 2.27 --native-dependencies
-          test "$(env -u LD_LIBRARY_PATH /opt/extracted-sdk/bin/qmake -query QT_VERSION)" = 5.15.17
-          bash scripts/smoke-linux.sh /opt/extracted-sdk /tmp/sdk-consumer
-        ' bash "$TARGET" "$VARIANT" 2>&1 | tee build-temp/logs/extracted-sdk.log
+        docker run --rm -v "$PWD:/workspace" -w /workspace ubuntu:18.04 \
+          bash scripts/verify-linux-artifact.sh "$TARGET" "$VARIANT" artifacts \
+          2>&1 | tee build-temp/logs/extracted-sdk.log
     - uses: actions/upload-artifact@v4
       if: always()
       with:
