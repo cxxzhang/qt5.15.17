@@ -7,7 +7,7 @@ import hashlib
 import json
 import os
 import re
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import subprocess
 import tempfile
 import time
@@ -77,6 +77,7 @@ def inputs(commit, kind, job=None):
             selected |= name == 'Patches/0001-qtbase-support-xp.patch'
             selected |= name in ('.github/workflows/setup-vc-ltl.bat', '.github/workflows/VC-LTL helper for nmake.cmd')
             selected |= name in ('scripts/force-runtime.ps1', 'scripts/verify-vc-ltl.ps1')
+            selected |= name.startswith('YY-Thunks/objs/')
         else:
             script = 'onekey-build-' + job + '.sh' if job else None
             selected |= name == script if script else name.startswith('onekey-build-macos-')
@@ -96,6 +97,27 @@ def inputs(commit, kind, job=None):
 def output(restored):
     with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as stream:
         stream.write('restored=' + str(restored).lower() + '\n')
+
+
+def safe_zip(archive):
+    for name in archive.namelist():
+        path = PurePosixPath(name.replace('\\', '/'))
+        if path.is_absolute() or '..' in path.parts or ':' in str(path):
+            raise ValueError('Unsafe source archive path')
+
+
+def extract_windows_sdk(archive, destination, artifact):
+    with zipfile.ZipFile(archive) as outer:
+        safe_zip(outer)
+        files = [i.filename for i in outer.infolist() if not i.is_dir()]
+        if files == [artifact]:
+            with tempfile.TemporaryDirectory(prefix='qt-prepacked-sdk-') as temporary:
+                outer.extractall(temporary)
+                with zipfile.ZipFile(Path(temporary, artifact)) as inner:
+                    safe_zip(inner)
+                    inner.extractall(destination)
+        else:
+            outer.extractall(destination)
 
 
 def main():
@@ -131,7 +153,7 @@ def main():
             output(False)
             return
         print('Waiting for source build ' + args.job, flush=True)
-        time.sleep(30)
+        time.sleep(60)
     if job['conclusion'] != 'success':
         print('Source native build did not succeed; build locally in this job')
         output(False)
@@ -149,13 +171,11 @@ def main():
         if destination.exists() and any(destination.iterdir()):
             raise ValueError('Refusing to mix SDK directories: ' + str(destination))
         destination.mkdir(parents=True, exist_ok=True)
-        with zipfile.ZipFile(archive) as sdk:
-            for name in sdk.namelist():
-                if not (Path(temp) / name).resolve().is_relative_to(Path(temp).resolve()):
-                    raise ValueError('Unsafe source archive path')
-            if args.kind == 'windows':
-                sdk.extractall(destination)
-            else:
+        if args.kind == 'windows':
+            extract_windows_sdk(archive, destination, args.artifact)
+        else:
+            with zipfile.ZipFile(archive) as sdk:
+                safe_zip(sdk)
                 sdk.extractall(temp)
                 packages = list(Path(temp).glob('*.tar.gz'))
                 if len(packages) != 1:

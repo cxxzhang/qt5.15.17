@@ -62,7 +62,6 @@ jobs:
         GH_TOKEN: ${{ github.token }}
       run: python scripts/restore-native-sdk.py --run "${{ inputs.reuse_native_run }}" --job windows-x86 --artifact qt5.15.17_windows_x86.zip --kind windows --destination Output/x86
     - name: Set up VC-LTL
-      if: steps.native-cache.outputs.restored != 'true'
       shell: cmd
       working-directory: C:\workspaces\qt5.15.17
       run: call C:\workspaces\qt5.15.17\.github\workflows\setup-vc-ltl.bat
@@ -75,6 +74,10 @@ jobs:
           git config --global user.name "GitHub Actions"
           call C:\workspaces\qt5.15.17\apply-patches.bat
           call C:\workspaces\qt5.15.17\onekey-build-windows-x86.bat
+    - name: Package Windows SDK
+      shell: pwsh
+      working-directory: C:/workspaces/qt5.15.17
+      run: python scripts/windows-sdk.py --sdk Output/x86 --target x86 --variant release --output archives/qt5.15.17_windows_x86.zip
     - name: Verify the installed Windows qmake
       shell: pwsh
       run: |
@@ -84,7 +87,8 @@ jobs:
       with:
         name: qt5.15.17_windows_x86.zip
         if-no-files-found: error
-        path: C:\workspaces\qt5.15.17\Output\x86
+        compression-level: 0
+        path: C:\workspaces\qt5.15.17\archives\qt5.15.17_windows_x86.zip
 
   windows-x64:
     needs: linux
@@ -113,7 +117,6 @@ jobs:
         GH_TOKEN: ${{ github.token }}
       run: python scripts/restore-native-sdk.py --run "${{ inputs.reuse_native_run }}" --job windows-x64 --artifact qt5.15.17_windows_x64.zip --kind windows --destination Output/x64
     - name: Set up VC-LTL
-      if: steps.native-cache.outputs.restored != 'true'
       shell: cmd
       working-directory: C:\workspaces\qt5.15.17
       run: call C:\workspaces\qt5.15.17\.github\workflows\setup-vc-ltl.bat
@@ -126,6 +129,10 @@ jobs:
           git config --global user.name "GitHub Actions"
           call C:\workspaces\qt5.15.17\apply-patches.bat
           call C:\workspaces\qt5.15.17\onekey-build-windows-x64.bat
+    - name: Package Windows SDK
+      shell: pwsh
+      working-directory: C:/workspaces/qt5.15.17
+      run: python scripts/windows-sdk.py --sdk Output/x64 --target x64 --variant release --output archives/qt5.15.17_windows_x64.zip
     - name: Verify the installed Windows qmake
       shell: pwsh
       run: |
@@ -135,7 +142,8 @@ jobs:
       with:
         name: qt5.15.17_windows_x64.zip
         if-no-files-found: error
-        path: C:\workspaces\qt5.15.17\Output\x64
+        compression-level: 0
+        path: C:\workspaces\qt5.15.17\archives\qt5.15.17_windows_x64.zip
 
   windows-arm64:
     needs: linux
@@ -164,7 +172,6 @@ jobs:
         GH_TOKEN: ${{ github.token }}
       run: python scripts/restore-native-sdk.py --run "${{ inputs.reuse_native_run }}" --job windows-arm64 --artifact qt5.15.17_windows_arm64.zip --kind windows --destination Output/arm64
     - name: Set up VC-LTL
-      if: steps.native-cache.outputs.restored != 'true'
       shell: cmd
       working-directory: C:\workspaces\qt5.15.17
       run: call C:\workspaces\qt5.15.17\.github\workflows\setup-vc-ltl.bat
@@ -177,6 +184,10 @@ jobs:
           git config --global user.name "GitHub Actions"
           call C:\workspaces\qt5.15.17\apply-patches.bat
           call C:\workspaces\qt5.15.17\onekey-build-windows-arm64.bat
+    - name: Package Windows SDK
+      shell: pwsh
+      working-directory: C:/workspaces/qt5.15.17
+      run: python scripts/windows-sdk.py --sdk Output/arm64 --target arm64 --variant release --output archives/qt5.15.17_windows_arm64.zip
     - name: Verify the installed Windows qmake
       shell: pwsh
       run: |
@@ -186,7 +197,8 @@ jobs:
       with:
         name: qt5.15.17_windows_arm64.zip
         if-no-files-found: error
-        path: C:\workspaces\qt5.15.17\Output\arm64
+        compression-level: 0
+        path: C:\workspaces\qt5.15.17\archives\qt5.15.17_windows_arm64.zip
 
   windows-x86-debug:
     needs: linux
@@ -213,9 +225,8 @@ jobs:
       working-directory: C:/workspaces/qt5.15.17
       env:
         GH_TOKEN: ${{ github.token }}
-      run: python scripts/restore-native-sdk.py --run "${{ inputs.reuse_native_run }}" --job windows-x86-debug --artifact qt5.15.17_windows_x86_debug.zip --kind windows --destination Output/x86d --wait-seconds 0
+      run: python scripts/restore-native-sdk.py --run "${{ inputs.reuse_native_run }}" --job windows-x86-debug --artifact qt5.15.17_windows_x86_debug.zip --kind windows --destination Output/x86d
     - name: Set up VC-LTL
-      if: steps.native-cache.outputs.restored != 'true'
       shell: cmd
       working-directory: C:\workspaces\qt5.15.17
       run: call C:\workspaces\qt5.15.17\.github\workflows\setup-vc-ltl.bat
@@ -252,6 +263,10 @@ jobs:
       with:
         name: diagnostics-windows-x86-debug
         path: C:/workspaces/qt5.15.17/build-temp/logs/
+    - name: Package Windows SDK
+      shell: pwsh
+      working-directory: C:/workspaces/qt5.15.17
+      run: python scripts/windows-sdk.py --sdk Output/x86d --target x86 --variant debug --output archives/qt5.15.17_windows_x86_debug.zip
     - name: Verify the installed Windows qmake
       shell: pwsh
       run: |
@@ -261,7 +276,8 @@ jobs:
       with:
         name: qt5.15.17_windows_x86_debug.zip
         if-no-files-found: error
-        path: C:\workspaces\qt5.15.17\Output\x86d
+        compression-level: 0
+        path: C:\workspaces\qt5.15.17\archives\qt5.15.17_windows_x86_debug.zip
 
   windows-x64-debug:
     needs: linux
@@ -288,9 +304,8 @@ jobs:
       working-directory: C:/workspaces/qt5.15.17
       env:
         GH_TOKEN: ${{ github.token }}
-      run: python scripts/restore-native-sdk.py --run "${{ inputs.reuse_native_run }}" --job windows-x64-debug --artifact qt5.15.17_windows_x64_debug.zip --kind windows --destination Output/x64d --wait-seconds 0
+      run: python scripts/restore-native-sdk.py --run "${{ inputs.reuse_native_run }}" --job windows-x64-debug --artifact qt5.15.17_windows_x64_debug.zip --kind windows --destination Output/x64d
     - name: Set up VC-LTL
-      if: steps.native-cache.outputs.restored != 'true'
       shell: cmd
       working-directory: C:\workspaces\qt5.15.17
       run: call C:\workspaces\qt5.15.17\.github\workflows\setup-vc-ltl.bat
@@ -327,6 +342,10 @@ jobs:
       with:
         name: diagnostics-windows-x64-debug
         path: C:/workspaces/qt5.15.17/build-temp/logs/
+    - name: Package Windows SDK
+      shell: pwsh
+      working-directory: C:/workspaces/qt5.15.17
+      run: python scripts/windows-sdk.py --sdk Output/x64d --target x64 --variant debug --output archives/qt5.15.17_windows_x64_debug.zip
     - name: Verify the installed Windows qmake
       shell: pwsh
       run: |
@@ -336,7 +355,8 @@ jobs:
       with:
         name: qt5.15.17_windows_x64_debug.zip
         if-no-files-found: error
-        path: C:\workspaces\qt5.15.17\Output\x64d
+        compression-level: 0
+        path: C:\workspaces\qt5.15.17\archives\qt5.15.17_windows_x64_debug.zip
 
   windows-arm64-debug:
     needs: linux
@@ -363,9 +383,8 @@ jobs:
       working-directory: C:/workspaces/qt5.15.17
       env:
         GH_TOKEN: ${{ github.token }}
-      run: python scripts/restore-native-sdk.py --run "${{ inputs.reuse_native_run }}" --job windows-arm64-debug --artifact qt5.15.17_windows_arm64_debug.zip --kind windows --destination Output/arm64d --wait-seconds 0
+      run: python scripts/restore-native-sdk.py --run "${{ inputs.reuse_native_run }}" --job windows-arm64-debug --artifact qt5.15.17_windows_arm64_debug.zip --kind windows --destination Output/arm64d
     - name: Set up VC-LTL
-      if: steps.native-cache.outputs.restored != 'true'
       shell: cmd
       working-directory: C:\workspaces\qt5.15.17
       run: call C:\workspaces\qt5.15.17\.github\workflows\setup-vc-ltl.bat
@@ -402,6 +421,10 @@ jobs:
       with:
         name: diagnostics-windows-arm64-debug
         path: C:/workspaces/qt5.15.17/build-temp/logs/
+    - name: Package Windows SDK
+      shell: pwsh
+      working-directory: C:/workspaces/qt5.15.17
+      run: python scripts/windows-sdk.py --sdk Output/arm64d --target arm64 --variant debug --output archives/qt5.15.17_windows_arm64_debug.zip
     - name: Verify the installed Windows qmake
       shell: pwsh
       run: |
@@ -411,7 +434,8 @@ jobs:
       with:
         name: qt5.15.17_windows_arm64_debug.zip
         if-no-files-found: error
-        path: C:\workspaces\qt5.15.17\Output\arm64d
+        compression-level: 0
+        path: C:\workspaces\qt5.15.17\archives\qt5.15.17_windows_arm64_debug.zip
 
   linux:
     uses: ./.github/workflows/LinuxPipeline.yml
@@ -541,8 +565,22 @@ jobs:
         name: verification-macos-${{ matrix.target }}-${{ matrix.consumer }}
         path: build-temp/logs/
 
+  verify-windows:
+    needs: [windows-x86, windows-x64, windows-arm64, windows-x86-debug, windows-x64-debug, windows-arm64-debug]
+    if: inputs.scope == 'all'
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [x86, x64, arm64]
+        variant: [release, debug]
+    uses: ./.github/workflows/VerifyWindowsArtifact.yml
+    with:
+      source_run: ${{ github.run_id }}
+      target: ${{ matrix.target }}
+      variant: ${{ matrix.variant }}
+
   release:
-    needs: [release-gates, linux, windows-x86, windows-x64, windows-arm64, windows-x86-debug, windows-x64-debug, windows-arm64-debug, macos-x64, macos-arm64, macos-universal, verify-macos]
+    needs: [release-gates, linux, windows-x86, windows-x64, windows-arm64, windows-x86-debug, windows-x64-debug, windows-arm64-debug, macos-x64, macos-arm64, macos-universal, verify-macos, verify-windows]
     if: >-
       ${{ !cancelled() && inputs.publish && needs.linux.result == 'success' && needs.release-gates.result == 'success' &&
       (inputs.scope == 'linux' || inputs.scope == 'all' &&
@@ -554,7 +592,20 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/download-artifact@v4
       with:
+        pattern: qt5.15.17_*
         path: release_work
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: verification-*
+        path: release_work/verification
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: modern-consumers-*
+        path: release_work/modern
+    - uses: actions/download-artifact@v4
+      with:
+        name: linux-acceptance-manifest
+        path: release_work/linux-acceptance-manifest
     - name: Collect release packages
       run: |
         mkdir release_zips
@@ -562,7 +613,7 @@ jobs:
           cp "$artifact"/*.tar.gz release_zips/
         done
         python3 scripts/linux-baseline/collect-acceptance.py --sdk release_zips \
-          --verification release_work --modern release_work \
+          --verification release_work/verification --modern release_work/modern \
           --targets-spec scripts/linux-baseline/targets.json --toolchains scripts/linux-baseline/toolchains.lock.json \
           --target all --variant all --source-run "${{ github.run_id }}" --source-commit "${{ github.sha }}" \
           --output release_zips/linux-acceptance-manifest.json
@@ -570,8 +621,8 @@ jobs:
         for artifact in release_work/*; do
           name="${artifact##*/}"
           case "$name" in
-            diagnostics-*|verification-*|modern-consumers-*|linux-acceptance-manifest|qt5.15.17_linux_*) continue ;;
-            qt5.15.17_windows_*.zip) (cd "$artifact" && zip -qr "../../release_zips/$name" .) ;;
+            diagnostics-*|verification-*|modern-consumers-*|verification|modern|linux-acceptance-manifest|qt5.15.17_linux_*) continue ;;
+            qt5.15.17_windows_*.zip) cp "$artifact/$name" release_zips/ ;;
             qt5.15.17_macos_*) cp "$artifact/$name.tar.gz" release_zips/ ;;
             *) echo "Unexpected artifact: $name" >&2; exit 1 ;;
           esac

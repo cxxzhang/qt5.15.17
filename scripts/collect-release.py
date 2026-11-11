@@ -78,6 +78,53 @@ def collect(packages, proofs, scope, run, commit):
                     require(str(proof.get('source_run', '')).isdigit()
                             and re.fullmatch('[0-9a-f]{40}', proof.get('source_commit') or '') is not None,
                             filename + ': missing VC-LTL compilation provenance')
+                    require('share/ci-windows-packaging.json' in names and 'bin/qt.conf' in names,
+                            filename + ': missing portable Windows packaging proof')
+                    packaging = json.loads(sdk.read('share/ci-windows-packaging.json'))
+                    require(packaging.get('target_arch') == arch and packaging.get('variant') == ('debug' if debug else 'release')
+                            and packaging.get('source_run') == str(run) and packaging.get('source_commit') == commit,
+                            filename + ': Windows packaging provenance mismatch')
+                    runtime = packaging.get('consumer_runtime', {})
+                    require(runtime.get('version') == proof['runtime_version'] and runtime.get('platform') == proof['platform'],
+                            filename + ': consumer CRT mismatch')
+                    runtime_files = runtime.get('files', {})
+                    runtime_base = 'mkspecs/VC-LTL/TargetPlatform/'
+                    required_runtime = {runtime_base + 'header/corecrt.h',
+                        runtime_base + proof['runtime_version'] + '/header/vcruntime.h', 'share/licenses/VC-LTL-LICENSE'}
+                    required_runtime |= {runtime_base + proof['runtime_version'] + '/lib/' + proof['platform'] + '/' + name
+                        for name in ('libucrt.lib', 'libucrtd.lib', 'libvcruntime.lib', 'libvcruntimed.lib')}
+                    require(required_runtime <= runtime_files.keys(), filename + ': incomplete consumer CRT')
+                    for path, checksum in runtime_files.items():
+                        require(path in names and hashlib.sha256(sdk.read(path)).hexdigest() == checksum,
+                                filename + ': consumer CRT hash mismatch: ' + path)
+                    for cpu, coff_machine in (('x86', 0x14c), ('x64', 0x8664)):
+                        path = 'mkspecs/YY-Thunks/objs/' + cpu + '/YY_Thunks_for_WinXP.obj'
+                        require(path in names, filename + ': missing thunk object ' + cpu)
+                        data = sdk.read(path)
+                        require(len(data) >= 8, filename + ': truncated thunk object')
+                        object_machine = struct.unpack_from('<H', data, 6 if data[:4] == b'\0\0\xff\xff' else 0)[0]
+                        record = packaging.get('thunk_objects', {}).get(cpu, {})
+                        require(object_machine == coff_machine and record.get('machine') == object_machine and record.get('path') == path
+                                and record.get('sha256') == hashlib.sha256(data).hexdigest(), filename + ': invalid thunk object proof')
+                    license_path = 'share/licenses/YY-Thunks-LICENSE'
+                    require(license_path in names and packaging.get('thunk_license', {}).get('path') == license_path
+                            and packaging['thunk_license'].get('sha256') == hashlib.sha256(sdk.read(license_path)).hexdigest(),
+                            filename + ': missing thunk license/provenance')
+                proof_name = 'verified-windows-' + arch + '-' + ('debug' if debug else 'release') + '.json'
+                matches = list(proofs.rglob(proof_name))
+                require(len(matches) == 1, 'Expected one Windows consumer proof: ' + proof_name)
+                consumer = json.loads(matches[0].read_text())
+                require(consumer.get('accepted') is True and consumer.get('source_run') == str(run)
+                        and consumer.get('source_commit') == commit and consumer.get('verifier_commit') == commit
+                        and consumer.get('target_arch') == arch and consumer.get('variant') == ('debug' if debug else 'release'),
+                        filename + ': invalid Windows consumer provenance')
+                require(consumer.get('archive') == filename and consumer.get('sha256') == digest(packages / filename),
+                        filename + ': Windows consumer archive hash mismatch')
+                require({'standalone extracted SDK', 'relocated qmake prefix', 'bundled thunk objects',
+                         'C++17 qmake consumer', 'ordinary and wide string round trips',
+                         'offscreen GUI/QML/fonts/TLS runtime', 'consumer PE architecture',
+                         'matching bundled VC-LTL consumer runtime', 'qmake static UiTools consumer'}
+                        <= set(consumer.get('checks', [])), filename + ': incomplete Windows consumer checks')
         for target, architectures, consumers in (
                 ('x64', {'x86_64'}, ('x86_64',)), ('arm64', {'arm64'}, ('arm64',)),
                 ('universal', {'x86_64', 'arm64'}, ('x86_64', 'arm64'))):

@@ -1,0 +1,36 @@
+{
+  "accepted_local_preflight": true,
+  "all_windows_ci_acceptance": false,
+  "compilation_source_run": "43104420959",
+  "compilation_source_commit": "5e9621cc8734d7d0e6d703dbd5cfdecc8eed1e7e",
+  "description": "Actual x64 release SDK from successful producer, repackaged locally and independently extracted outside source with spaces; packaging run 0 is local only.",
+  "consumer_proof": {
+    "accepted": true,
+    "target_arch": "x64",
+    "variant": "release",
+    "source_run": "0",
+    "source_commit": "5e9621cc8734d7d0e6d703dbd5cfdecc8eed1e7e",
+    "verifier_commit": "5e9621cc8734d7d0e6d703dbd5cfdecc8eed1e7e",
+    "archive": "qt5.15.17_windows_x64.zip",
+    "sha256": "0762b465c5d574913df349a6bfabc04160ee6a43956c1704ef39d3351ceff3f9",
+    "compiler": "14.44.35207",
+    "checks": [
+      "standalone extracted SDK",
+      "relocated qmake prefix",
+      "bundled thunk objects",
+      "C++17 qmake consumer",
+      "ordinary and wide string round trips",
+      "offscreen GUI/QML/fonts/TLS runtime",
+      "consumer PE architecture",
+      "matching bundled VC-LTL consumer runtime",
+      "qmake static UiTools consumer"
+    ]
+  },
+  "regression_tests": 31,
+  "baseline_failure": "LNK1181: missing YY-Thunks object outside source; default-CRT consumer then reproduced cross-CRT invalid heap free",
+  "native_compilation_inputs_unchanged_for_all_six_variants": true,
+  "licenses": {
+    "YY-Thunks": "c9b6ac2ab699da6d123f1416b93949c148ffae40",
+    "VC-LTL": "4d3abaa32bed8eb6449f7b68bd7cd083f7e570ac"
+  }
+}

@@ -1,0 +1,79 @@
+name: Verify an extracted Windows SDK
+on:
+  workflow_call:
+    inputs:
+      source_run:
+        type: string
+        required: true
+      target:
+        type: string
+        required: true
+      variant:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      source_run:
+        type: string
+        required: true
+      target:
+        type: choice
+        options: [x86, x64, arm64]
+        default: x64
+      variant:
+        type: choice
+        options: [release, debug]
+        default: release
+permissions:
+  contents: read
+  actions: read
+jobs:
+  verify:
+    runs-on: ${{ inputs.target == 'arm64' && 'windows-11-arm' || 'windows-latest' }}
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v4
+    - name: Bind archive to its successful native build
+      id: source
+      shell: pwsh
+      env:
+        GH_TOKEN: ${{ github.token }}
+        SOURCE_RUN: ${{ inputs.source_run }}
+        TARGET: ${{ inputs.target }}
+        VARIANT: ${{ inputs.variant }}
+      run: |
+        @'
+        import importlib.util, os
+        from pathlib import Path
+        spec = importlib.util.spec_from_file_location('restore', Path('scripts/restore-native-sdk.py'))
+        restore = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(restore)
+        run_id = os.environ['SOURCE_RUN']
+        assert run_id.isdigit()
+        assert os.environ['TARGET'] in ('x86', 'x64', 'arm64')
+        assert os.environ['VARIANT'] in ('release', 'debug')
+        source = restore.api('/actions/runs/' + run_id)
+        assert source['path'].split('@')[0] == '.github/workflows/BuildBinaries.yml'
+        jobs = restore.api('/actions/runs/' + run_id + '/jobs?per_page=100')['jobs']
+        expected = 'windows-' + os.environ['TARGET'] + ('-debug' if os.environ['VARIANT'] == 'debug' else '')
+        assert any(j['name'] == expected and j['conclusion'] == 'success' for j in jobs)
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
+            out.write('commit=' + source['head_sha'] + '\n')
+        '@ | python -B
+    - uses: actions/download-artifact@v4
+      with:
+        github-token: ${{ github.token }}
+        run-id: ${{ inputs.source_run }}
+        name: qt5.15.17_windows_${{ inputs.target }}${{ inputs.variant == 'debug' && '_debug' || '' }}.zip
+        path: archives
+    - name: Build and run a normal extracted SDK consumer
+      shell: cmd
+      run: >-
+        call scripts\verify-windows-sdk.cmd ${{ inputs.target }} ${{ inputs.variant }}
+        "archives\qt5.15.17_windows_${{ inputs.target }}${{ inputs.variant == 'debug' && '_debug' || '' }}.zip"
+        "${{ inputs.source_run }}" "${{ steps.source.outputs.commit }}"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: verification-windows-${{ inputs.target }}-${{ inputs.variant }}
+        path: build-temp/logs/
