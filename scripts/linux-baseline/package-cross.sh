@@ -58,12 +58,14 @@ if [[ ! -e "$prefix/llvm/bin/clang" && -x "$prefix/llvm/bin/clang-20" ]]; then
 fi
 if [[ "$arch" == loong64-oldworld ]]; then
   cp -a "$vendor_work/host-libs" "$prefix/"
+  python3 "$root/scripts/linux-baseline/wrap-vendor-host-tools.py" "$prefix"
 fi
 cp "$qemu" "$prefix/bin/qemu"
 cp "$root/scripts/linux-baseline/targets.json" "$root/scripts/linux-baseline/package-cross.sh" \
   "$root/scripts/linux-baseline/prepare-loongarch-oldworld.sh" "$root/scripts/linux-baseline/probe-mips.sh" \
   "$root/scripts/linux-baseline/prepare-mips.sh" "$root/scripts/linux-baseline/load-upstream-clang.sh" \
   "$root/scripts/linux-baseline/load-vendor-clang.sh" "$prefix/share/baseline/"
+cp "$root/scripts/linux-baseline/wrap-vendor-host-tools.py" "$prefix/share/baseline/"
 if [[ "$arch" == loong64-newworld ]]; then
   cp "$root/scripts/sysroots/loong64.lock.json" "$prefix/share/baseline/"
 fi
