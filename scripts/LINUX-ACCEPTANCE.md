@@ -7,10 +7,10 @@ Run numbers identify GitHub Actions runs in `cxxzhang/qt5.15.17`.
 | --- | --- | --- | --- |
 | x64 | Release | Passed, run `42955634377` | Passed, run `42966673803` |
 | x64 | Debug | Passed, run `42960048140` | Passed, run `42966678486` |
-| MIPS64EL | Release | Compiled; runtime acceptance failed in run `42963764883` | Pending |
+| MIPS64EL | Release | Passed MIPS job in run `42969467526` | In progress |
 | MIPS64EL | Debug | Pending | Pending |
-| LoongArch64 | Release | Building graphics dependencies | Pending |
-| LoongArch64 | Debug | Pending | Pending |
+| LoongArch64 | Release | Graphics dependencies passed; Qt architecture patch pending verification | Pending |
+| LoongArch64 | Debug | First Qt build in progress | Pending |
 | ARM64 | Release / Debug | Deferred until the other Linux targets pass | Pending |
 
 The independent x64 tests used commit `337fb784`, downloaded each SDK from
@@ -28,8 +28,11 @@ running QML. This is a failed acceptance result, not a usable SDK release.
 Diagnostic run `42968147029` reproduced it with the existing compiled SDK.
 GDB located a 64-bit `ld` from `EngineBase::globalObject` at offset 60;
 the packed field was not 8-byte aligned. A cross-build patch adds padding
-and compile-time pointer alignment assertions. Its target runtime test is
-still pending.
+and compile-time pointer alignment assertions. The MIPS Release job in run
+`42969467526` then passed its complete SDK build, audits, relocated consumer
+and TLS exchange. The parent workflow failed its separate, older LoongArch
+job; this does not represent a successful full Linux matrix. Independent
+MIPS artifact verification and the Debug build are still in progress.
 
 The LoongArch glibc 2.36 sysroot needs source-built graphics dependencies.
 Run `42966136435` compiled and installed libxcb, then stopped because the
@@ -45,8 +48,11 @@ rejects. GLU now compiles as C++11 with the same Clang/libstdc++ toolchain;
 the Qt SDK consumer remains C++20. Run `42970606668` completed GLU's C/C++
 compilation, then its older libtool could not read the newer GLVND `.la`
 sysroot metadata. Source dependency installs now retain the shared libraries
-and pkg-config files while omitting `.la` files. The next run must prove
-the complete dependency chain and Qt SDK.
+and pkg-config files while omitting `.la` files. Run `42971725995` then
+passed all graphics dependencies and their glibc 2.36 audit and entered the
+Qt SDK build. Qt's bundled Double-Conversion did not recognize LoongArch;
+the Qt architecture patch now includes the same LoongArch detection as
+upstream Double-Conversion. The next run must prove the complete Qt SDK.
 
 The fixed upstream toolchain digests were recorded successfully in run
 `42964385726` and committed in `69020f2c`. Configured target baselines and

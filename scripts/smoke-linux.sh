@@ -101,6 +101,7 @@ int main(int argc, char **argv) {
     component.setData("import QtQml 2.0\nQtObject { property int answer: 6 * 7 }", QUrl());
     QScopedPointer<QObject> object(component.create());
     return !(QString::number(result) == QStringLiteral("42") && QSslSocket::supportsSsl() && tlsProbe()
+             && QString::number(1.25, 'f', 2) == QStringLiteral("1.25")
              && object && object->property("answer").toInt() == 42
              && !QFontDatabase().families().isEmpty());
 }
