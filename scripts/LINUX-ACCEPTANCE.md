@@ -41,9 +41,12 @@ run `42968482270` then built the XCB, Wayland, xkbcommon and GLVND libraries.
 The final GLU dependency needed an explicit `stddef.h` include for `NULL`
 with the newer GL headers. Run `42969467526` passed that C compilation and
 then reached legacy C++ code using `register`, which Clang's default C++17
-rejects. GLU is now compiled as C++11 with the same Clang/libstdc++ toolchain;
-the Qt SDK consumer remains C++20. The next run must prove the complete
-dependency chain and Qt SDK.
+rejects. GLU now compiles as C++11 with the same Clang/libstdc++ toolchain;
+the Qt SDK consumer remains C++20. Run `42970606668` completed GLU's C/C++
+compilation, then its older libtool could not read the newer GLVND `.la`
+sysroot metadata. Source dependency installs now retain the shared libraries
+and pkg-config files while omitting `.la` files. The next run must prove
+the complete dependency chain and Qt SDK.
 
 The fixed upstream toolchain digests were recorded successfully in run
 `42964385726` and committed in `69020f2c`. Configured target baselines and

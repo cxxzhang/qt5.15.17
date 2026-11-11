@@ -111,6 +111,14 @@ def main():
             else:
                 stage = project / "install"
                 run("make", "DESTDIR=" + str(stage), "install", cwd=str(project), env=env)
+                # Shared libraries link through their .so names and pkg-config.
+                # Old libtool versions cannot consume newer .la sysroot escapes.
+                # Do not carry this absolute-path metadata between projects.
+                for archive in (stage / "usr/lib" / triple).glob("*.la"):
+                    previous = sysroot / "usr/lib" / triple / archive.name
+                    if previous.is_file() or previous.is_symlink():
+                        previous.unlink()
+                    archive.unlink()
                 run("cp", "-a", str(stage) + "/.", str(sysroot) + "/")
                 for library in sorted((stage / "usr/lib" / triple).glob("*.so*")):
                     libraries.append(library.name)
