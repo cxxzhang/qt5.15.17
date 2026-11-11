@@ -55,6 +55,9 @@ if [[ ! -f "$cross/runtime/.ready" ]]; then
   mkdir -p "$root/build-temp/logs"
   trap 'cp "$work/build/config.log" "$root/build-temp/logs/$arch-libstdcxx-config.log" 2>/dev/null || true; rm -rf "$work"' EXIT
   tar -xf "$archive" -C "$work"
+  # A standalone libstdc++ build has no preceding libgcc configure step to
+  # select the POSIX gthread backend. Supply that header before feature tests.
+  ln -s gthr-posix.h "$work/gcc-13.3.0/libgcc/gthr-default.h"
   # The dual-ABI ios_failure bridge rewrites generated assembly. Its GCC-only
   # flag suppresses assembler line directives; Clang uses -g0 for that file.
   python3 - "$work/gcc-13.3.0/libstdc++-v3/src/c++11/Makefile.in" <<'PY'
@@ -76,7 +79,9 @@ PY
       --with-cross-host=x86_64-linux-gnu --prefix="$cross/runtime" \
       --libdir="$cross/runtime/lib" \
       --with-gxx-include-dir="$cross/runtime/include/c++/13.3.0" \
-      --disable-multilib --disable-libstdcxx-pch --disable-static --enable-shared
+      --disable-multilib --disable-libstdcxx-pch --disable-static --enable-shared \
+      --enable-libstdcxx-threads
+    grep -q '^#define _GLIBCXX_HAS_GTHREADS 1' config.h
     make -j"${QT_BUILD_JOBS:-4}"
     make install
   )
@@ -119,6 +124,8 @@ cat >"$cross/probe.cpp" <<'EOF'
 #include <ranges>
 #include <span>
 #include <algorithm>
+#include <mutex>
+#include <thread>
 struct Done {
     struct promise_type {
         Done get_return_object() { return {}; }
@@ -133,9 +140,15 @@ Done calculate(std::integral auto value, int &result) {
     result = *std::ranges::find(std::span{values}, value + 1);
     co_return;
 }
-int main() { int result = 0; calculate(41, result); return result != 42; }
+int main() {
+    int result = 0;
+    std::mutex mutex;
+    std::thread worker([&] { std::lock_guard<std::mutex> lock(mutex); calculate(41, result); });
+    worker.join();
+    return result != 42;
+}
 EOF
-"$cross/bin/clang++" -std=c++20 "$cross/probe.cpp" \
+"$cross/bin/clang++" -std=c++20 -pthread "$cross/probe.cpp" \
   -Wl,-rpath,"$cross/runtime/lib" -o "$cross/probe"
 env -u LD_LIBRARY_PATH "$cross/bin/qemu" -L "$sysroot" "$cross/probe"
 touch "$cross/.ready"
