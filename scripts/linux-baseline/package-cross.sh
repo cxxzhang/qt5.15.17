@@ -99,24 +99,29 @@ prefix="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")/.." && pwd)"
 if [[ -d "\$prefix/host-libs/usr/lib/x86_64-linux-gnu" ]]; then
   export LD_LIBRARY_PATH="\$prefix/host-libs/usr/lib/x86_64-linux-gnu\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}"
 fi
+link=true
 for argument in "\$@"; do
   [[ "\$argument" != -print-multi-os-directory ]] || { echo .; exit 0; }
+  case "\$argument" in -c|-E|-S|-fsyntax-only|-M|-MM) link=false ;; esac
 done
 extra=()
 if [[ "$name" == clang++ ]]; then
   extra=(-fno-sized-deallocation -fno-aligned-allocation)
 fi
-if [[ "$arch" == mips64el ]]; then
+if [[ "$arch" == mips64el ]] && "\$link"; then
   extra+=(-L"\$prefix/$sysroot_rel/usr/lib/mips64el-linux-gnuabi64" \
     -L"\$prefix/$sysroot_rel/lib/mips64el-linux-gnuabi64" \
     -Wl,-rpath-link,"\$prefix/$sysroot_rel/usr/lib/mips64el-linux-gnuabi64" \
     -Wl,-rpath-link,"\$prefix/$sysroot_rel/lib/mips64el-linux-gnuabi64")
 fi
+if "\$link"; then
+  extra+=(-Wl,-rpath-link,"\$prefix/$sysroot_rel/lib/$triple" \
+    -Wl,-rpath-link,"\$prefix/$sysroot_rel/usr/lib/$triple")
+fi
 exec "\$prefix/llvm/bin/clang" --driver-mode="$mode" --target="$triple" $target_flags \
   --sysroot="\$prefix/$sysroot_rel" --gcc-install-dir="\$prefix/$gcc_rel" \
   --ld-path="\$prefix/$linker_rel" -Wno-unused-command-line-argument \
-  -Wl,-rpath-link,"\$prefix/$sysroot_rel/lib/$triple" \
-  -Wl,-rpath-link,"\$prefix/$sysroot_rel/usr/lib/$triple" "\${extra[@]}" "\$@"
+  "\${extra[@]}" "\$@"
 EOF
   chmod +x "$prefix/bin/$name"
 done

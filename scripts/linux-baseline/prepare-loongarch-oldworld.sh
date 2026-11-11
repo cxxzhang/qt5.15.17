@@ -36,18 +36,23 @@ write_driver() {
   local name="$1"
   cat >"$prefix/bin/$name" <<EOF
 #!/usr/bin/env bash
+link=true
 for argument in "\$@"; do
   [[ "\$argument" != -print-multi-os-directory ]] || { echo .; exit 0; }
+  case "\$argument" in -c|-E|-S|-fsyntax-only|-M|-MM) link=false ;; esac
 done
 extra=()
 if [[ "$name" == clang++ ]]; then
   extra=(-fno-sized-deallocation -fno-aligned-allocation)
 fi
+if "\$link"; then
+  extra+=(-Wl,-rpath-link,"$sysroot/lib/loongarch64-linux-gnu" \
+    -Wl,-rpath-link,"$sysroot/usr/lib/loongarch64-linux-gnu")
+fi
 exec "$vendor_compiler" --driver-mode="$([[ "$name" == clang++ ]] && echo g++ || echo gcc)" \
   --target=loongarch64-linux-gnu -mabi="$abi" --sysroot="$sysroot" \
   --gcc-install-dir="$gcc_install" --ld-path="$compiler_bin/ld.lld" -Wno-unused-command-line-argument \
-  -Wl,-rpath-link,"$sysroot/lib/loongarch64-linux-gnu" \
-  -Wl,-rpath-link,"$sysroot/usr/lib/loongarch64-linux-gnu" \${extra[@]+"\${extra[@]}"} "\$@"
+  "\${extra[@]}" "\$@"
 EOF
   chmod +x "$prefix/bin/$name"
 }
