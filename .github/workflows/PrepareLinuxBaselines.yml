@@ -9,6 +9,15 @@ on:
 permissions:
   contents: read
 jobs:
+  check-cache-release:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Verify the dedicated reusable toolchain cache release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
+      run: |
+        test "$(gh api "repos/$GH_REPO/releases/tags/linux-toolchains-v1" --jq .tag_name)" = linux-toolchains-v1
   native-inputs:
     if: inputs.target == 'native-inputs'
     runs-on: ubuntu-22.04
@@ -41,6 +50,7 @@ jobs:
         name: diagnostics-native-environment
         path: build-temp/logs/
   native:
+    needs: check-cache-release
     if: inputs.target == 'all' || inputs.target == 'native'
     name: glibc 2.17 (${{ matrix.arch }})
     strategy:
@@ -100,6 +110,7 @@ jobs:
     permissions:
       contents: write
     steps:
+    - uses: actions/checkout@v4
     - uses: actions/download-artifact@v4
       with:
         pattern: native-toolchain-*
@@ -112,16 +123,14 @@ jobs:
         COMMIT: ${{ github.sha }}
         RUN_ID: ${{ github.run_id }}
       run: |
-        cd toolchains
-        cat *.sha256 > SHA256SUMS
-        sha256sum -c SHA256SUMS
-        cat > notes.md <<'EOF'
-        x64 and ARM64 native Clang 20.1.8 + full GCC/libstdc++ 13.3.0 + glibc 2.17 sysroots. Both archives passed relocation, Clang and GCC C++20/thread execution, available matching older-GNU-library ABI interoperability, ELF glibc requirements and private runtime dependency checks in pinned manylinux2014 containers. Legacy distro headers may only support ABI=0; their unavailable ABI=1 is explicitly recorded instead of claimed as tested. Source pins, build scripts, GNU license files and sysroot package provenance are included.
-
-        These are reusable toolchains. Qt SDK acceptance is separate and has not been implied by this toolchain release. Host architecture must match the selected archive.
-        EOF
-        gh release create "toolchain-native-217-$RUN_ID" --target "$COMMIT" --latest=false --title "Linux glibc 2.17 native toolchains ($RUN_ID)" --notes-file notes.md *.tar.xz SHA256SUMS
+        (cd toolchains && cat *.sha256 | sha256sum -c -)
+        python3 scripts/linux-baseline/publish-cache.py toolchains --source-commit "$COMMIT" --source-run "$RUN_ID" --output published-native-toolchains.json
+    - uses: actions/upload-artifact@v4
+      with:
+        name: published-native-toolchains
+        path: published-native-toolchains.json
   mips:
+    needs: check-cache-release
     if: inputs.target == 'all' || inputs.target == 'cross' || inputs.target == 'mips' || inputs.target == 'mips-deps'
     name: Build MIPS64EL glibc 2.17 sysroot
     runs-on: ubuntu-22.04
@@ -239,6 +248,7 @@ jobs:
         name: diagnostics-baseline-loong28
         path: build-temp/logs/
   loongarch-oldworld:
+    needs: check-cache-release
     if: inputs.target == 'all' || inputs.target == 'cross' || inputs.target == 'loongarch-oldworld'
     name: Clang C++20 on LoongArch old-world glibc 2.28
     runs-on: ubuntu-22.04
@@ -300,6 +310,7 @@ jobs:
     permissions:
       contents: write
     steps:
+    - uses: actions/checkout@v4
     - uses: actions/download-artifact@v4
       with:
         pattern: cross-toolchain-*
@@ -312,16 +323,14 @@ jobs:
         COMMIT: ${{ github.sha }}
         RUN_ID: ${{ github.run_id }}
       run: |
-        cd toolchains
-        cat *.sha256 > SHA256SUMS
-        sha256sum -c SHA256SUMS
-        cat > notes.md <<'EOF'
-        Accepted cross toolchain archives selected by this run. Each archive includes toolchain.json describing its actual target, GNU support layout, loader, target glibc and tested host. Each passed Clang C++20/thread/format execution and private-runtime resolution in a real target chroot, then repeated compilation, dependency checks and execution after relocation. Tested host: Ubuntu 22.04 x86_64. Source pins, GNU/LLVM notices and build scripts are included.
-
-        LoongArch old world is glibc 2.28 with ELF ABI 0x3; new world is the user-authorized glibc 2.36 with ELF ABI 0x43. MIPS64EL n64 is glibc 2.17. Only targets whose archives are actually listed are included. This is not a Qt SDK acceptance result.
-        EOF
-        gh release create "toolchain-linux-cross-$RUN_ID" --target "$COMMIT" --latest=false --title "Accepted Linux cross toolchains ($RUN_ID)" --notes-file notes.md *.tar.xz SHA256SUMS
+        (cd toolchains && cat *.sha256 | sha256sum -c -)
+        python3 scripts/linux-baseline/publish-cache.py toolchains --source-commit "$COMMIT" --source-run "$RUN_ID" --output published-cross-toolchains.json
+    - uses: actions/upload-artifact@v4
+      with:
+        name: published-cross-toolchains
+        path: published-cross-toolchains.json
   loongarch-newworld:
+    needs: check-cache-release
     if: inputs.target == 'all' || inputs.target == 'cross' || inputs.target == 'loongarch-newworld'
     name: Clang C++20 on LoongArch new-world glibc 2.36
     runs-on: ubuntu-22.04

@@ -1,0 +1,98 @@
+name: Cache an already validated Linux toolchain
+on:
+  workflow_dispatch:
+    inputs:
+      source_run:
+        description: Run containing successful toolchain validation jobs
+        type: string
+        required: true
+      kind:
+        type: choice
+        options: [native, oldworld, cross, llvm]
+        required: true
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v4
+    - name: Require successful validation of every selected artifact
+      id: source
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
+        SOURCE_RUN: ${{ inputs.source_run }}
+        KIND: ${{ inputs.kind }}
+      run: |
+        python3 - <<'PY'
+        import json, os, subprocess
+        from pathlib import Path
+        repo, run_id, kind = os.environ['GH_REPO'], os.environ['SOURCE_RUN'], os.environ['KIND']
+        assert run_id.isdigit()
+        def api(path):
+            return json.loads(subprocess.check_output(['gh', 'api', 'repos/' + repo + path], text=True))
+        run = api('/actions/runs/' + run_id)
+        jobs = api('/actions/runs/' + run_id + '/jobs?filter=all&per_page=100')['jobs']
+        artifacts = api('/actions/runs/' + run_id + '/artifacts?per_page=100')['artifacts']
+        names = {a['name'] for a in artifacts if not a['expired']}
+        successful = {j['name'] for j in jobs if j['conclusion'] == 'success'}
+        selected = []
+        if kind == 'llvm':
+            assert run['name'] == 'Mirror verified Linux LLVM'
+            assert any(n.startswith('verify (x64,') for n in successful)
+            assert any(n.startswith('verify (arm64,') for n in successful)
+            selected = ['llvm-mirror-x64', 'llvm-mirror-arm64']
+            pattern = 'llvm-mirror-*'
+        else:
+            assert run['name'] == 'Prepare requested Linux baselines'
+            if kind == 'native':
+                assert {'glibc 2.17 (x64)', 'glibc 2.17 (arm64)'} <= successful
+                selected = ['native-toolchain-x64', 'native-toolchain-arm64']
+                pattern = 'native-toolchain-*'
+            elif kind == 'oldworld':
+                assert 'Clang C++20 on LoongArch old-world glibc 2.28' in successful
+                pattern = 'oldworld-toolchain' if 'oldworld-toolchain' in names else 'cross-toolchain-loong64-oldworld'
+                selected = [pattern]
+            elif kind == 'cross':
+                expected = {
+                    'cross-toolchain-mips64el': 'Build MIPS64EL glibc 2.17 sysroot',
+                    'cross-toolchain-loong64-oldworld': 'Clang C++20 on LoongArch old-world glibc 2.28',
+                    'cross-toolchain-loong64-newworld': 'Clang C++20 on LoongArch new-world glibc 2.36',
+                }
+                selected = [name for name in names if name.startswith('cross-toolchain-')]
+                assert selected and all(expected[name] in successful for name in selected)
+                pattern = 'cross-toolchain-*'
+        assert selected and set(selected) <= names
+        proof = dict(source_run=run_id, source_commit=run['head_sha'], artifacts=selected,
+                     successful_jobs=sorted(successful), acceptance='Selected toolchain validation jobs completed successfully')
+        Path('source-proof.json').write_text(json.dumps(proof, indent=2) + '\n')
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
+            out.write('commit=' + run['head_sha'] + '\npattern=' + pattern + '\n')
+        print(json.dumps(proof, indent=2))
+        PY
+    - uses: actions/download-artifact@v4
+      with:
+        github-token: ${{ github.token }}
+        run-id: ${{ inputs.source_run }}
+        pattern: ${{ steps.source.outputs.pattern }}
+        merge-multiple: true
+        path: cache-inputs
+    - name: Append immutable assets to the dedicated cache tag
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
+        SOURCE_COMMIT: ${{ steps.source.outputs.commit }}
+        SOURCE_RUN: ${{ inputs.source_run }}
+      run: |
+        if compgen -G 'cache-inputs/*.sha256' >/dev/null; then
+          (cd cache-inputs && cat *.sha256 | sha256sum -c -)
+        fi
+        cp source-proof.json cache-inputs/
+        python3 scripts/linux-baseline/publish-cache.py cache-inputs --source-commit "$SOURCE_COMMIT" --source-run "$SOURCE_RUN" --output published-cache.json
+    - uses: actions/upload-artifact@v4
+      with:
+        name: published-cache
+        path: published-cache.json
