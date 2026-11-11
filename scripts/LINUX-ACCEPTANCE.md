@@ -25,7 +25,11 @@ MIPS run `42963764883` passed the static audit of 167 ELF files/archives
 against glibc 2.24 and resolved dependencies of 145 dynamic ELF files using
 the target loader. Its extracted consumer then received SIGBUS while
 running QML. This is a failed acceptance result, not a usable SDK release.
-Crash diagnosis and a fresh build are in progress.
+Diagnostic run `42968147029` reproduced it with the existing compiled SDK.
+GDB located a 64-bit `ld` from `EngineBase::globalObject` at offset 60;
+the packed field was not 8-byte aligned. A cross-build patch adds padding
+and compile-time pointer alignment assertions. Its target runtime test is
+still pending.
 
 The LoongArch glibc 2.36 sysroot needs source-built graphics dependencies.
 Run `42966136435` compiled and installed libxcb, then stopped because the
@@ -33,7 +37,10 @@ host lacked gperf for xcb-util. The host dependency was added in `aa5fec88`;
 run `42967432245` then passed xcb-util and reached xcb-util-image. It exposed
 libtool following an absolute target library path outside the sysroot. The
 dependency configure commands now pass libtool's explicit `--with-sysroot`;
-the next run must prove the complete dependency chain and Qt SDK.
+run `42968482270` then built the XCB, Wayland, xkbcommon and GLVND libraries.
+The final GLU dependency needed an explicit `stddef.h` include for `NULL`
+with the newer GL headers. That source fix is now applied; the next run must
+prove the complete dependency chain and Qt SDK.
 
 The fixed upstream toolchain digests were recorded successfully in run
 `42964385726` and committed in `69020f2c`. Configured target baselines and

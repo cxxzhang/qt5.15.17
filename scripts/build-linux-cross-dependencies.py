@@ -76,6 +76,13 @@ def main():
         project.mkdir(parents=True, exist_ok=True)
         archive = prefix / "downloads/sources" / (recipe["sha256"] + "-" + Path(recipe["path"]).name)
         run("tar", "-xf", archive, "--strip-components=1", "-C", project)
+        if name == "libglu":
+            # Modern GL headers do not provide NULL through incidental includes.
+            error_source = project / "src/libutil/error.c"
+            content = error_source.read_text()
+            assert content.count('#include "gluos.h"') == 1
+            error_source.write_text(content.replace('#include "gluos.h"',
+                                                   '#include <stddef.h>\n#include "gluos.h"'))
         # Native source packages may omit the generated autotools files.
         env = dict(os.environ, PYTHON="python3") if is_host else target_env
         if not (project / "configure").is_file():

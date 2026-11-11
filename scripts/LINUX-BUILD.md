@@ -140,6 +140,9 @@ cross mkspec must be configured when consuming the SDK on a different host.
 
 Qt 5.15's QML JIT does not support these two cross targets. QML is built
 with its interpreter and tested by creating a QML object after SDK extraction.
+The cross build also patches QML's packed engine structure to align pointer
+members on 64-bit targets. The unpatched structure triggered SIGBUS on
+MIPS64EL when a pointer member was passed by reference during QML evaluation.
 OpenSSL uses its portable C implementation on the cross targets. The SDK
 consumer also checks system font discovery through FreeType/Fontconfig.
 Target dependency closure is resolved using the target's actual glibc loader

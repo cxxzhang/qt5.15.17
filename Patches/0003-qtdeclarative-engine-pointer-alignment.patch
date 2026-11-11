@@ -1,0 +1,26 @@
+diff --git a/src/qml/jsruntime/qv4enginebase_p.h b/src/qml/jsruntime/qv4enginebase_p.h
+--- a/src/qml/jsruntime/qv4enginebase_p.h
++++ b/src/qml/jsruntime/qv4enginebase_p.h
+@@ -87,6 +87,11 @@ struct Q_QML_EXPORT EngineBase {
+     MemoryManager *memoryManager = nullptr;
+ 
+     qint32 callDepth = 0;
++#if QT_POINTER_SIZE == 8
++    // Packed pointer members can be passed by reference. Keep their actual
++    // addresses aligned on targets such as MIPS64 that reject unaligned ld.
++    quint32 callDepthPadding = 0;
++#endif
+     Value *jsStackLimit = nullptr;
+     Value *jsStackBase = nullptr;
+ 
+@@ -145,6 +150,10 @@ Q_STATIC_ASSERT(offsetof(EngineBase, currentStackFrame) == 0);
+ Q_STATIC_ASSERT(offsetof(EngineBase, jsStackTop) == offsetof(EngineBase, currentStackFrame) + QT_POINTER_SIZE);
+ Q_STATIC_ASSERT(offsetof(EngineBase, hasException) == offsetof(EngineBase, jsStackTop) + QT_POINTER_SIZE);
+ Q_STATIC_ASSERT(offsetof(EngineBase, memoryManager) == offsetof(EngineBase, hasException) + 8);
++Q_STATIC_ASSERT(offsetof(EngineBase, jsStackLimit) % QT_POINTER_SIZE == 0);
++Q_STATIC_ASSERT(offsetof(EngineBase, jsStackBase) % QT_POINTER_SIZE == 0);
++Q_STATIC_ASSERT(offsetof(EngineBase, globalObject) % QT_POINTER_SIZE == 0);
++Q_STATIC_ASSERT(offsetof(EngineBase, exceptionValue) % QT_POINTER_SIZE == 0);
+ Q_STATIC_ASSERT(offsetof(EngineBase, isInterrupted) + sizeof(EngineBase::isInterrupted) <= offsetof(EngineBase, hasException) + 4);
+ 
+ }
