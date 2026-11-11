@@ -1,10 +1,16 @@
 name: Prepare requested Linux baselines
 on:
   workflow_dispatch:
+    inputs:
+      target:
+        type: choice
+        options: [all, native, cross]
+        default: all
 permissions:
   contents: read
 jobs:
   native:
+    if: inputs.target == 'all' || inputs.target == 'native'
     name: glibc 2.17 (${{ matrix.arch }})
     strategy:
       fail-fast: false
@@ -46,4 +52,67 @@ jobs:
       if: always()
       with:
         name: diagnostics-baseline-217-${{ matrix.arch }}
+        path: build-temp/logs/
+  mips:
+    if: inputs.target == 'all' || inputs.target == 'cross'
+    name: Build MIPS64EL glibc 2.17 sysroot
+    runs-on: ubuntu-22.04
+    timeout-minutes: 180
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/cache/restore@v4
+      id: mips-cache
+      with:
+        path: build-temp/baseline-mips64el
+        key: mips217-gnu-${{ hashFiles('scripts/linux-baseline/prepare-mips.sh') }}
+    - uses: actions/cache/restore@v4
+      with:
+        path: build-temp/baseline-downloads
+        key: baseline-gnu-downloads-${{ hashFiles('scripts/linux-baseline/prepare-mips.sh') }}
+        restore-keys: baseline-gnu-downloads-
+    - name: Build the pinned source toolchain
+      if: steps.mips-cache.outputs.cache-hit != 'true'
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        set -o pipefail
+        mkdir -p build-temp/logs
+        bash scripts/linux-baseline/prepare-mips.sh 2>&1 | tee build-temp/logs/mips217-toolchain.log
+    - uses: actions/cache/save@v4
+      if: steps.mips-cache.outputs.cache-hit != 'true'
+      with:
+        path: build-temp/baseline-mips64el
+        key: ${{ steps.mips-cache.outputs.cache-primary-key }}
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: diagnostics-baseline-mips217
+        path: build-temp/logs/
+  loongarch:
+    if: inputs.target == 'all' || inputs.target == 'cross'
+    name: Inspect LoongArch glibc 2.28 ABI inputs
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/cache/restore@v4
+      id: loong-inputs
+      with:
+        path: build-temp/loong28-inspection/downloads
+        key: loong28-vendor-inputs-${{ hashFiles('scripts/linux-baseline/inspect-loongarch.sh') }}
+        restore-keys: loong28-vendor-inputs-
+    - name: Record compiler ABI modes and libc symbol versions
+      run: |
+        set -o pipefail
+        mkdir -p build-temp/logs
+        bash scripts/linux-baseline/inspect-loongarch.sh 2>&1 | tee build-temp/logs/loong28-inspection.log
+    - uses: actions/cache/save@v4
+      if: always() && steps.loong-inputs.outputs.cache-hit != 'true'
+      with:
+        path: build-temp/loong28-inspection/downloads
+        key: ${{ steps.loong-inputs.outputs.cache-primary-key }}
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: diagnostics-baseline-loong28
         path: build-temp/logs/
