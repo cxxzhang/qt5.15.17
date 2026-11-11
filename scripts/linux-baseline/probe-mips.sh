@@ -3,7 +3,11 @@
 set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 prefix="$root/build-temp/baseline-mips64el"
-source "$root/scripts/linux-baseline/load-vendor-clang.sh"
+sudo apt-get -o Acquire::Retries=5 update
+sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends patchelf libtinfo5 libxml2
+# The vendor LLVM 20 emitted invalid local CALL16 coroutine relocations on
+# MIPS at -O0. Use upstream LLVM 18, which also includes the required backend.
+source "$root/scripts/linux-baseline/load-upstream-clang.sh"
 gcc="$(find -L "$prefix/gcc/bin" -name '*-gcc' -type f -print -quit)"
 test -x "$gcc"
 triple="$("$gcc" -dumpmachine)"
@@ -23,7 +27,6 @@ stdlib="$("${gcc%gcc}g++" -print-file-name=libstdc++.so.6)"
 libgcc="$("$gcc" -print-file-name=libgcc_s.so.1)"
 cp -L "$stdlib" "$prefix/probe-sdk/lib/libstdc++.so.6"
 cp -L "$libgcc" "$prefix/probe-sdk/lib/libgcc_s.so.1"
-sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends patchelf
 patchelf --set-rpath '$ORIGIN' "$prefix/probe-sdk/lib/libstdc++.so.6"
 patchelf --set-rpath '$ORIGIN' "$prefix/probe-sdk/lib/libgcc_s.so.1"
 cat >"$prefix/probe.cpp" <<'CPP'
