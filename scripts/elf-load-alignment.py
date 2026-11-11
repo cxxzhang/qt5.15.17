@@ -37,10 +37,9 @@ def audit(path):
 
 def set_rpath(path, rpath):
     machine, segments = load_segments(path)
-    # MIPS and LoongArch kernels can use larger pages than the build host.
-    # patchelf otherwise defaults to the host's 4 KiB, breaking guest loading.
-    minimum = 65536 if machine in (8, 258) else 4096
-    page_size = max([minimum] + [segment[2] for segment in segments])
+    # Preserve the input's target page alignment rather than patchelf's host
+    # default. A larger invented page size cannot realign existing segments.
+    page_size = max([4096] + [segment[2] for segment in segments])
     subprocess.check_call(['patchelf', '--page-size', str(page_size),
                            '--set-rpath', rpath, str(path)])
     audit(path)

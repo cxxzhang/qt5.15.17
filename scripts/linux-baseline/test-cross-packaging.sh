@@ -6,6 +6,7 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 prefix="$root/build-temp/accepted-$arch"
 mkdir -p "$root/build-temp/logs"
 work="$(mktemp -d "$root/build-temp/logs/packaging-probe-$arch.XXXXXXXX")"
+trap 'chmod -R a+rX "$work"' EXIT
 echo "Packaging probe evidence: $work"
 mkdir -p "$work/bin" "$work/lib"
 readarray -t settings < <(python3 - "$prefix/toolchain.json" "$arch" <<'PY'
@@ -29,14 +30,15 @@ for elf in "$work/bin/probe" "$work/lib/"*; do
 done
 PYTHONPATH="$root/scripts" python3 - "$prefix/${settings[0]}" "$prefix/bin/qemu" "$work" "${settings[1]}" <<'PY'
 from pathlib import Path
-import sys
+import posixpath, re, sys
 from linux_cross_runtime import TargetRoot
 target = TargetRoot(sys.argv[1], sys.argv[2], sys.argv[3])
 try:
     staged = target.stage_sdk(Path(sys.argv[3]))
     dependencies = target.list_dependencies(sys.argv[4], staged / 'bin/probe')
     for name in ('libstdc++.so.6', 'libgcc_s.so.1'):
-        if target.guest_path(staged / 'lib' / name) not in dependencies:
+        match = re.search(r'^\s*' + re.escape(name) + r'\s+=>\s+(\S+)', dependencies, re.M)
+        if not match or posixpath.normpath(match[1]) != target.guest_path(staged / 'lib' / name):
             raise ValueError('Packaged probe loaded an unexpected provider: ' + dependencies)
     target.execute(staged / 'bin/probe')
     print('Stripped and relocated target ELF packaging probe passed')
