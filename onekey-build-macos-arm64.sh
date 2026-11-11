@@ -59,6 +59,27 @@ export OPENSSL_LIBS="${OPENSSL_SYMBOL_HIDE_FLAGS} -L${OPENSSL_LIB_RELEASE} -lssl
 export OPENSSL_LIBS_RELEASE="$OPENSSL_LIBS"
 export PATH="$SCRIPT_DIR/qtbase/bin:$PATH"
 
-bash ./configure -prefix "$INSTALL_DIR" -confirm-license -opensource -release -force-debug-info -nomake examples -nomake tests -openssl-linked -platform macx-clang -I "$OPENSSL_INCDIR" -L "$OPENSSL_LIBDIR"
+bash ./configure \
+  -prefix "$INSTALL_DIR" \
+  -confirm-license \
+  -opensource \
+  -release \
+  -force-debug-info \
+  -nomake examples \
+  -nomake tests \
+  -openssl-linked \
+  -qt-zlib \
+  -qt-libpng \
+  -qt-pcre \
+  -qt-doubleconversion \
+  -qt-freetype \
+  -qt-harfbuzz \
+  -qt-libjpeg \
+  -qt-libmd4c \
+  -qt-sqlite \
+  -no-zstd \
+  -platform macx-clang \
+  -I "$OPENSSL_INCDIR" \
+  -L "$OPENSSL_LIBDIR"
 make -j"$(cpu_count)"
 make install

@@ -15,6 +15,11 @@ OPENSSL_INCLUDE="$OPENSSL_INSTALL_PREFIX/include"
 OPENSSL_LIB_DEBUG="$OPENSSL_INSTALL_PREFIX/lib"
 OPENSSL_SYMBOL_HIDE_FLAGS="-Wl,--exclude-libs,libssl.a:libcrypto.a"
 COMMON_CFLAGS="-fPIC"
+GRAPHICS_FEATURE_FLAGS=(
+  -feature-xcb
+  -feature-wayland-client
+  -feature-wayland-server
+)
 export CFLAGS="$COMMON_CFLAGS"
 export CXXFLAGS="$COMMON_CFLAGS"
 
@@ -59,6 +64,29 @@ export OPENSSL_LIBS_RELEASE="$OPENSSL_LIBS"
 export OPENSSL_LIBS_DEBUG="$OPENSSL_LIBS"
 export PATH="$SCRIPT_DIR/qtbase/bin:$PATH"
 
-bash ./configure -prefix "$INSTALL_DIR" -confirm-license -opensource -debug -force-debug-info -nomake examples -nomake tests -openssl-linked -platform linux-g++ -I "$OPENSSL_INCDIR" -L "$OPENSSL_LIBDIR"
+bash ./configure \
+  -prefix "$INSTALL_DIR" \
+  -confirm-license \
+  -opensource \
+  -debug \
+  -force-debug-info \
+  -nomake examples \
+  -nomake tests \
+  -openssl-linked \
+  -qt-zlib \
+  -qt-libpng \
+  -qt-pcre \
+  -qt-doubleconversion \
+  -system-freetype \
+  -qt-harfbuzz \
+  -qt-libjpeg \
+  -qt-libmd4c \
+  -qt-sqlite \
+  -no-zstd \
+  -no-icu \
+  -platform linux-g++ \
+  -I "$OPENSSL_INCDIR" \
+  -L "$OPENSSL_LIBDIR" \
+  "${GRAPHICS_FEATURE_FLAGS[@]}"
 make -j"$(cpu_count)"
 make install
