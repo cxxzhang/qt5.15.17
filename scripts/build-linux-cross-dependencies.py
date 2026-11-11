@@ -24,7 +24,7 @@ def main():
     sysroot = prefix / "sysroot-loong64"
     triple = "loongarch64-linux-gnu"
     recipe_path = source / "scripts/sysroots/loong64-sources.lock.json"
-    recipe_bytes = recipe_path.read_bytes()
+    recipe_bytes = recipe_path.read_text(encoding="utf-8").encode("utf-8")
     lock = json.loads((source / "scripts/sysroots/loong64.lock.json").read_text())
     if hashlib.sha256(recipe_bytes).hexdigest() != lock["recipes_sha256"]:
         raise ValueError("Graphics recipes do not match the pinned sysroot")

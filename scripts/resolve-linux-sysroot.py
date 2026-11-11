@@ -114,7 +114,7 @@ def main():
         headers["Base-URL"] = args.headers_base_url.rstrip("/")
         packages["linux-libc-dev"] = headers
     if args.recipes:
-        recipes_data = args.recipes.read_bytes()
+        recipes_data = args.recipes.read_text(encoding="utf-8").encode("utf-8")
         recipes = json.loads(recipes_data.decode("utf-8"))
         for provided in recipes["provided_packages"]:
             packages[provided["name"]] = {"Package": provided["name"], "Version": provided["version"],
@@ -157,7 +157,8 @@ def main():
     if args.recipes:
         result["recipes_sha256"] = hashlib.sha256(recipes_data).hexdigest()
         result["built_packages"] = built_packages
-    args.output.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    with args.output.open("w", encoding="utf-8", newline="\n") as stream:
+        stream.write(json.dumps(result, indent=2, ensure_ascii=False) + "\n")
     print("Locked {} packages, {:.1f} MiB".format(len(records), sum(p["size"] for p in records) / 2**20))
 
 
