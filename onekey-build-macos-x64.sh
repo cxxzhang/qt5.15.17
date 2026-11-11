@@ -83,3 +83,5 @@ bash ./configure \
   -L "$OPENSSL_LIBDIR"
 make -j"$(cpu_count)"
 make install
+python3 "$SCRIPT_DIR/scripts/prepare-macos-bundles.py" "$INSTALL_DIR" --source "$SCRIPT_DIR"
+tar -C "$INSTALL_DIR" -czf "$SCRIPT_DIR/Output/qt5.15.17_macos_x64.tar.gz" .
