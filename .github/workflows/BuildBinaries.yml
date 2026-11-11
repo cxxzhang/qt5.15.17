@@ -219,17 +219,19 @@ jobs:
       id: toolchain-cache
       with:
         path: build-temp/toolchain
-        key: bionic-qt-${{ matrix.arch }}-${{ hashFiles('scripts/setup-linux-toolchain.sh') }}
+        key: bionic-qt-${{ matrix.arch }}-${{ hashFiles('scripts/setup-linux-toolchain.sh', 'scripts/linux-toolchain.lock.json') }}
         restore-keys: bionic-qt-${{ matrix.arch }}-
     - name: Prepare Ubuntu 18.04 toolchain
       env:
         TARGET: ${{ matrix.arch }}
+        GITHUB_TOKEN: ${{ github.token }}
       run: |
         set -o pipefail
         mkdir -p build-temp/logs
+        qt_container=$(python3 -c 'import json; print(json.load(open("scripts/linux-toolchain.lock.json"))["container"]["image"])')
         docker run -d --name qt-linux-build -v "$PWD:/workspace" -w /workspace \
-          ubuntu:18.04 sleep infinity
-        docker exec qt-linux-build bash scripts/setup-linux-toolchain.sh "$TARGET" \
+          "$qt_container" sleep infinity
+        docker exec -e GITHUB_TOKEN qt-linux-build bash scripts/setup-linux-toolchain.sh "$TARGET" \
           2>&1 | tee "build-temp/logs/$TARGET-toolchain.log"
     - uses: actions/cache/save@v4
       if: steps.toolchain-cache.outputs.cache-hit != 'true'

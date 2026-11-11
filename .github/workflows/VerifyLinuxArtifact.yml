@@ -34,7 +34,7 @@ jobs:
     - uses: actions/cache/restore@v4
       with:
         path: build-temp/toolchain
-        key: bionic-qt-${{ inputs.arch == 'arm64' && 'arm64' || 'x64' }}-${{ hashFiles('scripts/setup-linux-toolchain.sh') }}
+        key: bionic-qt-${{ inputs.arch == 'arm64' && 'arm64' || 'x64' }}-${{ hashFiles('scripts/setup-linux-toolchain.sh', 'scripts/linux-toolchain.lock.json') }}
         restore-keys: bionic-qt-${{ inputs.arch == 'arm64' && 'arm64' || 'x64' }}-
     - uses: actions/cache/restore@v4
       if: inputs.arch == 'loong64' || inputs.arch == 'mips64el'
@@ -52,10 +52,12 @@ jobs:
       env:
         TARGET: ${{ inputs.arch }}
         VARIANT: ${{ inputs.variant }}
+        GITHUB_TOKEN: ${{ github.token }}
       run: |
         set -o pipefail
         mkdir -p build-temp/logs
-        docker run --rm -v "$PWD:/workspace" -w /workspace ubuntu:18.04 \
+        qt_container=$(python3 -c 'import json; print(json.load(open("scripts/linux-toolchain.lock.json"))["container"]["image"])')
+        docker run --rm -e GITHUB_TOKEN -v "$PWD:/workspace" -w /workspace "$qt_container" \
           bash scripts/verify-linux-artifact.sh "$TARGET" "$VARIANT" artifacts \
           2>&1 | tee build-temp/logs/extracted-sdk.log
     - uses: actions/upload-artifact@v4

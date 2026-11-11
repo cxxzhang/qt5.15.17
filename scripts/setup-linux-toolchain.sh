@@ -23,10 +23,26 @@ work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 jobs="$(nproc)"
 (( jobs <= 4 )) || jobs=4
-fetch() { curl --fail --location --retry 5 --output "$2" "$1"; }
+pins="$PWD/scripts/linux-toolchain.lock.json"
+fetch() {
+  local key="$1" output="$2" url checksum
+  read -r url checksum < <(python3 - "$pins" "$key" <<'PY'
+import json, sys
+entry = json.load(open(sys.argv[1]))[sys.argv[2]]
+print(entry.get("api_url", entry["url"]), entry["sha256"])
+PY
+  )
+  local headers=()
+  if [[ "$url" == https://api.github.com/* ]]; then
+    headers+=(-H 'Accept: application/octet-stream')
+    [[ -z "${GITHUB_TOKEN:-}" ]] || headers+=(-H "Authorization: Bearer $GITHUB_TOKEN")
+  fi
+  curl --fail --location --retry 5 --connect-timeout 30 "${headers[@]}" --output "$output" "$url"
+  echo "$checksum  $output" | sha256sum -c -
+}
 
 if [[ ! -f "$prefix/gcc/.ready" ]] || [[ "$("$prefix/gcc/bin/gcc" -dumpfullversion)" != 13.3.0 ]]; then
-  fetch https://gcc.gnu.org/pub/gcc/releases/gcc-13.3.0/gcc-13.3.0.tar.xz "$work/gcc.tar.xz"
+  fetch gcc_source "$work/gcc.tar.xz"
   tar -xf "$work/gcc.tar.xz" -C "$work"
   mkdir "$work/gcc-build"
   (
@@ -40,21 +56,20 @@ if [[ ! -f "$prefix/gcc/.ready" ]] || [[ "$("$prefix/gcc/bin/gcc" -dumpfullversi
   touch "$prefix/gcc/.ready"
 fi
 
-llvm_release=https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8
 if [[ ! -f "$prefix/llvm/.ready" || ! -x "$prefix/llvm/bin/llvm-readelf" \
       || ! -x "$prefix/llvm/bin/llvm-objcopy" || ! -x "$prefix/llvm/bin/llvm-strip" ]] \
    || ! "$prefix/llvm/bin/clang" --version | head -n1 | grep -q '18\.1\.8'; then
   mkdir -p "$prefix/llvm"
   if [[ "$arch" == x64 ]]; then
-    fetch "$llvm_release/clang%2Bllvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04.tar.xz" "$work/llvm.tar.xz"
+    fetch llvm_x64 "$work/llvm.tar.xz"
     tar -xf "$work/llvm.tar.xz" -C "$prefix/llvm" --strip-components=1
   else
     # Build against Bionic rather than assuming the upstream ARM64 binary
     # can run with this container's glibc.
-    fetch https://github.com/Kitware/CMake/releases/download/v3.27.9/cmake-3.27.9-linux-aarch64.tar.gz "$work/cmake.tar.gz"
+    fetch cmake_arm64 "$work/cmake.tar.gz"
     tar -xf "$work/cmake.tar.gz" -C "$work"
     export PATH="$work/cmake-3.27.9-linux-aarch64/bin:$PATH"
-    fetch "$llvm_release/llvm-project-18.1.8.src.tar.xz" "$work/llvm.tar.xz"
+    fetch llvm_source "$work/llvm.tar.xz"
     tar -xf "$work/llvm.tar.xz" -C "$work"
     cmake -S "$work/llvm-project-18.1.8.src/llvm" -B "$work/llvm-build" -G Ninja \
       -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$prefix/llvm" \

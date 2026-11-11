@@ -623,6 +623,16 @@
       "pre_depends": ""
     },
     {
+      "name": "libpthread-stubs0-dev",
+      "version": "0.4-1",
+      "architecture": "loong64",
+      "path": "pool-loong64/main/libp/libpthread-stubs/libpthread-stubs0-dev_0.4-1_loong64.deb",
+      "sha256": "ae53b99f7924f8bfd575af016202a1f32519d460808c1edf750b3c3f6146297a",
+      "size": 5044,
+      "depends": "",
+      "pre_depends": ""
+    },
+    {
       "name": "libselinux1",
       "version": "3.4-1+loong64",
       "architecture": "loong64",
@@ -1016,7 +1026,7 @@
   ],
   "supplement_sha256": "071a0b31fffd977aa75fbd6f7841c9e886095472ca8aaa353ab8842412547636",
   "headers_index_sha256": "cb40f097317b1831758b9ddb46ee1a5dd24a982857b90e1c93f49068bedf60e3",
-  "recipes_sha256": "bdabfbd5d9c25119e5a19561b1254301a315ba87161041a34f84fcbe529188cc",
+  "recipes_sha256": "482c7395332c152d95531d715b7caf6208cb5ecc08c313a4775b8d1ceb68218f",
   "built_packages": [
     {
       "name": "libegl1-mesa-dev",

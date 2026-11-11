@@ -103,7 +103,7 @@
       "name": "libxcb1-dev",
       "version": "1.13.1-2",
       "recipe": "libxcb",
-      "depends": "libxcb1, libxau-dev, libxdmcp-dev"
+      "depends": "libxcb1, libxau-dev, libxdmcp-dev, libpthread-stubs0-dev"
     },
     {
       "name": "libxcb-glx0",

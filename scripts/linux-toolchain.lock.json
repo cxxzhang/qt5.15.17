@@ -1,0 +1,56 @@
+{
+  "llvm_x64": {
+    "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/clang%2Bllvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04.tar.xz",
+    "api_url": "https://api.github.com/repos/llvm/llvm-project/releases/assets/177973150",
+    "sha256": "54ec30358afcc9fb8aa74307db3046f5187f9fb89fb37064cdde906e062ebf36",
+    "size": 1044930068
+  },
+  "llvm_source": {
+    "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/llvm-project-18.1.8.src.tar.xz",
+    "api_url": "https://api.github.com/repos/llvm/llvm-project/releases/assets/175206835",
+    "sha256": "0b58557a6d32ceee97c8d533a59b9212d87e0fc4d2833924eb6c611247db2f2a",
+    "size": 132067260
+  },
+  "cmake_arm64": {
+    "url": "https://github.com/Kitware/CMake/releases/download/v3.27.9/cmake-3.27.9-linux-aarch64.tar.gz",
+    "api_url": "https://api.github.com/repos/Kitware/CMake/releases/assets/137866107",
+    "sha256": "11bf3d30697df465cdf43664a9473a586f010c528376a966fd310a3a22082461",
+    "size": 53604675
+  },
+  "gcc_source": {
+    "url": "https://gcc.gnu.org/pub/gcc/releases/gcc-13.3.0/gcc-13.3.0.tar.xz",
+    "sha256": "0845e9621c9543a13f484e94584a49ffc0129970e9914624235fc1d061a0c083",
+    "sha512": "ed5f2f4c6ed2c796fcf2c93707159e9dbd3ddb1ba063d549804dd68cdabbb6d550985ae1c8465ae9a336cfe29274a6eb0f42e21924360574ebd8e5d5c7c9a801"
+  },
+  "container": {
+    "image": "ubuntu:18.04@sha256:152dc042452c496007f07ca9127571cb9c29697f42acbfad72324b2bb2e43c98",
+    "platforms": [
+      {
+        "architecture": "amd64",
+        "os": "linux"
+      },
+      {
+        "architecture": "arm",
+        "os": "linux",
+        "variant": "v7"
+      },
+      {
+        "architecture": "arm64",
+        "os": "linux",
+        "variant": "v8"
+      },
+      {
+        "architecture": "386",
+        "os": "linux"
+      },
+      {
+        "architecture": "ppc64le",
+        "os": "linux"
+      },
+      {
+        "architecture": "s390x",
+        "os": "linux"
+      }
+    ]
+  }
+}
