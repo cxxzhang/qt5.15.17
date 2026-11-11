@@ -5,6 +5,11 @@ arch="${1:?x64 or arm64 required}"
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 case "$arch:$(uname -m)" in x64:x86_64|arm64:aarch64) ;; *) exit 2 ;; esac
 test "$(getconf GNU_LIBC_VERSION)" = 'glibc 2.17'
+if [[ ! -x /opt/python/cp311-cp311/bin/python3 ]]; then
+  manylinux-interpreters ensure cp311-cp311
+fi
+export PATH="/opt/python/cp311-cp311/bin:$PATH"
+python3 --version
 prefix="$root/build-temp/baseline-$arch"
 mkdir -p "$prefix" "$root/build-temp/logs"
 work="$(mktemp -d)"

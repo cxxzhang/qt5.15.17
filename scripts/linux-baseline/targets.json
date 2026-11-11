@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "targets": {
-    "x64": {"glibc": "2.17", "machine": "Advanced Micro Devices X86-64", "triple": "x86_64-linux-gnu", "image_candidate": "quay.io/pypa/manylinux2014_x86_64"},
-    "arm64": {"glibc": "2.17", "machine": "AArch64", "triple": "aarch64-linux-gnu", "image_candidate": "quay.io/pypa/manylinux2014_aarch64"},
+    "x64": {"glibc": "2.17", "machine": "Advanced Micro Devices X86-64", "triple": "x86_64-linux-gnu", "image": "quay.io/pypa/manylinux2014_x86_64@sha256:62eeff30ef134a85ec0f97109e008a319b0315ca5e8a6d754ee771556c02622a"},
+    "arm64": {"glibc": "2.17", "machine": "AArch64", "triple": "aarch64-linux-gnu", "image": "quay.io/pypa/manylinux2014_aarch64@sha256:101d2292840109c9d329fcfcd7b89b46f59e19ca23cbfdcf059fb389994665fc"},
     "mips64el": {"glibc": "2.17", "machine": "MIPS R3000", "triple": "mips64el-linux-gnuabi64"},
     "loong64-oldworld": {"glibc": "2.28", "machine": "LoongArch", "triple": "loongarch64-linux-gnu", "elf_flags": 3, "interpreter": "/lib64/ld.so.1"},
     "loong64-newworld": {"glibc": "2.28", "machine": "LoongArch", "triple": "loongarch64-linux-gnu", "elf_flags": 67, "interpreter": "/lib64/ld-linux-loongarch-lp64d.so.1"}

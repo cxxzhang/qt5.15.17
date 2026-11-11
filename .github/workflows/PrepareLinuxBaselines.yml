@@ -30,7 +30,7 @@ jobs:
       run: |
         set -o pipefail
         mkdir -p build-temp/logs
-        image=$(python3 -c 'import json,os; print(json.load(open("scripts/linux-baseline/targets.json"))["targets"][os.environ["TARGET"]]["image_candidate"])')
+        image=$(python3 -c 'import json,os; print(json.load(open("scripts/linux-baseline/targets.json"))["targets"][os.environ["TARGET"]]["image"])')
         docker pull "$image"
         pinned=$(docker image inspect "$image" --format '{{index .RepoDigests 0}}')
         printf '%s\n' "$pinned" >"build-temp/logs/$TARGET-image.txt"
