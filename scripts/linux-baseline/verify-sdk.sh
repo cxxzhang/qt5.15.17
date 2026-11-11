@@ -52,8 +52,15 @@ if "$cross"; then
 else
   test "$(getconf GNU_LIBC_VERSION)" = "glibc $baseline"
   tools="$root/build-temp/accepted-$arch/clang/bin"
+  runtime_audit=()
+  if [[ "${QT_SYSTEM_GNU_RUNTIME:-0}" == 1 ]]; then
+    runtime_audit=(--system-libstdcxx /usr/lib64/libstdc++.so.6 --system-libgcc /lib64/libgcc_s.so.1)
+    python3 "$root/scripts/audit-linux-gnu-runtime.py" "$sdk" \
+      --libstdcxx /usr/lib64/libstdc++.so.6 --libgcc /lib64/libgcc_s.so.1 --readelf "$tools/llvm-readelf" \
+      --output "$root/build-temp/logs/gnu-requirements-$arch-$variant.json"
+  fi
   python3 "$root/scripts/package-linux.py" "$sdk" --audit-only --require-stripped \
-    --machine "$machine" --glibc "$baseline" --native-dependencies --readelf "$tools/llvm-readelf"
+    --machine "$machine" --glibc "$baseline" --native-dependencies --readelf "$tools/llvm-readelf" "${runtime_audit[@]}"
   qmake="$sdk/bin/qmake"
 fi
 test "$(env -u LD_LIBRARY_PATH "$qmake" -query QT_VERSION)" = 5.15.17
@@ -69,11 +76,12 @@ def digest(path):
         for block in iter(lambda: stream.read(1024 * 1024), b''): result.update(block)
     return result.hexdigest()
 record = dict(target=arch, variant=variant, glibc=baseline, accepted=True,
+              gnu_runtime_policy='baseline-system' if os.environ.get('QT_SYSTEM_GNU_RUNTIME') == '1' else 'bundled',
               source_run=os.environ.get('QT_VERIFY_SOURCE_RUN'),
               source_commit=os.environ.get('QT_VERIFY_SOURCE_COMMIT'),
               verifier_commit=os.environ.get('GITHUB_SHA'),
               archives={suffix: digest(Path(artifacts, name + suffix)) for suffix in ('.tar.gz', '-symbols.tar.gz')},
-              checks=['ELF ABI/versions/strip', 'matching symbols/debuglink CRC', 'private C++ runtime resolution',
+              checks=['ELF ABI/versions/strip', 'matching symbols/debuglink CRC', 'selected C++ runtime resolution',
                       'extracted qmake C++17 consumer', 'offscreen GUI/QML/fonts/TLS runtime'])
 Path(logs, 'verified-' + arch + '-' + variant + '.json').write_text(json.dumps(record, indent=2) + '\n')
 PY

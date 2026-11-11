@@ -69,4 +69,28 @@ if env -u LD_LIBRARY_PATH python3 "$root/scripts/package-linux.py" \
   exit 1
 fi
 grep -q 'unresolved runtime dependency' "$work/error.log"
+# Check real system C++ providers, including deliberate mismatches.
+mkdir "$work/system-cxx"
+printf '#include <string>\nint main() { return std::string("system").size() != 6; }\n' >"$work/system-cxx.cpp"
+g++ -std=c++11 "$work/system-cxx.cpp" -o "$work/system-cxx/probe"
+stdlib="$(g++ -print-file-name=libstdc++.so.6)"
+libgcc="$(gcc -print-file-name=libgcc_s.so.1)"
+python3 "$root/scripts/package-linux.py" "$work/system-cxx" --audit-only \
+  --machine "$machine" --glibc 99.0 --native-dependencies \
+  --system-libstdcxx "$stdlib" --system-libgcc "$libgcc"
+python3 "$root/scripts/audit-linux-gnu-runtime.py" "$work/system-cxx" \
+  --libstdcxx "$stdlib" --libgcc "$libgcc" --output "$work/system-cxx.json"
+if python3 "$root/scripts/audit-linux-gnu-runtime.py" "$work/system-cxx" \
+    --libstdcxx "$libgcc" --libgcc "$libgcc" --output "$work/wrong-gnu.json" >"$work/error.log" 2>&1; then
+  echo 'The GNU gate accepted a provider without the imported C++ symbols' >&2
+  exit 1
+fi
+grep -q 'cannot provide imports' "$work/error.log"
+if python3 "$root/scripts/package-linux.py" "$work/system-cxx" --audit-only \
+    --machine "$machine" --glibc 99.0 --native-dependencies \
+    --system-libstdcxx "$libgcc" --system-libgcc "$libgcc" >"$work/error.log" 2>&1; then
+  echo 'The resolver accepted a provider different from the selected baseline' >&2
+  exit 1
+fi
+grep -q 'outside the selected runtime' "$work/error.log"
 echo 'Packaging gate functional checks passed'

@@ -53,6 +53,7 @@ export OPENSSL_LIBS_RELEASE="$OPENSSL_LIBS" OPENSSL_LIBS_DEBUG="$OPENSSL_LIBS"
 mkdir "$build/qt"
 cd "$build/qt"
 bash "$source_dir/configure" -prefix "$install" -confirm-license -opensource "-$variant" \
+  -c++std c++11 \
   -force-debug-info -no-strip -nomake examples -nomake tests -openssl-linked \
   -qt-zlib -qt-libpng -qt-pcre -qt-doubleconversion -system-freetype -qt-harfbuzz \
   -qt-libjpeg -qt-libmd4c -qt-sqlite -no-zstd -no-icu \
@@ -63,6 +64,7 @@ bash "$source_dir/configure" -prefix "$install" -confirm-license -opensource "-$
 make -j"$jobs"
 make install
 
+if [[ "${QT_SYSTEM_GNU_RUNTIME:-0}" != 1 ]]; then
 for runtime in libstdc++.so.6 libgcc_s.so.1; do
   if [[ -n "${QT_CXX_RUNTIME_DIR:-}" ]]; then
     runtime_path="$QT_CXX_RUNTIME_DIR/$runtime"
@@ -72,6 +74,7 @@ for runtime in libstdc++.so.6 libgcc_s.so.1; do
   [[ -f "$runtime_path" ]]
   cp -L "$runtime_path" "$install/lib/$runtime"
 done
+fi
 
 # Split debug information before changing the ELF segment layout. In
 # particular, old objcopy cannot split some patchelf-expanded executables.
@@ -88,9 +91,16 @@ while IFS= read -r -d '' elf; do
   fi
 done < <(find "$install" -type f -print0)
 
+runtime_audit=()
+if [[ "${QT_SYSTEM_GNU_RUNTIME:-0}" == 1 ]]; then
+  runtime_audit=(--system-libstdcxx /usr/lib64/libstdc++.so.6 --system-libgcc /lib64/libgcc_s.so.1)
+  python3 "$source_dir/scripts/audit-linux-gnu-runtime.py" "$install" \
+    --libstdcxx /usr/lib64/libstdc++.so.6 --libgcc /lib64/libgcc_s.so.1 --readelf "$readelf" \
+    --output "$source_dir/build-temp/logs/gnu-requirements-$arch-$variant.json"
+fi
 python3 "$source_dir/scripts/package-linux.py" "$install" \
   --machine "$machine" --glibc "$baseline" --native-dependencies \
-  --audit-only --require-stripped --readelf "$readelf"
+  --audit-only --require-stripped --readelf "$readelf" "${runtime_audit[@]}"
 name="qt5.15.17_${tag//-/_}"
 tar -C "$install" -czf "$source_dir/Output/$name.tar.gz" .
 tar -C "$symbols" -czf "$source_dir/Output/$name-symbols.tar.gz" .

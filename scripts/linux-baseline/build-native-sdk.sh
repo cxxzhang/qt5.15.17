@@ -30,6 +30,9 @@ ldconfig
 export PATH="$prefix/bin:$prefix/host/bin:/opt/python/cp311-cp311/bin:$PATH"
 export CC="$prefix/bin/clang" CXX="$prefix/bin/clang++"
 export QT_CXX_RUNTIME_DIR="$prefix/gcc/lib64"
+if [[ -f "$prefix/gcc/.system-runtime" ]]; then
+  export QT_SYSTEM_GNU_RUNTIME=1
+fi
 export PKG_CONFIG_SYSROOT_DIR="$prefix/sysroot"
 export PKG_CONFIG_LIBDIR="$prefix/sysroot/usr/lib64/pkgconfig:$prefix/sysroot/usr/share/pkgconfig"
 unset PKG_CONFIG_PATH

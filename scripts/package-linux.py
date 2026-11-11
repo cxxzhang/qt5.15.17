@@ -64,8 +64,10 @@ def audit_native_dependencies(path, args):
         raise ValueError("{}: unresolved runtime dependency\n{}".format(path, result.stdout))
     for runtime in ("libstdc++.so.6", "libgcc_s.so.1"):
         match = re.search(r"^\s*" + re.escape(runtime) + r"\s+=>\s+(\S+)", result.stdout, re.M)
-        if match and Path(match[1]).resolve() != (args.sdk / "lib" / runtime).resolve():
-            raise ValueError("{}: {} resolved outside the SDK: {}".format(path, runtime, match[1]))
+        provider = args.system_libstdcxx if runtime == 'libstdc++.so.6' else args.system_libgcc
+        expected = Path(provider) if provider else args.sdk / 'lib' / runtime
+        if match and Path(match[1]).resolve() != expected.resolve():
+            raise ValueError("{}: {} resolved outside the selected runtime: {}".format(path, runtime, match[1]))
 
 
 def main():
@@ -82,6 +84,8 @@ def main():
     parser.add_argument("--objcopy", default="objcopy")
     parser.add_argument("--strip", default="strip")
     parser.add_argument("--native-dependencies", action="store_true")
+    parser.add_argument("--system-libstdcxx", type=Path)
+    parser.add_argument("--system-libgcc", type=Path)
     parser.add_argument("--audit-only", action="store_true")
     parser.add_argument("--require-stripped", action="store_true")
     args = parser.parse_args()
