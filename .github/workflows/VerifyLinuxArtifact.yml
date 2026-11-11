@@ -14,6 +14,10 @@ on:
         type: choice
         options: [release, debug]
         default: release
+      inspect_gnu_only:
+        description: Report the existing SDK GNU imports without rebuilding or declaring it accepted
+        type: boolean
+        default: false
 permissions:
   contents: read
   actions: read
@@ -92,12 +96,13 @@ jobs:
         VARIANT: ${{ inputs.variant }}
         QT_VERIFY_SOURCE_RUN: ${{ inputs.source_run }}
         QT_VERIFY_SOURCE_COMMIT: ${{ steps.source.outputs.commit }}
+        QT_INSPECT_GNU_ONLY: ${{ inputs.inspect_gnu_only }}
       run: |
         set -o pipefail
         mkdir -p build-temp/logs
         if [[ "$ARCH" == x64 || "$ARCH" == arm64 ]]; then
           image=$(python3 -c 'import json,os; print(json.load(open("scripts/linux-baseline/targets.json"))["targets"][os.environ["ARCH"]]["image"])')
-          docker run --rm -e QT_VERIFY_SOURCE_RUN -e QT_VERIFY_SOURCE_COMMIT -e GITHUB_SHA \
+          docker run --rm -e QT_VERIFY_SOURCE_RUN -e QT_VERIFY_SOURCE_COMMIT -e GITHUB_SHA -e QT_INSPECT_GNU_ONLY \
             -v "$PWD:/workspace" -w /workspace "$image" \
             bash scripts/linux-baseline/build-native-sdk.sh "$ARCH" "$VARIANT" artifacts \
             2>&1 | tee build-temp/logs/extracted-sdk.log

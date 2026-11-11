@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -39,6 +40,8 @@ def main():
     parser.add_argument("--readelf", default="readelf")
     parser.add_argument("--skip-host", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--report-only", action="store_true",
+                        help="Inspect historical SDKs without claiming baseline compatibility")
     args = parser.parse_args()
     definitions, exports = set(), set()
     for provider in (args.libstdcxx, args.libgcc):
@@ -68,12 +71,19 @@ def main():
         values = [v for v in all_versions if re.fullmatch(re.escape(prefix) + r"\d+(?:\.\d+)*", v)]
         maxima[prefix.rstrip("_")] = max(values, key=lambda v: tuple(map(int, v[len(prefix):].split(".")))) if values else None
     record = dict(accepted=not missing, providers=dict(libstdcxx=str(args.libstdcxx), libgcc=str(args.libgcc)),
-                  maximum_required_versions=maxima, files=files, missing=missing)
+                  maximum_required_versions=maxima, files=files, missing=missing,
+                  source_run=os.environ.get('QT_VERIFY_SOURCE_RUN'),
+                  source_commit=os.environ.get('QT_VERIFY_SOURCE_COMMIT'))
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(record, indent=2) + "\n")
+    print("Required GNU versions: " + json.dumps(maxima))
     if missing:
-        raise SystemExit("Baseline GNU runtimes cannot provide all imports: " + json.dumps(missing))
-    print("Baseline GNU runtime imports verified: " + json.dumps(maxima))
+        message = "Baseline GNU runtimes cannot provide imports in {} files; see {}".format(len(missing), args.output)
+        if not args.report_only:
+            raise SystemExit(message)
+        print(message)
+    else:
+        print("Baseline GNU runtime imports verified")
 
 
 if __name__ == "__main__":

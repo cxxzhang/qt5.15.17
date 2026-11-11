@@ -27,6 +27,15 @@ sdk="$(mktemp -d /tmp/qt-baseline-sdk.XXXXXXXX)"
 work="$(mktemp -d /tmp/qt-baseline-consumer.XXXXXXXX)"
 trap 'rm -rf "$sdk" "$work"' EXIT
 tar -xzf "$artifacts/$name.tar.gz" -C "$sdk"
+if [[ "${QT_INSPECT_GNU_ONLY:-false}" == true ]]; then
+  [[ "$arch" == x64 || "$arch" == arm64 ]]
+  python3 "$root/scripts/audit-linux-gnu-runtime.py" "$sdk" \
+    --libstdcxx /usr/lib64/libstdc++.so.6 --libgcc /lib64/libgcc_s.so.1 \
+    --readelf "$root/build-temp/accepted-$arch/clang/bin/llvm-readelf" --report-only \
+    --output "$root/build-temp/logs/gnu-requirements-$arch-$variant.json"
+  echo "$arch/$variant: historical GNU requirements inspection finished; this is not SDK acceptance"
+  exit 0
+fi
 python3 "$root/scripts/verify-linux-symbols.py" "$sdk" "$artifacts/$name-symbols.tar.gz"
 if "$cross"; then
   prefix="$root/build-temp/accepted-$arch"
