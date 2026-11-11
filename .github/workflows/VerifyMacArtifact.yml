@@ -1,0 +1,72 @@
+name: Verify an extracted macOS SDK
+on:
+  workflow_dispatch:
+    inputs:
+      source_run:
+        type: string
+        required: true
+      target:
+        type: choice
+        options: [x64, arm64, universal]
+        default: x64
+      universal_host:
+        description: Native host for a universal SDK check
+        type: choice
+        options: [x64, arm64]
+        default: x64
+permissions:
+  contents: read
+  actions: read
+jobs:
+  verify:
+    runs-on: ${{ (inputs.target == 'arm64' || inputs.target == 'universal' && inputs.universal_host == 'arm64') && 'macos-15' || 'macos-15-intel' }}
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v4
+    - name: Bind the archive to its successful native build
+      id: source
+      env:
+        GH_TOKEN: ${{ github.token }}
+        SOURCE_RUN: ${{ inputs.source_run }}
+        TARGET: ${{ inputs.target }}
+      run: |
+        python3 - <<'PY'
+        import json, os, subprocess
+        run_id = os.environ['SOURCE_RUN']
+        assert run_id.isdigit()
+        prefix = 'repos/' + os.environ['GITHUB_REPOSITORY']
+        def api(path):
+            return json.loads(subprocess.check_output(['gh', 'api', prefix + path], text=True))
+        source = api('/actions/runs/' + run_id)
+        assert source['path'].split('@')[0] == '.github/workflows/BuildBinaries.yml'
+        jobs = api('/actions/runs/' + run_id + '/jobs?per_page=100')['jobs']
+        assert any(j['name'] == 'macos-' + os.environ['TARGET'] and j['conclusion'] == 'success' for j in jobs)
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
+            out.write('commit=' + source['head_sha'] + '\n')
+        PY
+    - uses: actions/download-artifact@v4
+      with:
+        github-token: ${{ github.token }}
+        run-id: ${{ inputs.source_run }}
+        name: qt5.15.17_macos_${{ inputs.target }}
+        path: archives
+    - name: Consume the archive without the Qt source build or installation
+      env:
+        QT_VERIFY_MAC_SOURCE_RUN: ${{ inputs.source_run }}
+        QT_VERIFY_MAC_SOURCE_COMMIT: ${{ steps.source.outputs.commit }}
+        TARGET: ${{ inputs.target }}
+        UNIVERSAL_HOST: ${{ inputs.universal_host }}
+      run: |
+        set -o pipefail
+        mkdir -p build-temp/logs
+        consumer=x86_64
+        if [[ "$TARGET" == arm64 || "$TARGET" == universal && "$UNIVERSAL_HOST" == arm64 ]]; then consumer=arm64; fi
+        architectures=("$consumer")
+        if [[ "$TARGET" == universal ]]; then architectures=(x86_64 arm64); fi
+        bash scripts/verify-macos-sdk.sh "archives/qt5.15.17_macos_$TARGET.tar.gz" "$TARGET" "$consumer" "${architectures[@]}" \
+          2>&1 | tee build-temp/logs/extracted-macos-sdk.log
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: verification-macos-${{ inputs.target }}-${{ inputs.universal_host }}
+        path: build-temp/logs/

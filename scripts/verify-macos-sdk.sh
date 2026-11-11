@@ -36,7 +36,9 @@ from pathlib import Path
 archive, target, consumer, logs, sdk, *architectures = sys.argv[1:]
 path = Path(archive)
 record = dict(accepted=True, target=target, consumer_arch=consumer, architectures=architectures,
-              source_run=os.environ['GITHUB_RUN_ID'], source_commit=os.environ['GITHUB_SHA'],
+              source_run=os.environ.get('QT_VERIFY_MAC_SOURCE_RUN', os.environ['GITHUB_RUN_ID']),
+              source_commit=os.environ.get('QT_VERIFY_MAC_SOURCE_COMMIT', os.environ['GITHUB_SHA']),
+              verifier_commit=os.environ['GITHUB_SHA'],
               archive=path.name, sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
               checks=['extracted executable permissions', 'all Mach-O and static archive architectures',
                       'advertised qmake architectures', 'default native qmake consumer',
