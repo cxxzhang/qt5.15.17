@@ -4,7 +4,7 @@ on:
     inputs:
       target:
         type: choice
-        options: [all, native, native-inputs, cross, loongarch, loongarch-oldworld, loongarch-newworld, mips]
+        options: [all, native, native-inputs, cross, loongarch, loongarch-oldworld, loongarch-newworld, mips, mips-deps]
         default: all
 permissions:
   contents: read
@@ -122,7 +122,7 @@ jobs:
         EOF
         gh release create "toolchain-native-217-$RUN_ID" --target "$COMMIT" --latest=false --title "Linux glibc 2.17 native toolchains ($RUN_ID)" --notes-file notes.md *.tar.xz SHA256SUMS
   mips:
-    if: inputs.target == 'all' || inputs.target == 'cross' || inputs.target == 'mips'
+    if: inputs.target == 'all' || inputs.target == 'cross' || inputs.target == 'mips' || inputs.target == 'mips-deps'
     name: Build MIPS64EL glibc 2.17 sysroot
     runs-on: ubuntu-22.04
     timeout-minutes: 180
@@ -176,17 +176,35 @@ jobs:
         path: build-temp/loong-newworld-inputs/downloads
         key: ${{ steps.mips-vendor.outputs.cache-primary-key }}
     - name: Relocate and package the accepted MIPS toolchain
+      if: inputs.target != 'mips-deps'
       env:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
         set -o pipefail
         bash scripts/linux-baseline/package-cross.sh mips64el 2>&1 | tee build-temp/logs/mips217-packaging.log
     - uses: actions/upload-artifact@v4
+      if: inputs.target != 'mips-deps'
       with:
         name: cross-toolchain-mips64el
         compression-level: 0
         path: Output/toolchains/
         if-no-files-found: error
+    - uses: actions/cache/restore@v4
+      if: inputs.target == 'mips-deps'
+      id: mips-graphics
+      with:
+        path: build-temp/baseline-mips64el/graphics-inputs
+        key: mips-graphics-inputs-${{ hashFiles('scripts/linux-baseline/mips-graphics.lock.json') }}
+    - name: Audit non-glibc MIPS graphics against the real 2.17 root
+      if: inputs.target == 'mips-deps'
+      run: |
+        set -o pipefail
+        python3 scripts/linux-baseline/prepare-mips-deps.py 2>&1 | tee build-temp/logs/mips217-graphics.log
+    - uses: actions/cache/save@v4
+      if: always() && inputs.target == 'mips-deps' && steps.mips-graphics.outputs.cache-hit != 'true'
+      with:
+        path: build-temp/baseline-mips64el/graphics-inputs
+        key: ${{ steps.mips-graphics.outputs.cache-primary-key }}
     - uses: actions/upload-artifact@v4
       if: always()
       with:
@@ -277,7 +295,7 @@ jobs:
         path: build-temp/logs/
   publish-cross:
     needs: [loongarch-oldworld, loongarch-newworld, mips]
-    if: ${{ !cancelled() && contains(needs.*.result, 'success') && !contains(needs.*.result, 'failure') }}
+    if: ${{ !cancelled() && inputs.target != 'mips-deps' && contains(needs.*.result, 'success') && !contains(needs.*.result, 'failure') }}
     runs-on: ubuntu-22.04
     permissions:
       contents: write

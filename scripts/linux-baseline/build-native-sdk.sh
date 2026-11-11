@@ -11,6 +11,7 @@ test "$(getconf GNU_LIBC_VERSION)" = 'glibc 2.17'
 compgen -G "$prefix/.accepted-*" >/dev/null
 test -x "$prefix/bin/clang++"
 test -f "$prefix/share/baseline/qt-dependency-rpms.txt"
+test -x "$prefix/host/bin/wayland-scanner"
 if [[ ! -x /opt/python/cp311-cp311/bin/python3 ]]; then
   manylinux-interpreters ensure cp311-cp311
 fi

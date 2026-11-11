@@ -92,6 +92,6 @@ mv "$rel" "$prefix"
 rmdir "$relocated"
 trap - EXIT
 archive="toolchain-linux-$arch-glibc217.tar.xz"
-tar -C "$prefix" -cJf "$out/$archive" .
+XZ_OPT='-T2 -3' tar -C "$prefix" -cJf "$out/$archive" .
 (cd "$out" && sha256sum "$archive" >"$archive.sha256")
 echo "$arch: relocated Clang/GCC/sysroot and both private C++ ABI probes passed; packaged $archive"

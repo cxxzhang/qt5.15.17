@@ -1,0 +1,1432 @@
+{
+  "architecture": "mips64el-graphics",
+  "glibc": "2.17",
+  "base_url": "https://archive.debian.org/debian",
+  "index_sha256": "60cf1149b744f51539673897d1dc26ff7739a40fbd79a636827273346ed31a2c",
+  "purpose": "Non-glibc graphical dependencies only; must pass ELF requirement audit against the separately source-built glibc 2.17 before merging",
+  "excluded_core_packages": [
+    "libatomic1",
+    "libc-bin",
+    "libc-dev-bin",
+    "libc6",
+    "libc6-dev",
+    "libgcc-6-dev",
+    "libgcc1",
+    "libgomp1",
+    "libstdc++-6-dev",
+    "libstdc++6",
+    "linux-libc-dev"
+  ],
+  "packages": [
+    {
+      "name": "fontconfig-config",
+      "version": "2.11.0-6.7",
+      "architecture": "all",
+      "path": "pool/main/f/fontconfig/fontconfig-config_2.11.0-6.7_all.deb",
+      "sha256": "8226e3a525fef6aee3268929d15ed8352a7edfa263b8f70e3eb1a0962e772e27",
+      "size": 271184,
+      "depends": "debconf (>= 0.5) | debconf-2.0, ucf (>= 0.29), fonts-dejavu-core | ttf-bitstream-vera | fonts-liberation | fonts-freefont",
+      "pre_depends": ""
+    },
+    {
+      "name": "fonts-dejavu-core",
+      "version": "2.37-1",
+      "architecture": "all",
+      "path": "pool/main/f/fonts-dejavu/fonts-dejavu-core_2.37-1_all.deb",
+      "sha256": "58d21a255606191e6512cca51f32c4480e7a798945cc980623377696acfa3cfc",
+      "size": 1068028,
+      "depends": "",
+      "pre_depends": ""
+    },
+    {
+      "name": "libacl1",
+      "version": "2.2.52-3+b1",
+      "architecture": "mips64el",
+      "path": "pool/main/a/acl/libacl1_2.2.52-3+b1_mips64el.deb",
+      "sha256": "077138b9cc9fe15f3bc8852d7817c1b9734db1b44707ddcb1dccf9e0402d1332",
+      "size": 27432,
+      "depends": "libattr1 (>= 1:2.4.46-8), libc6 (>= 2.4)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libattr1",
+      "version": "1:2.4.47-2+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/a/attr/libattr1_2.4.47-2+b2_mips64el.deb",
+      "sha256": "a2d02a6bdcee0929d09adce47e4e0eb4518cdcc3fc618fef20d02fea7041180e",
+      "size": 17962,
+      "depends": "libc6 (>= 2.4)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libaudit-common",
+      "version": "1:2.6.7-2",
+      "architecture": "all",
+      "path": "pool/main/a/audit/libaudit-common_2.6.7-2_all.deb",
+      "sha256": "42c502f6d37d8d7b77e659d23c58b7e13401b52003782276eb891dfb1bf958c2",
+      "size": 18108,
+      "depends": "",
+      "pre_depends": ""
+    },
+    {
+      "name": "libaudit1",
+      "version": "1:2.6.7-2",
+      "architecture": "mips64el",
+      "path": "pool/main/a/audit/libaudit1_2.6.7-2_mips64el.deb",
+      "sha256": "1d63d0ab501d3bcbb88788263e89ad2c406778414163d5c0a189a5379663e319",
+      "size": 49912,
+      "depends": "libaudit-common (>= 1:2.6.7-2), libc6 (>= 2.8), libcap-ng0",
+      "pre_depends": ""
+    },
+    {
+      "name": "libblkid1",
+      "version": "2.29.2-1+deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/u/util-linux/libblkid1_2.29.2-1+deb9u1_mips64el.deb",
+      "sha256": "2e7ae153d6a705a03cfa4a9a0ad708f14e961a406d78b8dae51c4bff540e949a",
+      "size": 156776,
+      "depends": "libc6 (>= 2.17), libuuid1 (>= 2.16)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libbsd0",
+      "version": "0.8.3-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libb/libbsd/libbsd0_0.8.3-1_mips64el.deb",
+      "sha256": "19d19698e82d645dc2b95d7efa0ab9a03208b8eb9ce2e5bdd7bf9baa6852121b",
+      "size": 82712,
+      "depends": "libc6 (>= 2.17)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libbz2-1.0",
+      "version": "1.0.6-8.1",
+      "architecture": "mips64el",
+      "path": "pool/main/b/bzip2/libbz2-1.0_1.0.6-8.1_mips64el.deb",
+      "sha256": "14aa9ae63704218b79b0bbb4b26a855d0f70f363db520e9d8b2e9b20246f265c",
+      "size": 45278,
+      "depends": "libc6 (>= 2.4)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libcap-ng0",
+      "version": "0.7.7-3+b1",
+      "architecture": "mips64el",
+      "path": "pool/main/libc/libcap-ng/libcap-ng0_0.7.7-3+b1_mips64el.deb",
+      "sha256": "87b4e138173583e6fc876d16043f0c654f8fd3edff0bf956d7712790af6e9999",
+      "size": 13338,
+      "depends": "libc6 (>= 2.8)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libdb5.3",
+      "version": "5.3.28-12+deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/d/db5.3/libdb5.3_5.3.28-12+deb9u1_mips64el.deb",
+      "sha256": "ffaeaddaad243ef69a4742345ac7d70ef74fdd3989aba8ef3631e4e23f4bf8cd",
+      "size": 592696,
+      "depends": "libc6 (>= 2.17)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libdbus-1-3",
+      "version": "1.10.32-0+deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/d/dbus/libdbus-1-3_1.10.32-0+deb9u1_mips64el.deb",
+      "sha256": "f5e4b47c55b9f750337d077c0e73869fc02857efc2c8ab9e5a3e928185bc099d",
+      "size": 175648,
+      "depends": "libc6 (>= 2.17), libsystemd0 (>= 209)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libdbus-1-dev",
+      "version": "1.10.32-0+deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/d/dbus/libdbus-1-dev_1.10.32-0+deb9u1_mips64el.deb",
+      "sha256": "ae9a4f6c9b20a72e237b5ff52372d35c3bd9d0b94748e1c658bea5863c3ce846",
+      "size": 245240,
+      "depends": "libdbus-1-3 (= 1.10.32-0+deb9u1), pkg-config",
+      "pre_depends": ""
+    },
+    {
+      "name": "libdpkg-perl",
+      "version": "1.18.25",
+      "architecture": "all",
+      "path": "pool/main/d/dpkg/libdpkg-perl_1.18.25_all.deb",
+      "sha256": "df0ae8a030720fcc9627d867b8c68f9ac6e244f5d598b5692c7dfa4542251674",
+      "size": 1287170,
+      "depends": "perl, dpkg (>= 1.18.11)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libdrm-amdgpu1",
+      "version": "2.4.74-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libd/libdrm/libdrm-amdgpu1_2.4.74-1_mips64el.deb",
+      "sha256": "847a2a260a6a4d8a0008febdf7ab75db2a2d15ad828b492dae32a97a8c1be6b5",
+      "size": 25434,
+      "depends": "libc6 (>= 2.17), libdrm2 (>= 2.4.60)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libdrm-dev",
+      "version": "2.4.74-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libd/libdrm/libdrm-dev_2.4.74-1_mips64el.deb",
+      "sha256": "39b48f7fd404012a688c3a87ebbdbeba19713487c24a52a50c76d59fbcf2515a",
+      "size": 176140,
+      "depends": "libdrm2 (= 2.4.74-1), libdrm-radeon1 (= 2.4.74-1), libdrm-nouveau2 (= 2.4.74-1), libdrm-amdgpu1 (= 2.4.74-1)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libdrm-nouveau2",
+      "version": "2.4.74-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libd/libdrm/libdrm-nouveau2_2.4.74-1_mips64el.deb",
+      "sha256": "2e03745ac995e2215eade80fea672cdfdda8177a8e5b34624412b7ac0bf2978d",
+      "size": 24638,
+      "depends": "libc6 (>= 2.4), libdrm2 (>= 2.4.38)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libdrm-radeon1",
+      "version": "2.4.74-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libd/libdrm/libdrm-radeon1_2.4.74-1_mips64el.deb",
+      "sha256": "a8a69f5b8f6851c21418c5b1ef56ac3a6fc0ca0435bf28a27e1e0caa95212fc9",
+      "size": 29766,
+      "depends": "libc6 (>= 2.4), libdrm2 (>= 2.4.38)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libdrm2",
+      "version": "2.4.74-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libd/libdrm/libdrm2_2.4.74-1_mips64el.deb",
+      "sha256": "82d5ec38ef7a3c659f2f5eddb881ee8b5cfa7470710f4d8b5b769cbd078ef5df",
+      "size": 34136,
+      "depends": "libc6 (>= 2.17)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libegl1-mesa",
+      "version": "13.0.6-1+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/m/mesa/libegl1-mesa_13.0.6-1+b2_mips64el.deb",
+      "sha256": "b0302f142f94f34e75c61d3f444d0fc2f7fd206e7d79edf645295ecabafa9722",
+      "size": 101978,
+      "depends": "libc6 (>= 2.17), libdrm2 (>= 2.4.66), libexpat1 (>= 2.0.1), libgbm1 (= 13.0.6-1+b2), libwayland-client0 (>= 1.9.91), libwayland-server0 (>= 1.2.0), libx11-6, libx11-xcb1, libxcb-dri2-0 (>= 1.8), libxcb-dri3-0, libxcb-present0, libxcb-sync1, libxcb-xfixes0, libxcb1 (>= 1.9.2), libxshmfence1",
+      "pre_depends": ""
+    },
+    {
+      "name": "libegl1-mesa-dev",
+      "version": "13.0.6-1+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/m/mesa/libegl1-mesa-dev_13.0.6-1+b2_mips64el.deb",
+      "sha256": "36eac24e366531cbe6f4371119c10a30a969cf2b416fb3a10cb546cf73c4ced2",
+      "size": 55422,
+      "depends": "libegl1-mesa (= 13.0.6-1+b2), libwayland-egl1-mesa (= 13.0.6-1+b2), libdrm-dev (>= 2.4.69), x11proto-dri2-dev (>= 2.6), x11proto-gl-dev (>= 1.4.14), libx11-dev, libxext-dev, libxxf86vm-dev, libxdamage-dev, libxfixes-dev, libxcb-glx0-dev, libxcb-dri2-0-dev, libxcb-dri3-dev, libxcb-present-dev, libxcb-sync-dev, libxshmfence-dev, libx11-xcb-dev, libwayland-dev (>= 1.2.0)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libexpat1",
+      "version": "2.2.0-2+deb9u3",
+      "architecture": "mips64el",
+      "path": "pool/main/e/expat/libexpat1_2.2.0-2+deb9u3_mips64el.deb",
+      "sha256": "ed17cc4466ff1ee76bf40f5a8e10291c06a625b173c154ea362b3eff832b4a09",
+      "size": 83772,
+      "depends": "libc6 (>= 2.4)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libexpat1-dev",
+      "version": "2.2.0-2+deb9u3",
+      "architecture": "mips64el",
+      "path": "pool/main/e/expat/libexpat1-dev_2.2.0-2+deb9u3_mips64el.deb",
+      "sha256": "853afe62807a0c13d64e7b28df6511fcf6a22ca026900ef0c75ff192a5ad403c",
+      "size": 136716,
+      "depends": "libexpat1 (= 2.2.0-2+deb9u3), libc6-dev | libc-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libffi6",
+      "version": "3.2.1-6",
+      "architecture": "mips64el",
+      "path": "pool/main/libf/libffi/libffi6_3.2.1-6_mips64el.deb",
+      "sha256": "524cf08ed7f28c2089670d1aacc99fb59aa832cc4dcbda96ce8103f74509ddb6",
+      "size": 20644,
+      "depends": "libc6 (>= 2.7)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libfontconfig1",
+      "version": "2.11.0-6.7+b1",
+      "architecture": "mips64el",
+      "path": "pool/main/f/fontconfig/libfontconfig1_2.11.0-6.7+b1_mips64el.deb",
+      "sha256": "476a8b56cd7fdd6af003ac0705fc99321ddbc13cdebf5579f618befb94496b77",
+      "size": 328242,
+      "depends": "libc6 (>= 2.7), libexpat1 (>= 2.0.1), libfreetype6 (>= 2.2.1), fontconfig-config (>= 2.11.0-6.7)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libfontconfig1-dev",
+      "version": "2.11.0-6.7+b1",
+      "architecture": "mips64el",
+      "path": "pool/main/f/fontconfig/libfontconfig1-dev_2.11.0-6.7+b1_mips64el.deb",
+      "sha256": "4792e495088f2a8230564b7da606f9f544e6843362dda1d1c0b0c27a84eaf2eb",
+      "size": 908016,
+      "depends": "libfontconfig1 (= 2.11.0-6.7+b1), libexpat1-dev, libfreetype6-dev (>= 2.1.7), pkg-config",
+      "pre_depends": ""
+    },
+    {
+      "name": "libfreetype6",
+      "version": "2.6.3-3.2+deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/f/freetype/libfreetype6_2.6.3-3.2+deb9u1_mips64el.deb",
+      "sha256": "c31f67ad80470bfcd348ce6fac0b100f77e6b32903d7758ba3d260ac67b8b1de",
+      "size": 416696,
+      "depends": "libc6 (>= 2.11), libpng16-16 (>= 1.6.2-1), zlib1g (>= 1:1.1.4)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libfreetype6-dev",
+      "version": "2.6.3-3.2+deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/f/freetype/libfreetype6-dev_2.6.3-3.2+deb9u1_mips64el.deb",
+      "sha256": "fc28bb4569c3f21f4b5d70a60b86c5438894e29b90949d25057d344a2e545ee2",
+      "size": 5831670,
+      "depends": "libfreetype6 (= 2.6.3-3.2+deb9u1), libc6-dev | libc-dev, zlib1g-dev | libz-dev, libpng-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libgbm1",
+      "version": "13.0.6-1+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/m/mesa/libgbm1_13.0.6-1+b2_mips64el.deb",
+      "sha256": "8e4387f614ade5cfca7ed55a8ae5cca60ccf244e46f0a001113507c07a9b1551",
+      "size": 57454,
+      "depends": "libc6 (>= 2.8), libdrm2 (>= 2.4.66), libexpat1 (>= 2.0.1), libwayland-client0 (>= 1.2.0), libwayland-server0 (>= 1.2.0)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libgcrypt20",
+      "version": "1.7.6-2+deb9u3",
+      "architecture": "mips64el",
+      "path": "pool/main/libg/libgcrypt20/libgcrypt20_1.7.6-2+deb9u3_mips64el.deb",
+      "sha256": "138ef4a0c1acfc886a9cc67986904003f9367a61a17adbfd248b90bf9e7efd54",
+      "size": 467262,
+      "depends": "libc6 (>= 2.15), libgpg-error0 (>= 1.14)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libgdbm3",
+      "version": "1.8.3-14",
+      "architecture": "mips64el",
+      "path": "pool/main/g/gdbm/libgdbm3_1.8.3-14_mips64el.deb",
+      "sha256": "1b8936670f8c24fbb69101c2a79491f0237fb7ad8f4a3b67d76777d7d665c66f",
+      "size": 29364,
+      "depends": "libc6 (>= 2.4), dpkg (>= 1.15.4) | install-info",
+      "pre_depends": ""
+    },
+    {
+      "name": "libgl1-mesa-dev",
+      "version": "13.0.6-1+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/m/mesa/libgl1-mesa-dev_13.0.6-1+b2_mips64el.deb",
+      "sha256": "6d4a68bc79543a6cf1f0e2ba1fb9df813bad46003b3bcd4e3ecdffdaa2bdc39d",
+      "size": 41524,
+      "depends": "mesa-common-dev (= 13.0.6-1+b2), libgl1-mesa-glx (= 13.0.6-1+b2), libdrm-dev (>= 2.4.69), libx11-dev, libx11-xcb-dev, libxcb-dri3-dev, libxcb-present-dev, libxcb-sync-dev, libxshmfence-dev, libxcb-dri2-0-dev, libxcb-glx0-dev, libxdamage-dev, libxext-dev, libxfixes-dev, libxxf86vm-dev, x11proto-dri2-dev (>= 2.6), x11proto-gl-dev (>= 1.4.14)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libgl1-mesa-glx",
+      "version": "13.0.6-1+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/m/mesa/libgl1-mesa-glx_13.0.6-1+b2_mips64el.deb",
+      "sha256": "75f1f989ff95c853802ed05112796ca85a7bcdf955c50a89535fc8f413b6e131",
+      "size": 156440,
+      "depends": "libc6 (>= 2.8), libdrm2 (>= 2.4.66), libexpat1 (>= 2.0.1), libglapi-mesa (= 13.0.6-1+b2), libx11-6 (>= 2:1.4.99.1), libx11-xcb1, libxcb-dri2-0 (>= 1.8), libxcb-dri3-0, libxcb-glx0 (>= 1.8), libxcb-present0, libxcb-sync1, libxcb1 (>= 1.9.2), libxdamage1 (>= 1:1.1), libxext6, libxfixes3, libxshmfence1, libxxf86vm1",
+      "pre_depends": ""
+    },
+    {
+      "name": "libglapi-mesa",
+      "version": "13.0.6-1+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/m/mesa/libglapi-mesa_13.0.6-1+b2_mips64el.deb",
+      "sha256": "e181889daf6ffe766d4da4a87fa27e11aef97238502ad709fbea0c23acfe27fe",
+      "size": 63214,
+      "depends": "libc6 (>= 2.4)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libgles2-mesa",
+      "version": "13.0.6-1+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/m/mesa/libgles2-mesa_13.0.6-1+b2_mips64el.deb",
+      "sha256": "7adca736a5c078e46e2abbcdd95809f941fa2e8f5569bd69926586371091487a",
+      "size": 50718,
+      "depends": "libglapi-mesa (= 13.0.6-1+b2), libc6 (>= 2.2), libdrm2 (>= 2.3.1)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libgles2-mesa-dev",
+      "version": "13.0.6-1+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/m/mesa/libgles2-mesa-dev_13.0.6-1+b2_mips64el.deb",
+      "sha256": "48bfb257f04a560e46f0d5e9a22bc4e328636184d9e56c7e1a928e9e8ac42c75",
+      "size": 75554,
+      "depends": "libgles2-mesa (= 13.0.6-1+b2), libegl1-mesa-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libglib2.0-0",
+      "version": "2.50.3-2+deb9u2",
+      "architecture": "mips64el",
+      "path": "pool/main/g/glib2.0/libglib2.0-0_2.50.3-2+deb9u2_mips64el.deb",
+      "sha256": "03dae032fbf7b49eafb79c5ef09f8aa00c1c8c8771ffb60879a5b71b1c7a3626",
+      "size": 2525634,
+      "depends": "libc6 (>= 2.17), libffi6 (>= 3.2.1-6), libmount1 (>= 2.20.1), libpcre3, libselinux1 (>= 1.32), zlib1g (>= 1:1.2.2)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libglu1-mesa",
+      "version": "9.0.0-2.1",
+      "architecture": "mips64el",
+      "path": "pool/main/libg/libglu/libglu1-mesa_9.0.0-2.1_mips64el.deb",
+      "sha256": "e549a234301854d54ace3f0cdb29ef9f90cbcf37f947a32bd33d7ddfb0a7db8f",
+      "size": 171714,
+      "depends": "libc6 (>= 2.19), libgcc1, libgl1-mesa-glx | libgl1, libstdc++6 (>= 4.1.1)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libglu1-mesa-dev",
+      "version": "9.0.0-2.1",
+      "architecture": "mips64el",
+      "path": "pool/main/libg/libglu/libglu1-mesa-dev_9.0.0-2.1_mips64el.deb",
+      "sha256": "8db15b457ec1c5acd38ad9f9f6af9fe147e51e38ffdb43003cacb4ae3c223415",
+      "size": 231906,
+      "depends": "libglu1-mesa (= 9.0.0-2.1), libgl1-mesa-dev | libgl-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libgpg-error0",
+      "version": "1.26-2",
+      "architecture": "mips64el",
+      "path": "pool/main/libg/libgpg-error/libgpg-error0_1.26-2_mips64el.deb",
+      "sha256": "226197d4cc983a9762723c0d977c658488baab2c2f6461448be6983c511890e2",
+      "size": 111008,
+      "depends": "libc6 (>= 2.15)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libicu57",
+      "version": "57.1-6+deb9u4",
+      "architecture": "mips64el",
+      "path": "pool/main/i/icu/libicu57_57.1-6+deb9u4_mips64el.deb",
+      "sha256": "b901b32cf93e9f44aa34e0245fd991b79762d3406ea435fd0b8a7287c8e33f1d",
+      "size": 7615446,
+      "depends": "libc6 (>= 2.7), libgcc1 (>= 1:3.0), libstdc++6 (>= 5.2)",
+      "pre_depends": ""
+    },
+    {
+      "name": "liblz4-1",
+      "version": "0.0~r131-2+b1",
+      "architecture": "mips64el",
+      "path": "pool/main/l/lz4/liblz4-1_0.0~r131-2+b1_mips64el.deb",
+      "sha256": "445633ce42259eb2bfdee6b92e3bd95af8861631c12e3e0decb0bff3c538d4e0",
+      "size": 36636,
+      "depends": "libc6 (>= 2.4)",
+      "pre_depends": ""
+    },
+    {
+      "name": "liblzma5",
+      "version": "5.2.2-1.2+b1",
+      "architecture": "mips64el",
+      "path": "pool/main/x/xz-utils/liblzma5_5.2.2-1.2+b1_mips64el.deb",
+      "sha256": "6aa3d2446b33c914a121f09204a254114e2c5809c32b18f25014aa135d00a80d",
+      "size": 232206,
+      "depends": "libc6 (>= 2.17)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libmount1",
+      "version": "2.29.2-1+deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/u/util-linux/libmount1_2.29.2-1+deb9u1_mips64el.deb",
+      "sha256": "347ba44e2bf6b38b537c588e27ddbc92b1e6bb5d25e4849753aa411cd5da7d5c",
+      "size": 159798,
+      "depends": "libblkid1 (>= 2.17.2), libc6 (>= 2.17), libselinux1 (>= 2.6-3~)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libpam-modules",
+      "version": "1.1.8-3.6",
+      "architecture": "mips64el",
+      "path": "pool/main/p/pam/libpam-modules_1.1.8-3.6_mips64el.deb",
+      "sha256": "b1b63134d44b897221474a0760e1be6592e7abb8c029d36f6521b6314314fdf0",
+      "size": 300064,
+      "depends": "",
+      "pre_depends": "libaudit1 (>= 1:2.2.1), libc6 (>= 2.15), libdb5.3, libpam0g (>= 1.1.3-2), libselinux1 (>= 2.1.9), debconf (>= 0.5) | debconf-2.0, libpam-modules-bin (= 1.1.8-3.6)"
+    },
+    {
+      "name": "libpam-modules-bin",
+      "version": "1.1.8-3.6",
+      "architecture": "mips64el",
+      "path": "pool/main/p/pam/libpam-modules-bin_1.1.8-3.6_mips64el.deb",
+      "sha256": "1d8de6c753eaf1323df30bed2bb2795d922777509f2feb45bcf65ab2612e6f3f",
+      "size": 104890,
+      "depends": "libaudit1 (>= 1:2.2.1), libc6 (>= 2.4), libpam0g (>= 0.99.7.1), libselinux1 (>= 1.32)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libpam0g",
+      "version": "1.1.8-3.6",
+      "architecture": "mips64el",
+      "path": "pool/main/p/pam/libpam0g_1.1.8-3.6_mips64el.deb",
+      "sha256": "bd7d9b254cc8012a4bd272198b5fd9d34860c37712bb8d8e38de6cc5f0a371cf",
+      "size": 122474,
+      "depends": "libaudit1 (>= 1:2.2.1), libc6 (>= 2.8), debconf (>= 0.5) | debconf-2.0",
+      "pre_depends": ""
+    },
+    {
+      "name": "libpcre3",
+      "version": "2:8.39-3",
+      "architecture": "mips64el",
+      "path": "pool/main/p/pcre3/libpcre3_8.39-3_mips64el.deb",
+      "sha256": "2303b19ca09a522ecab0b7b0a3928df894c2eddc1eb5fd3f39d98055d529ae0f",
+      "size": 329214,
+      "depends": "libc6 (>= 2.4)",
+      "pre_depends": "multiarch-support"
+    },
+    {
+      "name": "libperl5.24",
+      "version": "5.24.1-3+deb9u7",
+      "architecture": "mips64el",
+      "path": "pool/main/p/perl/libperl5.24_5.24.1-3+deb9u7_mips64el.deb",
+      "sha256": "ad56ceb1c4ac7f0602eab60ae657a123c9d5cfe74459a1e8f4e0ea81e2424590",
+      "size": 2907220,
+      "depends": "libbz2-1.0, libc6 (>= 2.23), libdb5.3, libgdbm3 (>= 1.8.3), zlib1g (>= 1:1.2.2.3), perl-modules-5.24 (>= 5.24.1-3+deb9u7)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libpng-dev",
+      "version": "1.6.28-1+deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/libp/libpng1.6/libpng-dev_1.6.28-1+deb9u1_mips64el.deb",
+      "sha256": "700dd41606e6a7ac21e627e9e028a42459a642b906bf0ba3dc2629b3a1cc9440",
+      "size": 256790,
+      "depends": "libpng16-16 (= 1.6.28-1+deb9u1), zlib1g-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libpng16-16",
+      "version": "1.6.28-1+deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/libp/libpng1.6/libpng16-16_1.6.28-1+deb9u1_mips64el.deb",
+      "sha256": "0c51bce17999302757d67c3c943f4020122c945b01e2fa262304c40a72225795",
+      "size": 275202,
+      "depends": "libc6 (>= 2.11), zlib1g (>= 1:1.2.3.4)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libpthread-stubs0-dev",
+      "version": "0.3-4",
+      "architecture": "mips64el",
+      "path": "pool/main/libp/libpthread-stubs/libpthread-stubs0-dev_0.3-4_mips64el.deb",
+      "sha256": "0e61f3e14e8c1a4e4fd6da8da4d9e15af7ff63716cb95476a84cec5270223859",
+      "size": 3858,
+      "depends": "",
+      "pre_depends": ""
+    },
+    {
+      "name": "libselinux1",
+      "version": "2.6-3+b3",
+      "architecture": "mips64el",
+      "path": "pool/main/libs/libselinux/libselinux1_2.6-3+b3_mips64el.deb",
+      "sha256": "e15a43b8643d181830dd8ff5329ee29112305589440108bb83ea3e07a78d0cd1",
+      "size": 95340,
+      "depends": "libc6 (>= 2.8), libpcre3",
+      "pre_depends": ""
+    },
+    {
+      "name": "libsemanage-common",
+      "version": "2.6-2",
+      "architecture": "all",
+      "path": "pool/main/libs/libsemanage/libsemanage-common_2.6-2_all.deb",
+      "sha256": "f9ccd6a271af92cc2b557d5a3e2725b0d3a44a336704cded5f77e1a7a8503840",
+      "size": 26924,
+      "depends": "",
+      "pre_depends": ""
+    },
+    {
+      "name": "libsemanage1",
+      "version": "2.6-2",
+      "architecture": "mips64el",
+      "path": "pool/main/libs/libsemanage/libsemanage1_2.6-2_mips64el.deb",
+      "sha256": "80ff5a29e48bb3df2e2ef9625043ee8e155da443e1a258a5e16ecd809b3b0163",
+      "size": 92882,
+      "depends": "libsemanage-common (= 2.6-2), libaudit1 (>= 1:2.2.1), libbz2-1.0, libc6 (>= 2.8), libselinux1 (>= 2.6), libsepol1 (>= 2.6), libustr-1.0-1 (>= 1.0.4)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libsepol1",
+      "version": "2.6-2",
+      "architecture": "mips64el",
+      "path": "pool/main/libs/libsepol/libsepol1_2.6-2_mips64el.deb",
+      "sha256": "b40a618a08d5f4fc5170adce10aaa5bb5cb18224f47caa7f8a00e3c8d3818c09",
+      "size": 214442,
+      "depends": "libc6 (>= 2.8)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libsystemd0",
+      "version": "232-25+deb9u12",
+      "architecture": "mips64el",
+      "path": "pool/main/s/systemd/libsystemd0_232-25+deb9u12_mips64el.deb",
+      "sha256": "0ff35c55677c6aa3167297fa347e6dab89167a51b3b3c98bbc0e625ae1d1efd6",
+      "size": 247602,
+      "depends": "",
+      "pre_depends": "libc6 (>= 2.17), libgcrypt20 (>= 1.7.0), liblz4-1 (>= 0.0~r113), liblzma5 (>= 5.1.1alpha+20120614), libselinux1 (>= 2.1.9)"
+    },
+    {
+      "name": "libustr-1.0-1",
+      "version": "1.0.4-6",
+      "architecture": "mips64el",
+      "path": "pool/main/u/ustr/libustr-1.0-1_1.0.4-6_mips64el.deb",
+      "sha256": "aed2ad73c4c07855a9c0b8db6206328ba9ce27e446cc7a74c90b6adb16df1323",
+      "size": 66218,
+      "depends": "libc6 (>= 2.4)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libuuid1",
+      "version": "2.29.2-1+deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/u/util-linux/libuuid1_2.29.2-1+deb9u1_mips64el.deb",
+      "sha256": "852e7b5080596865a2d7a14c889d4abf60fa1d10aa28d1c16b00c628ae0d442f",
+      "size": 70334,
+      "depends": "passwd, libc6 (>= 2.4)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libwayland-bin",
+      "version": "1.12.0-1+deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/w/wayland/libwayland-bin_1.12.0-1+deb9u1_mips64el.deb",
+      "sha256": "ac5e2aedde7f067f8d46ae1f3cfa232df2d8563ece16a28489a6c7ff949097e8",
+      "size": 20684,
+      "depends": "libc6 (>= 2.4), libexpat1 (>= 2.0.1), libxml2 (>= 2.7.4)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libwayland-client0",
+      "version": "1.12.0-1+deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/w/wayland/libwayland-client0_1.12.0-1+deb9u1_mips64el.deb",
+      "sha256": "5c68914b4be05ffcd15f3314243294da4e2460939576790b9ced41a6b12df8e9",
+      "size": 23104,
+      "depends": "libc6 (>= 2.10), libffi6 (>= 3.2.1-6)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libwayland-cursor0",
+      "version": "1.12.0-1+deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/w/wayland/libwayland-cursor0_1.12.0-1+deb9u1_mips64el.deb",
+      "sha256": "31bb2053495f360383d3c9adfd1002e38e0fba39e3d00dbbc532cd2c15ca60c0",
+      "size": 13358,
+      "depends": "libc6 (>= 2.7), libwayland-client0 (>= 1.3.92)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libwayland-dev",
+      "version": "1.12.0-1+deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/w/wayland/libwayland-dev_1.12.0-1+deb9u1_mips64el.deb",
+      "sha256": "7d7dee34476cab7b883d801922a11e09ac4df48bedd278ee92c3bffe43d0e696",
+      "size": 100112,
+      "depends": "libwayland-client0 (= 1.12.0-1+deb9u1), libwayland-server0 (= 1.12.0-1+deb9u1), libwayland-cursor0 (= 1.12.0-1+deb9u1), libwayland-bin (= 1.12.0-1+deb9u1)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libwayland-egl1-mesa",
+      "version": "13.0.6-1+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/m/mesa/libwayland-egl1-mesa_13.0.6-1+b2_mips64el.deb",
+      "sha256": "04e2e476523090c7cb277cc8f014c6e83ff400a7e6dd1973057ef857eee7e2ab",
+      "size": 42928,
+      "depends": "libc6 (>= 2.2), libegl1-mesa (= 13.0.6-1+b2)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libwayland-server0",
+      "version": "1.12.0-1+deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/w/wayland/libwayland-server0_1.12.0-1+deb9u1_mips64el.deb",
+      "sha256": "f04ebf22567486436cca0e2272017e703054787252da82f9e0257e2fd00c6599",
+      "size": 27654,
+      "depends": "libc6 (>= 2.10), libffi6 (>= 3.2.1-6)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libx11-6",
+      "version": "2:1.6.4-3+deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libx11/libx11-6_1.6.4-3+deb9u1_mips64el.deb",
+      "sha256": "b9669b4f38a76db39e5e504711e7e1a08654294cd9e1fd4a1591d6d929248836",
+      "size": 702654,
+      "depends": "libc6 (>= 2.15), libxcb1 (>= 1.11.1), libx11-data",
+      "pre_depends": ""
+    },
+    {
+      "name": "libx11-data",
+      "version": "2:1.6.4-3+deb9u1",
+      "architecture": "all",
+      "path": "pool/main/libx/libx11/libx11-data_1.6.4-3+deb9u1_all.deb",
+      "sha256": "c589d2decc374dff78da717a4716c0d79d9646abb7ccc4a64e1f61534a2ba3b3",
+      "size": 287062,
+      "depends": "",
+      "pre_depends": ""
+    },
+    {
+      "name": "libx11-dev",
+      "version": "2:1.6.4-3+deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libx11/libx11-dev_1.6.4-3+deb9u1_mips64el.deb",
+      "sha256": "70b327412449f6637ae0709e7d59a7bc10e2894db7666a7ae80befcb4113cdd3",
+      "size": 825790,
+      "depends": "libx11-6 (= 2:1.6.4-3+deb9u1), libxau-dev (>= 1:1.0.0-1), libxdmcp-dev (>= 1:1.0.0-1), x11proto-core-dev (>= 7.0.17), x11proto-input-dev, x11proto-kb-dev, xtrans-dev, libxcb1-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libx11-xcb-dev",
+      "version": "2:1.6.4-3+deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libx11/libx11-xcb-dev_1.6.4-3+deb9u1_mips64el.deb",
+      "sha256": "30477b429fa24a20c0b4f3ece887a513dd9afe785b23772f29fce5278c4f028d",
+      "size": 185486,
+      "depends": "libx11-xcb1 (= 2:1.6.4-3+deb9u1), libxcb1-dev (>= 1.11.1), libx11-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libx11-xcb1",
+      "version": "2:1.6.4-3+deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libx11/libx11-xcb1_1.6.4-3+deb9u1_mips64el.deb",
+      "sha256": "e3c947368d56d90bf1235139bc58fb87e8b562919f2643d89599341a3c164733",
+      "size": 183358,
+      "depends": "libc6 (>= 2.2)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxau-dev",
+      "version": "1:1.0.8-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxau/libxau-dev_1.0.8-1_mips64el.deb",
+      "sha256": "426bc9008a021ef35a8760600bc841242ba761e1e7f22b32ce67475292831de2",
+      "size": 23384,
+      "depends": "libxau6 (= 1:1.0.8-1), x11proto-core-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxau6",
+      "version": "1:1.0.8-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxau/libxau6_1.0.8-1_mips64el.deb",
+      "sha256": "11edda4817cba7972d6edfae3603e6594f3e76d788357a04936210fd7029c9c3",
+      "size": 19514,
+      "depends": "libc6 (>= 2.19)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-dri2-0",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-dri2-0_1.12-1_mips64el.deb",
+      "sha256": "9378933f0c6f06cbd88f2ffc2d0ab99b9baf73b75f5c4a2d4b350f1b2059b708",
+      "size": 96712,
+      "depends": "libc6 (>= 2.4), libxcb1",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-dri2-0-dev",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-dri2-0-dev_1.12-1_mips64el.deb",
+      "sha256": "bd3077697573a5b95856c57b42d563386626b06916527312aed7c99f5350374a",
+      "size": 99302,
+      "depends": "libxcb-dri2-0 (= 1.12-1), libxcb1-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-dri3-0",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-dri3-0_1.12-1_mips64el.deb",
+      "sha256": "50fe0f20ca383ef40507df94eba60455632fea24db8aa896463efddcd3f911f8",
+      "size": 95370,
+      "depends": "libc6 (>= 2.4), libxcb1 (>= 1.12)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-dri3-dev",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-dri3-dev_1.12-1_mips64el.deb",
+      "sha256": "3d15f391eb5723b41b86de7337c93fc51e78dfcac196ef8d442c7c13798d924f",
+      "size": 96488,
+      "depends": "libxcb-dri3-0 (= 1.12-1), libxcb1-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-glx0",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-glx0_1.12-1_mips64el.deb",
+      "sha256": "30f3a1f05cd4f239a9c2169f11511ab733baf80781e20a291d97c1511d394201",
+      "size": 107874,
+      "depends": "libc6 (>= 2.4), libxcb1",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-glx0-dev",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-glx0-dev_1.12-1_mips64el.deb",
+      "sha256": "4224ef8904e3c3a31f40b69ec289eea604d5d6abaf64ce19643619901778edff",
+      "size": 119972,
+      "depends": "libxcb-glx0 (= 1.12-1), libxcb1-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-icccm4",
+      "version": "0.4.1-1",
+      "architecture": "mips64el",
+      "path": "pool/main/x/xcb-util-wm/libxcb-icccm4_0.4.1-1_mips64el.deb",
+      "sha256": "cbd77a2c7fce7f2c0bda04ed6c47b5dc1815b3b7ef30109eeaa3751b5dc0d62e",
+      "size": 26016,
+      "depends": "libc6 (>= 2.19), libxcb1",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-icccm4-dev",
+      "version": "0.4.1-1",
+      "architecture": "mips64el",
+      "path": "pool/main/x/xcb-util-wm/libxcb-icccm4-dev_0.4.1-1_mips64el.deb",
+      "sha256": "ea5577e23858f0231eb8d5a668c6e92dc597ab059a6cc0f8d29db24a7751d7ca",
+      "size": 30064,
+      "depends": "libxcb-icccm4 (= 0.4.1-1), libxcb1-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-image0",
+      "version": "0.4.0-1+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/x/xcb-util-image/libxcb-image0_0.4.0-1+b2_mips64el.deb",
+      "sha256": "5dccdc16f3d33009dd74faea2d9bb4dd4ea99d2909310f5850c14f845c2dac45",
+      "size": 24086,
+      "depends": "libc6 (>= 2.4), libxcb-shm0, libxcb-util0 (>= 0.3.8), libxcb1",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-image0-dev",
+      "version": "0.4.0-1+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/x/xcb-util-image/libxcb-image0-dev_0.4.0-1+b2_mips64el.deb",
+      "sha256": "61274f25797bb1edd69a9c872f2fdef71bf6d312bdd610405df8124f947fde0e",
+      "size": 30044,
+      "depends": "libxcb-image0 (= 0.4.0-1+b2), libxcb1-dev, libxcb-shm0-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-keysyms1",
+      "version": "0.4.0-1+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/x/xcb-util-keysyms/libxcb-keysyms1_0.4.0-1+b2_mips64el.deb",
+      "sha256": "20092ba59a45772f4ded7cfad0bffcfc3c4359db913619344a98b6ad89241520",
+      "size": 16172,
+      "depends": "libc6 (>= 2.2), libxcb1",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-keysyms1-dev",
+      "version": "0.4.0-1+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/x/xcb-util-keysyms/libxcb-keysyms1-dev_0.4.0-1+b2_mips64el.deb",
+      "sha256": "89f882550e4872d90a86a8dede808fe31a154e673f115aa6ab20e13a39cd28ff",
+      "size": 16280,
+      "depends": "libxcb-keysyms1 (= 0.4.0-1+b2), libxcb1-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-present-dev",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-present-dev_1.12-1_mips64el.deb",
+      "sha256": "17b2f613fa1c27f3d1a1f2eadff09cf8d06d61f22301ab34a02e65b8a8dc0972",
+      "size": 97518,
+      "depends": "libxcb-present0 (= 1.12-1), libxcb1-dev, libxcb-randr0-dev, libxcb-xfixes0-dev, libxcb-sync-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-present0",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-present0_1.12-1_mips64el.deb",
+      "sha256": "e35c70a4c5a8d7c64630e959dd1da21ef23ba94b75a5ee80e22e23148dcf0e44",
+      "size": 95644,
+      "depends": "libc6 (>= 2.4), libxcb1",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-randr0",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-randr0_1.12-1_mips64el.deb",
+      "sha256": "e9734e0d1c0ec5f76a783983348c030118cc829e5ef1508aac594e5455dfd050",
+      "size": 103998,
+      "depends": "libc6 (>= 2.4), libxcb1",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-randr0-dev",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-randr0-dev_1.12-1_mips64el.deb",
+      "sha256": "ec075c6bbe976c8c4ff296c794af764cd7dcb48209be563d0833149b7d5e3d9f",
+      "size": 110868,
+      "depends": "libxcb-randr0 (= 1.12-1), libxcb1-dev, libxcb-render0-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-render-util0",
+      "version": "0.3.9-1",
+      "architecture": "mips64el",
+      "path": "pool/main/x/xcb-util-renderutil/libxcb-render-util0_0.3.9-1_mips64el.deb",
+      "sha256": "7689a0a0e5c39cfadc59c1211b2536eb9ee0d8317fea1e9c40bbc330a9ce62c3",
+      "size": 17680,
+      "depends": "libc6 (>= 2.19), libxcb-render0, libxcb1",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-render-util0-dev",
+      "version": "0.3.9-1",
+      "architecture": "mips64el",
+      "path": "pool/main/x/xcb-util-renderutil/libxcb-render-util0-dev_0.3.9-1_mips64el.deb",
+      "sha256": "5a3bba374e68dec6b05b0ba6752af99ed80beb942209c7f851b6d7a0d7cdf0f6",
+      "size": 18300,
+      "depends": "libxcb-render-util0 (= 0.3.9-1), libxcb1-dev, libxcb-render0-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-render0",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-render0_1.12-1_mips64el.deb",
+      "sha256": "86f9263b663096208d67845fbd29964da7e93921887b13ea318a78be6ccebec4",
+      "size": 103186,
+      "depends": "libc6 (>= 2.4), libxcb1 (>= 1.8)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-render0-dev",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-render0-dev_1.12-1_mips64el.deb",
+      "sha256": "f94197d192a2ff8753229dd059cf9f745aad635cda760a63ee4a83a151e0ee19",
+      "size": 109364,
+      "depends": "libxcb-render0 (= 1.12-1), libxcb1-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-shape0",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-shape0_1.12-1_mips64el.deb",
+      "sha256": "08c1a796a761cb5a14720bc8286675bc4f1fb4408e89d659e4432ca956a0b1e0",
+      "size": 95904,
+      "depends": "libc6 (>= 2.4), libxcb1",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-shape0-dev",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-shape0-dev_1.12-1_mips64el.deb",
+      "sha256": "9f060699860e3e43185286ef4933d61be7287b90cf842b97a97ac30e7c82c436",
+      "size": 97762,
+      "depends": "libxcb-shape0 (= 1.12-1), libxcb1-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-shm0",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-shm0_1.12-1_mips64el.deb",
+      "sha256": "bc2024b39ca92cf8b5b7fe00ac4eae4b76c437eb8c8979fc989d43751db1d9f2",
+      "size": 95666,
+      "depends": "libc6 (>= 2.4), libxcb1 (>= 1.12)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-shm0-dev",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-shm0-dev_1.12-1_mips64el.deb",
+      "sha256": "f479f7a1f561d8bef2f42fb78324a3fec29e53fbdf7b2944bb5b158c44d7ec94",
+      "size": 97330,
+      "depends": "libxcb-shm0 (= 1.12-1), libxcb1-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-sync-dev",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-sync-dev_1.12-1_mips64el.deb",
+      "sha256": "2a5523d7299fd7ab506c49caf816b414e15c7da0b64d591daa7d047e9c96bb95",
+      "size": 101568,
+      "depends": "libxcb-sync1 (= 1.12-1), libxcb1-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-sync1",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-sync1_1.12-1_mips64el.deb",
+      "sha256": "62615f19cc609eae3b9e70a47ba23015f1d73a930faf987e78e853abee74aab7",
+      "size": 98262,
+      "depends": "libc6 (>= 2.4), libxcb1",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-util0",
+      "version": "0.3.8-3+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/x/xcb-util/libxcb-util0_0.3.8-3+b2_mips64el.deb",
+      "sha256": "0bf9c37c466594d0c3a3fd568fb0e44312bd6bd50b23667d6152c5c30ab5ce71",
+      "size": 22412,
+      "depends": "libc6 (>= 2.8), libxcb1",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-util0-dev",
+      "version": "0.3.8-3+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/x/xcb-util/libxcb-util0-dev_0.3.8-3+b2_mips64el.deb",
+      "sha256": "8057a85e187b01b3078fa2fcaba85b7809a83ac4a0d0746ccd61d24589868ddf",
+      "size": 26156,
+      "depends": "libxcb-util0 (= 0.3.8-3+b2), libxcb1-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-xfixes0",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-xfixes0_1.12-1_mips64el.deb",
+      "sha256": "342b455633e76436206446dfc8c0c6afeaa7ac7059e9b1dad1ff9f0f13f297d5",
+      "size": 98434,
+      "depends": "libc6 (>= 2.4), libxcb1",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-xfixes0-dev",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-xfixes0-dev_1.12-1_mips64el.deb",
+      "sha256": "a9781a07ee1dd37a766ffc7877c1805d076fbff62dadf2b7fe8f2a2edbbdcef5",
+      "size": 102712,
+      "depends": "libxcb-xfixes0 (= 1.12-1), libxcb1-dev, libxcb-render0-dev, libxcb-shape0-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-xinerama0",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-xinerama0_1.12-1_mips64el.deb",
+      "sha256": "a6ba6471c37d9878d9b86a741d1e22be2679be342c0b1bbdf804139fd38d283a",
+      "size": 95404,
+      "depends": "libc6 (>= 2.4), libxcb1",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-xinerama0-dev",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-xinerama0-dev_1.12-1_mips64el.deb",
+      "sha256": "b9e9cf870081f21aafb8fca6978be764b4baeb42e1df0af364f204741b64b95b",
+      "size": 96570,
+      "depends": "libxcb-xinerama0 (= 1.12-1), libxcb1-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-xkb-dev",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-xkb-dev_1.12-1_mips64el.deb",
+      "sha256": "689199e488d737689c4f5093a861205c769a77cb7a330c9a7d333ff21b484426",
+      "size": 130340,
+      "depends": "libxcb-xkb1 (= 1.12-1), libxcb1-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb-xkb1",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb-xkb1_1.12-1_mips64el.deb",
+      "sha256": "61c1cd763a2566c3e98e8089d750c9263cfa94c611f90a8344706dc30a8703eb",
+      "size": 116076,
+      "depends": "libc6 (>= 2.4), libxcb1",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb1",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb1_1.12-1_mips64el.deb",
+      "sha256": "224cd93bb69cd03e73d410181b1dd17e54032c96a9d2b5d8e34556c6da7f262e",
+      "size": 126240,
+      "depends": "libc6 (>= 2.4), libxau6, libxdmcp6",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxcb1-dev",
+      "version": "1.12-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxcb/libxcb1-dev_1.12-1_mips64el.deb",
+      "sha256": "baceb22230c3cb62b5a6eda88753d980e961aee9359f045eef8651d56a245a9e",
+      "size": 172594,
+      "depends": "libxcb1 (= 1.12-1), libpthread-stubs0-dev, libxau-dev (>= 1:1.0.0-1), libxdmcp-dev (>= 1:1.0.0-1)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxdamage-dev",
+      "version": "1:1.1.4-2+b3",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxdamage/libxdamage-dev_1.1.4-2+b3_mips64el.deb",
+      "sha256": "565c207413bef5b78c3bc1da8fbbe6927d515e51f691871aad64c595d0c9200b",
+      "size": 14568,
+      "depends": "libxdamage1 (= 1:1.1.4-2+b3), libx11-dev, libxfixes-dev, x11proto-damage-dev (>= 1.1)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxdamage1",
+      "version": "1:1.1.4-2+b3",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxdamage/libxdamage1_1.1.4-2+b3_mips64el.deb",
+      "sha256": "e25746b07e90f39e22000e4bf3f1e7c96f39a20eef440df5d13e02c3151d92a8",
+      "size": 14412,
+      "depends": "libc6 (>= 2.4), libx11-6 (>= 2:1.4.99.1), libxfixes3",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxdmcp-dev",
+      "version": "1:1.1.2-3",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxdmcp/libxdmcp-dev_1.1.2-3_mips64el.deb",
+      "sha256": "1d8f36ad11a110f5d95e033da110b75ada09dc6d328edbb75e9437ca7041d30c",
+      "size": 42886,
+      "depends": "libxdmcp6 (= 1:1.1.2-3), x11proto-core-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxdmcp6",
+      "version": "1:1.1.2-3",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxdmcp/libxdmcp6_1.1.2-3_mips64el.deb",
+      "sha256": "91e492ea330784fa9b19575e7ae84047b2c5524e073c529375e8e97fbfa8dd5a",
+      "size": 26146,
+      "depends": "libbsd0 (>= 0.2.0), libc6 (>= 2.4)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxext-dev",
+      "version": "2:1.3.3-1+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxext/libxext-dev_1.3.3-1+b2_mips64el.deb",
+      "sha256": "957ddf471f6c8bb1ecb906cba1941c150867ca95effcc5b1d29930aab6417127",
+      "size": 109916,
+      "depends": "libxext6 (= 2:1.3.3-1+b2), x11proto-core-dev, x11proto-xext-dev (>= 7.0.99.2), libx11-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxext6",
+      "version": "2:1.3.3-1+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxext/libxext6_1.3.3-1+b2_mips64el.deb",
+      "sha256": "3f8785538fc05c42f5e36f4d48db4717945ffa50aef5ce36052dc1fb6d84851f",
+      "size": 49610,
+      "depends": "libc6 (>= 2.4), libx11-6 (>= 2:1.6.0)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxfixes-dev",
+      "version": "1:5.0.3-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxfixes/libxfixes-dev_5.0.3-1_mips64el.deb",
+      "sha256": "c557c3402d4e7c45260616ae00b9241f8e090596cff672f9955f78951af67f54",
+      "size": 24448,
+      "depends": "libxfixes3 (= 1:5.0.3-1), libx11-dev, x11proto-fixes-dev (>= 1:5.0-1)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxfixes3",
+      "version": "1:5.0.3-1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxfixes/libxfixes3_5.0.3-1_mips64el.deb",
+      "sha256": "a2ce5de11229fb3218e6491c074370d628becd25f44417fa9ad548265e627efa",
+      "size": 21382,
+      "depends": "libc6 (>= 2.4), libx11-6 (>= 2:1.6.0)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxkbcommon-dev",
+      "version": "0.7.1-2~deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxkbcommon/libxkbcommon-dev_0.7.1-2~deb9u1_mips64el.deb",
+      "sha256": "b2f20ce1c046de147760617c9a28770c964eff04fa8c3fc8017bcb4c319f7256",
+      "size": 360930,
+      "depends": "libxkbcommon0 (= 0.7.1-2~deb9u1)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxkbcommon-x11-0",
+      "version": "0.7.1-2~deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxkbcommon/libxkbcommon-x11-0_0.7.1-2~deb9u1_mips64el.deb",
+      "sha256": "0e6a6c22122eb212da2489b0cab471ed8ef81d1f73662ae62fa7d048089e9376",
+      "size": 38590,
+      "depends": "libxkbcommon0 (= 0.7.1-2~deb9u1), libc6 (>= 2.17), libxcb-xkb1, libxcb1 (>= 1.6)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxkbcommon-x11-dev",
+      "version": "0.7.1-2~deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxkbcommon/libxkbcommon-x11-dev_0.7.1-2~deb9u1_mips64el.deb",
+      "sha256": "ec6d45492d11f46dfb99524cb388f2d974b277d2ac4922969d283260d8284538",
+      "size": 42756,
+      "depends": "libxkbcommon-x11-0 (= 0.7.1-2~deb9u1), libxkbcommon-dev (= 0.7.1-2~deb9u1), libxcb1-dev, libxcb-xkb-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxkbcommon0",
+      "version": "0.7.1-2~deb9u1",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxkbcommon/libxkbcommon0_0.7.1-2~deb9u1_mips64el.deb",
+      "sha256": "fd0620cebbf6ac1450665ec9302271a9bb3ad3ffec33d6ab083b8aaa452dd013",
+      "size": 118864,
+      "depends": "xkb-data, libc6 (>= 2.17)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxml2",
+      "version": "2.9.4+dfsg1-2.2+deb9u2",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxml2/libxml2_2.9.4+dfsg1-2.2+deb9u2_mips64el.deb",
+      "sha256": "0cda13dbd8cb01a7444a1de4ddbe2dbd6b6ae1ebc17f5ff8bb0b12dc7a8ed102",
+      "size": 827424,
+      "depends": "libc6 (>= 2.15), libicu57 (>= 57.1-1~), liblzma5 (>= 5.1.1alpha+20120614), zlib1g (>= 1:1.2.3.3)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxshmfence-dev",
+      "version": "1.2-1+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxshmfence/libxshmfence-dev_1.2-1+b2_mips64el.deb",
+      "sha256": "bfb0e7b85da44271803d02a4ccab3440924ecbeeb9823a7f483acd465c61b9bc",
+      "size": 7654,
+      "depends": "libxshmfence1 (= 1.2-1+b2)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxshmfence1",
+      "version": "1.2-1+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxshmfence/libxshmfence1_1.2-1+b2_mips64el.deb",
+      "sha256": "4998b526472d62e29b57a3e7ecd60004a87731e507ea4def929be17ea08fb30c",
+      "size": 8010,
+      "depends": "libc6 (>= 2.4)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxxf86vm-dev",
+      "version": "1:1.1.4-1+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxxf86vm/libxxf86vm-dev_1.1.4-1+b2_mips64el.deb",
+      "sha256": "8d337749ad76b6128849a2f0c572ee0bfe2b13c7ca32495a1885e12808c5fa74",
+      "size": 26158,
+      "depends": "libxxf86vm1 (= 1:1.1.4-1+b2), libx11-dev, x11proto-xf86vidmode-dev (>= 2.2.99.1)",
+      "pre_depends": ""
+    },
+    {
+      "name": "libxxf86vm1",
+      "version": "1:1.1.4-1+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/libx/libxxf86vm/libxxf86vm1_1.1.4-1+b2_mips64el.deb",
+      "sha256": "13e2a56064772ed1028139692336ca728375acedeb3df3853d29d53b297e74ce",
+      "size": 20350,
+      "depends": "libc6 (>= 2.4), libx11-6 (>= 2:1.6.0), libxext6",
+      "pre_depends": ""
+    },
+    {
+      "name": "mesa-common-dev",
+      "version": "13.0.6-1+b2",
+      "architecture": "mips64el",
+      "path": "pool/main/m/mesa/mesa-common-dev_13.0.6-1+b2_mips64el.deb",
+      "sha256": "5db6dd1a514fc44616cdfe158c5b3c20ebb4f95e6112f5f38d9e4b46dfcd4afa",
+      "size": 516800,
+      "depends": "libx11-dev, libdrm-dev (>= 2.4.65)",
+      "pre_depends": ""
+    },
+    {
+      "name": "wayland-protocols",
+      "version": "1.7-1",
+      "architecture": "all",
+      "path": "pool/main/w/wayland-protocols/wayland-protocols_1.7-1_all.deb",
+      "sha256": "162182cd65507ee1ccabadfb600b802e5566d0cc4c9567b1be52dabc1be34137",
+      "size": 44356,
+      "depends": "",
+      "pre_depends": ""
+    },
+    {
+      "name": "x11proto-core-dev",
+      "version": "7.0.31-1",
+      "architecture": "all",
+      "path": "pool/main/x/x11proto-core/x11proto-core-dev_7.0.31-1_all.deb",
+      "sha256": "761615f12786dfa3b3887504a1213aa38db2db8304d32573ee0fc5f9b8070f6b",
+      "size": 728268,
+      "depends": "xorg-sgml-doctools (>= 1:1.5)",
+      "pre_depends": ""
+    },
+    {
+      "name": "x11proto-damage-dev",
+      "version": "1:1.2.1-2",
+      "architecture": "all",
+      "path": "pool/main/x/x11proto-damage/x11proto-damage-dev_1.2.1-2_all.deb",
+      "sha256": "a4fa4c2f2a24d0a1d49c66315c17d1600d1583ac20f7627bcec3aedc47865f2f",
+      "size": 11780,
+      "depends": "x11proto-fixes-dev, x11proto-core-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "x11proto-dri2-dev",
+      "version": "2.8-2",
+      "architecture": "all",
+      "path": "pool/main/x/x11proto-dri2/x11proto-dri2-dev_2.8-2_all.deb",
+      "sha256": "4a83ce74655189e756f775030cb85928dc8a86c05c2a7aa355bbbdaee14ab7ec",
+      "size": 18234,
+      "depends": "",
+      "pre_depends": ""
+    },
+    {
+      "name": "x11proto-fixes-dev",
+      "version": "1:5.0-2",
+      "architecture": "all",
+      "path": "pool/main/x/x11proto-fixes/x11proto-fixes-dev_5.0-2_all.deb",
+      "sha256": "e08e0aa9b58ffccc7685c6715df77a9c00781575a6229b4497b06b32bd61336c",
+      "size": 19170,
+      "depends": "x11proto-core-dev, x11proto-xext-dev (>= 7.0.99.1)",
+      "pre_depends": ""
+    },
+    {
+      "name": "x11proto-gl-dev",
+      "version": "1.4.17-1",
+      "architecture": "all",
+      "path": "pool/main/x/x11proto-gl/x11proto-gl-dev_1.4.17-1_all.deb",
+      "sha256": "6ce92444e2fda684d5071667adb776152291f940696e547d73022d5ed66d3f10",
+      "size": 27960,
+      "depends": "",
+      "pre_depends": ""
+    },
+    {
+      "name": "x11proto-input-dev",
+      "version": "2.3.2-1",
+      "architecture": "all",
+      "path": "pool/main/x/x11proto-input/x11proto-input-dev_2.3.2-1_all.deb",
+      "sha256": "aed15641c999b89211c05d884867923834b68410dca375f040983eeb64d0eeba",
+      "size": 158226,
+      "depends": "x11proto-core-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "x11proto-kb-dev",
+      "version": "1.0.7-1",
+      "architecture": "all",
+      "path": "pool/main/x/x11proto-kb/x11proto-kb-dev_1.0.7-1_all.deb",
+      "sha256": "67415fc23b0cb6da8803519bc258c753f4dcd05b3e786e507697be2762bdb534",
+      "size": 233362,
+      "depends": "",
+      "pre_depends": ""
+    },
+    {
+      "name": "x11proto-xext-dev",
+      "version": "7.3.0-1",
+      "architecture": "all",
+      "path": "pool/main/x/x11proto-xext/x11proto-xext-dev_7.3.0-1_all.deb",
+      "sha256": "bb505470525281ad330093a9d9d23f4a36b00d0b8502dcbc05e44781375abdf0",
+      "size": 212236,
+      "depends": "x11proto-input-dev, x11proto-core-dev",
+      "pre_depends": ""
+    },
+    {
+      "name": "x11proto-xf86vidmode-dev",
+      "version": "2.3.1-2",
+      "architecture": "all",
+      "path": "pool/main/x/x11proto-xf86vidmode/x11proto-xf86vidmode-dev_2.3.1-2_all.deb",
+      "sha256": "772d65dc9808a00197527a77899df50d4222a859b91cc98da17a178c4d78cc7b",
+      "size": 6114,
+      "depends": "",
+      "pre_depends": ""
+    },
+    {
+      "name": "xkb-data",
+      "version": "2.19-1+deb9u1",
+      "architecture": "all",
+      "path": "pool/main/x/xkeyboard-config/xkb-data_2.19-1+deb9u1_all.deb",
+      "sha256": "42a659506d453158b02eaa331972316ed4e47faf3c7144a30044a904c70929c3",
+      "size": 649940,
+      "depends": "",
+      "pre_depends": ""
+    },
+    {
+      "name": "xorg-sgml-doctools",
+      "version": "1:1.11-1",
+      "architecture": "all",
+      "path": "pool/main/x/xorg-sgml-doctools/xorg-sgml-doctools_1.11-1_all.deb",
+      "sha256": "359dc76bf7b19fbbdb0b9e3ca3077e415b5b9ca8ff85162ccc889f9974493600",
+      "size": 21928,
+      "depends": "",
+      "pre_depends": ""
+    },
+    {
+      "name": "xtrans-dev",
+      "version": "1.3.5-1",
+      "architecture": "all",
+      "path": "pool/main/x/xtrans/xtrans-dev_1.3.5-1_all.deb",
+      "sha256": "cadb720a2f8f0a2b2ad2dd82172d59e105e37885cedb3a93f6de9c78478c72d0",
+      "size": 100320,
+      "depends": "",
+      "pre_depends": ""
+    },
+    {
+      "name": "zlib1g",
+      "version": "1:1.2.8.dfsg-5",
+      "architecture": "mips64el",
+      "path": "pool/main/z/zlib/zlib1g_1.2.8.dfsg-5_mips64el.deb",
+      "sha256": "567e38e95ea9720e3d2c64761986742ebecdc9c837620fa0a0265004e08e5dca",
+      "size": 84648,
+      "depends": "libc6 (>= 2.4)",
+      "pre_depends": ""
+    },
+    {
+      "name": "zlib1g-dev",
+      "version": "1:1.2.8.dfsg-5",
+      "architecture": "mips64el",
+      "path": "pool/main/z/zlib/zlib1g-dev_1.2.8.dfsg-5_mips64el.deb",
+      "sha256": "f5e6fa95727fb659eced9bd09334edf67e1a1164f1ab6767c854be384e8762ce",
+      "size": 205276,
+      "depends": "zlib1g (= 1:1.2.8.dfsg-5), libc6-dev | libc-dev",
+      "pre_depends": ""
+    }
+  ]
+}
