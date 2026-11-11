@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+arch="${1:?architecture required}"
+variant="${2:?release or debug required}"
+case "$variant" in release|debug) ;; *) exit 2;; esac
+tag="linux-$arch"
+[[ "$variant" != debug ]] || tag+=-debug
+case "$arch" in
+  x64) openssl_target=linux-x86_64; machine='Advanced Micro Devices X86-64'; baseline=2.27 ;;
+  arm64) openssl_target=linux-aarch64; machine=AArch64; baseline=2.27 ;;
+  *) echo "Unsupported target: $arch" >&2; exit 2 ;;
+esac
+
+work="${QT_BUILD_TEMP:-$source_dir/build-temp}/$tag"
+install="$source_dir/Output/$tag"
+mkdir -p "$work" "$source_dir/Output"
+[[ ! -e "$install" ]] || { echo "Remove or move the previous SDK: $install" >&2; exit 1; }
+build="$(mktemp -d "$work/build.XXXXXXXX")"
+jobs="${QT_BUILD_JOBS:-$(nproc)}"
+export CC="${CC:-clang}" CXX="${CXX:-clang++}"
+export CFLAGS=-fPIC
+"$CC" --version
+getconf GNU_LIBC_VERSION
+
+tar -xf "$source_dir/openssl/openssl-1.1.1w.tar.gz" -C "$build"
+ssl="$build/openssl"
+(
+  cd "$build/openssl-1.1.1w"
+  perl ./Configure "$openssl_target" "--$variant" no-shared no-tests --prefix="$ssl" --libdir=lib
+  make -j"$jobs" build_libs
+  make install_dev
+)
+export OPENSSL_INCDIR="$ssl/include" OPENSSL_LIBDIR="$ssl/lib"
+export OPENSSL_LIBS="-Wl,--exclude-libs,libssl.a:libcrypto.a -L$ssl/lib -lssl -lcrypto -ldl -lpthread"
+export OPENSSL_LIBS_RELEASE="$OPENSSL_LIBS" OPENSSL_LIBS_DEBUG="$OPENSSL_LIBS"
+
+mkdir "$build/qt"
+cd "$build/qt"
+bash "$source_dir/configure" -prefix "$install" -confirm-license -opensource "-$variant" \
+  -force-debug-info -no-strip -nomake examples -nomake tests -openssl-linked \
+  -qt-zlib -qt-libpng -qt-pcre -qt-doubleconversion -system-freetype -qt-harfbuzz \
+  -qt-libjpeg -qt-libmd4c -qt-sqlite -no-zstd -no-icu \
+  -feature-xcb -feature-wayland-client -feature-wayland-server \
+  -platform linux-clang "QMAKE_CC=$CC" "QMAKE_CXX=$CXX" "QMAKE_LFLAGS=" \
+  -I "$OPENSSL_INCDIR" -L "$OPENSSL_LIBDIR"
+make -j"$jobs"
+make install
+
+for runtime in libstdc++.so.6 libgcc_s.so.1; do
+  runtime_path="$("$CXX" "-print-file-name=$runtime")"
+  [[ -f "$runtime_path" ]]
+  cp -L "$runtime_path" "$install/lib/$runtime"
+done
+# Use the matching runtime after extracting the SDK to a different directory.
+while IFS= read -r -d '' elf; do
+  if readelf -h "$elf" >/dev/null 2>&1 && patchelf --print-needed "$elf" >/dev/null 2>&1; then
+    rel="$(realpath --relative-to="$(dirname "$elf")" "$install/lib")"
+    patchelf --set-rpath "\$ORIGIN/$rel" "$elf"
+  fi
+done < <(find "$install" -type f -print0)
+
+symbols="$build/symbols"
+python3 "$source_dir/scripts/package-linux.py" "$install" "$symbols" \
+  --machine "$machine" --glibc "$baseline"
+env -u LD_LIBRARY_PATH "$install/bin/qmake" -query QT_VERSION
+bash "$source_dir/scripts/smoke-linux.sh" "$install" "$build/smoke"
+name="qt5.15.17_${tag//-/_}"
+tar -C "$install" -czf "$source_dir/Output/$name.tar.gz" .
+tar -C "$symbols" -czf "$source_dir/Output/$name-symbols.tar.gz" .

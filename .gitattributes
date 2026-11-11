@@ -4,3 +4,4 @@
 .commit-template        export-ignore eol=lf
 init-repository         export-ignore
 README.git              export-ignore
+*.sh                    text eol=lf
