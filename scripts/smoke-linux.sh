@@ -26,7 +26,9 @@ cat >"$work/main.cpp" <<'EOF'
 #include <QtCore/QScopedPointer>
 #include <algorithm>
 #include <exception>
+#include <string>
 #include <utility>
+static_assert(__cplusplus >= 201703L, "The SDK consumer must use C++17 or later");
 
 void probe(int value, int &result) {
     // C++17 language support does not require a new GNU standard library.
@@ -82,13 +84,15 @@ bool tlsProbe() {
 }
 int main(int argc, char **argv) {
     QGuiApplication app(argc, argv);
+    const std::string message = "qt-sdk-standard-string";
+    const bool stringsMatch = QString::fromStdString(message).toStdString() == message;
     int result = 0;
     probe(41, result);
     QQmlEngine engine;
     QQmlComponent component(&engine);
     component.setData("import QtQml 2.0\nQtObject { property int answer: 6 * 7 }", QUrl());
     QScopedPointer<QObject> object(component.create());
-    return !(QString::number(result) == QStringLiteral("42") && QSslSocket::supportsSsl() && tlsProbe()
+    return !(stringsMatch && QString::number(result) == QStringLiteral("42") && QSslSocket::supportsSsl() && tlsProbe()
              && QString::number(1.25, 'f', 2) == QStringLiteral("1.25")
              && object && object->property("answer").toInt() == 42
              && !QFontDatabase().families().isEmpty());
