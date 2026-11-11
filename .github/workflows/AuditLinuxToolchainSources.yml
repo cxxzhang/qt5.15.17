@@ -1,0 +1,23 @@
+name: Record fixed Linux toolchain source digests
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  digests:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@v4
+    - name: Hash the fixed upstream archives and Ubuntu image index
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: python3 scripts/record-linux-toolchain.py build-temp/linux-toolchain.lock.json
+    - uses: actions/upload-artifact@v4
+      with:
+        name: linux-toolchain-source-digests
+        path: build-temp/linux-toolchain.lock.json
+        if-no-files-found: error
