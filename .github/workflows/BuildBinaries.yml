@@ -24,7 +24,7 @@ permissions:
 
 jobs:
   windows-x86:
-    needs: linux
+    needs: [linux, linux-cross-release, linux-cross-debug]
     if: inputs.scope == 'all'
     runs-on: windows-latest
     env:
@@ -54,7 +54,7 @@ jobs:
         path: C:\workspaces\qt5.15.17\Output\x86
 
   windows-x64:
-    needs: linux
+    needs: [linux, linux-cross-release, linux-cross-debug]
     if: inputs.scope == 'all'
     runs-on: windows-latest
     env:
@@ -84,7 +84,7 @@ jobs:
         path: C:\workspaces\qt5.15.17\Output\x64
 
   windows-arm64:
-    needs: linux
+    needs: [linux, linux-cross-release, linux-cross-debug]
     if: inputs.scope == 'all'
     runs-on: windows-11-arm
     env:
@@ -114,7 +114,7 @@ jobs:
         path: C:\workspaces\qt5.15.17\Output\arm64
 
   windows-x86-debug:
-    needs: linux
+    needs: [linux, linux-cross-release, linux-cross-debug]
     if: inputs.scope == 'all'
     runs-on: windows-latest
     env:
@@ -144,7 +144,7 @@ jobs:
         path: C:\workspaces\qt5.15.17\Output\x86d
 
   windows-x64-debug:
-    needs: linux
+    needs: [linux, linux-cross-release, linux-cross-debug]
     if: inputs.scope == 'all'
     runs-on: windows-latest
     env:
@@ -174,7 +174,7 @@ jobs:
         path: C:\workspaces\qt5.15.17\Output\x64d
 
   windows-arm64-debug:
-    needs: linux
+    needs: [linux, linux-cross-release, linux-cross-debug]
     if: inputs.scope == 'all'
     runs-on: windows-11-arm
     env:
@@ -265,8 +265,24 @@ jobs:
           Output/qt5.15.17_${{ matrix.asset }}.tar.gz
           Output/qt5.15.17_${{ matrix.asset }}-symbols.tar.gz
 
+  linux-cross-release:
+    if: github.event_name == 'workflow_dispatch' && (inputs.scope == 'linux' || inputs.scope == 'all')
+    uses: ./.github/workflows/CheckLinuxCrossToolchains.yml
+    with:
+      target: all
+      build_sdk: true
+      variant: release
+
+  linux-cross-debug:
+    if: github.event_name == 'workflow_dispatch' && (inputs.scope == 'linux' || inputs.scope == 'all')
+    uses: ./.github/workflows/CheckLinuxCrossToolchains.yml
+    with:
+      target: all
+      build_sdk: true
+      variant: debug
+
   macos-x64:
-    needs: linux
+    needs: [linux, linux-cross-release, linux-cross-debug]
     if: inputs.scope == 'all'
     runs-on: macos-15-intel
     steps:
@@ -287,7 +303,7 @@ jobs:
         path: ${{ github.workspace }}/Output/macos-x64
 
   macos-arm64:
-    needs: linux
+    needs: [linux, linux-cross-release, linux-cross-debug]
     if: inputs.scope == 'all'
     runs-on: macos-14
     steps:
@@ -354,9 +370,10 @@ jobs:
         path: ./macos-universal
 
   release:
-    needs: [linux, windows-x86, windows-x64, windows-arm64, windows-x86-debug, windows-x64-debug, windows-arm64-debug, macos-x64, macos-arm64, macos-universal]
+    needs: [linux, linux-cross-release, linux-cross-debug, windows-x86, windows-x64, windows-arm64, windows-x86-debug, windows-x64-debug, windows-arm64-debug, macos-x64, macos-arm64, macos-universal]
     if: >-
       ${{ !cancelled() && inputs.publish && needs.linux.result == 'success' &&
+      needs['linux-cross-release'].result == 'success' && needs['linux-cross-debug'].result == 'success' &&
       (inputs.scope == 'linux' || inputs.scope == 'all' &&
       !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'skipped')) }}
     runs-on: ubuntu-22.04

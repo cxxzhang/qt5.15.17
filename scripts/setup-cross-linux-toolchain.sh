@@ -190,17 +190,17 @@ int main() {
 EOF
 "$cross/bin/clang++" -std=c++20 -pthread "$cross/probe.cpp" \
   -Wl,-rpath,"$cross/runtime/lib" -o "$cross/probe"
-if env -u LD_LIBRARY_PATH "$cross/bin/qemu" -L "$sysroot" "$cross/probe"; then
+if env -u LD_LIBRARY_PATH -u GITHUB_TOKEN "$cross/bin/qemu" -L "$sysroot" "$cross/probe"; then
   echo "$arch: target C++20 and POSIX thread probe passed"
 else
   probe_status=$?
   # Capture the target loader's actual search paths and syscall failures.
   # A failed probe remains a failure after collecting diagnostics.
-  env -u LD_LIBRARY_PATH "$cross/bin/qemu" -strace -L "$sysroot" \
+  env -u LD_LIBRARY_PATH -u GITHUB_TOKEN "$cross/bin/qemu" -strace -L "$sysroot" \
     -E LD_DEBUG=libs "$cross/probe" || true
   find "$sysroot" -name 'libm.so.6' -o -name 'ld-linux-*.so*'
   if [[ "$arch" == loong64 ]]; then
-    "$cross/bin/qemu" -L "$sysroot" "$sysroot/lib64/ld-linux-loongarch-lp64d.so.1" --list-diagnostics || true
+    env -u GITHUB_TOKEN "$cross/bin/qemu" -L "$sysroot" "$sysroot/lib64/ld-linux-loongarch-lp64d.so.1" --list-diagnostics || true
   fi
   exit "$probe_status"
 fi

@@ -76,18 +76,53 @@ bash scripts/test-package-linux.sh
 Pushes affecting the Linux workflow or scripts run the x64 release job
 first. Manual `scope=linux-x64` does the same; `scope=linux` selects native
 x64/ARM64 release and debug builds. `scope=all` waits for the Linux matrix
-to pass before starting Windows/macOS. Publishing is disabled by default.
+and both cross-target variants to pass before starting Windows/macOS.
+`scope=linux` also runs LoongArch64/MIPS64EL release and debug builds through
+the reusable cross workflow. Publishing is disabled by default.
 
 The workflow caches the prepared toolchain before compiling Qt, preserving
 it even when Qt fails later. Build and toolchain logs, `config.log` and
 `config.summary` are uploaded as `diagnostics-*` artifacts, including on
 failure. Diagnostics are excluded from release packages.
 
-## Remaining work
+## Cross targets and acceptance status
 
-Native end-to-end CI verification is still in progress. LoongArch64 and
-MIPS64EL cross builds are planned in
-`openspec/changes/refactor-linux-build-release/` and are not selectable in
-the current workflow. Their target sysroots, ABI and glibc limits must be
-validated independently; the native glibc 2.27 claim does not apply to
-those targets.
+| Target | Selected sysroot | glibc ceiling | ABI |
+| --- | --- | --- | --- |
+| x64 | Ubuntu 18.04 | 2.27 | x86-64 |
+| ARM64 | Ubuntu 18.04 | 2.27 | AArch64 |
+| MIPS64EL | Debian Stretch | 2.24 | little-endian n64 |
+| LoongArch64 | early Debian port plus source-built graphics dependencies | 2.36 | LP64D, ELF object ABI v1 |
+
+These are the configured verification ceilings. Full matrix acceptance is
+still in progress; they are not a claim that every target already passed.
+ARM64 verification is deferred while the other Linux targets are being fixed.
+glibc 2.17 was discussed as a possible later target and has not been selected.
+
+The manual **Check Linux cross toolchains** workflow can select either cross
+architecture. Its default runs only the toolchain test. Set `build_sdk=true`
+to continue to the complete Qt SDK build and `variant=release` or `debug`.
+The toolchain test runs C++20 concepts, coroutines, span and ranges with a
+POSIX thread and mutex under pinned QEMU. It must pass before Qt is built.
+
+Cross builds use the same Clang 18/libstdc++ 13 generation. The standard
+library is rebuilt against each target's own headers and C library. MIPS
+uses a pinned GNU linker for n64 exception-frame relocations; Clang remains
+the C/C++ compiler. LoongArch's missing graphics libraries are built from
+checksummed source against glibc 2.36, rather than borrowing a newer glibc
+dependency stack. The resulting compatibility libraries are included in
+the SDK's private library directory.
+
+Cross SDKs keep x64 host tools in `host/`, with a separate private host C++
+runtime (glibc <= 2.27). Invoke `host/bin/qmake` on the build host. Target
+libraries and programs use the target ABI and glibc ceiling above. The
+external target compiler/sysroot paths in `host/bin/qt.conf` and the installed
+cross mkspec must be configured when consuming the SDK on a different host.
+
+Qt 5.15's QML JIT does not support these two cross targets. QML is built
+with its interpreter and tested by creating a QML object after SDK extraction.
+OpenSSL uses its portable C implementation on the cross targets. The SDK
+consumer also checks system font discovery through FreeType/Fontconfig.
+Target dependency closure is resolved using the target's actual glibc loader
+under QEMU, including symbol versions and the SDK's private C++ runtime paths.
+This does not exercise desktop display servers or hardware GPU drivers.

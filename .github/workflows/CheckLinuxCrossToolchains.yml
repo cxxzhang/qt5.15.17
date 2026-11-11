@@ -1,6 +1,17 @@
 name: Check Linux cross toolchains
 
 on:
+  workflow_call:
+    inputs:
+      target:
+        type: string
+        default: all
+      build_sdk:
+        type: boolean
+        default: true
+      variant:
+        type: string
+        default: release
   workflow_dispatch:
     inputs:
       target:
@@ -21,6 +32,7 @@ permissions:
 
 jobs:
   toolchain:
+    name: ${{ inputs.build_sdk && 'Qt SDK' || 'Toolchain' }} (${{ matrix.arch }}, ${{ inputs.variant }})
     runs-on: ubuntu-22.04
     timeout-minutes: 180
     strategy:
@@ -85,7 +97,7 @@ jobs:
       continue-on-error: true
       uses: actions/upload-artifact@v4
       with:
-        name: cross-toolchain-${{ matrix.arch }}
+        name: diagnostics-cross-${{ matrix.arch }}-${{ inputs.variant }}
         if-no-files-found: ignore
         path: build-temp/logs/
     - name: Remove cross build container
