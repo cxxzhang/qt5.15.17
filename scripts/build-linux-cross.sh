@@ -1,19 +1,35 @@
 #!/usr/bin/env bash
 set -euo pipefail
 source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-arch="${1:?loong64 or mips64el required}"
+arch="${1:?cross target required}"
 variant="${2:?release or debug required}"
 case "$variant" in release|debug) ;; *) exit 2 ;; esac
 case "$arch" in
-  loong64) triple=loongarch64-linux-gnu; machine=LoongArch; loader=/lib64/ld-linux-loongarch-lp64d.so.1; openssl_target=linux-generic64 ;;
+  loong64|loong64-newworld) triple=loongarch64-linux-gnu; machine=LoongArch; loader=/lib64/ld-linux-loongarch-lp64d.so.1; openssl_target=linux-generic64 ;;
+  loong64-oldworld) triple=loongarch64-linux-gnu; machine=LoongArch; loader=/lib64/ld.so.1; openssl_target=linux-generic64 ;;
   mips64el) triple=mips64el-linux-gnuabi64; machine='MIPS R3000'; loader=/lib64/ld.so.1; openssl_target=linux64-mips64 ;;
   *) echo "Unsupported cross target: $arch" >&2; exit 2 ;;
 esac
 prefix="$source_dir/build-temp/toolchain"
-cross="$prefix/cross-$arch"
-sysroot="$prefix/sysroot-$arch"
-[[ -f "$cross/.ready" ]]
-baseline="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["glibc"])' "$source_dir/scripts/sysroots/$arch.lock.json")"
+if [[ -n "${QT_ACCEPTED_CROSS_PREFIX:-}" ]]; then
+  cross="$QT_ACCEPTED_CROSS_PREFIX"
+  prefix="${QT_ACCEPTED_HOST_PREFIX:?accepted native host toolchain required}"
+  sysroot="${QT_ACCEPTED_SYSROOT:?accepted target sysroot required}"
+  tools="$cross/llvm/bin"
+  host_glibc=2.17
+  host_runtime="$prefix/gcc/lib64"
+  compgen -G "$cross/.accepted-*" >/dev/null
+  compgen -G "$prefix/.accepted-*" >/dev/null
+  baseline="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["targets"][sys.argv[2]]["glibc"])' "$source_dir/scripts/linux-baseline/targets.json" "$arch")"
+else
+  cross="$prefix/cross-$arch"
+  sysroot="$prefix/sysroot-$arch"
+  tools="$prefix/llvm/bin"
+  host_glibc=2.27
+  host_runtime=""
+  [[ -f "$cross/.ready" ]]
+  baseline="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["glibc"])' "$source_dir/scripts/sysroots/$arch.lock.json")"
+fi
 tag="linux-$arch"
 [[ "$variant" != debug ]] || tag+=-debug
 install="$source_dir/Output/$tag"
@@ -23,9 +39,11 @@ mkdir -p "$work" "$source_dir/Output"
 build="$(mktemp -d "$work/build.XXXXXXXX")"
 source "$source_dir/scripts/linux-build-diagnostics.sh"
 jobs="${QT_BUILD_JOBS:-$(nproc)}"
-export PATH="$prefix/bin:$PATH"
-export LD_LIBRARY_PATH="$(dirname "$(clang++ -print-file-name=libstdc++.so.6)")"
-export PKG_CONFIG="$cross/bin/pkg-config"
+export PATH="$prefix/bin:$cross/host/bin:$prefix/host/bin:$PATH"
+host_runtime="${host_runtime:-$(dirname "$(clang++ -print-file-name=libstdc++.so.6)")}"
+export LD_LIBRARY_PATH="$host_runtime"
+cross_pkgconfig="${QT_CROSS_PKG_CONFIG:-$cross/bin/pkg-config}"
+export PKG_CONFIG="$cross_pkgconfig"
 export PKG_CONFIG_SYSROOT_DIR="$sysroot"
 export PKG_CONFIG_LIBDIR="$sysroot/usr/lib/$triple/pkgconfig:$sysroot/usr/share/pkgconfig"
 spec="linux-clang-$arch"
@@ -35,7 +53,7 @@ if [[ "${QT_REUSE_INSTALL:-false}" == true && -f "$raw_install" ]]; then
   tar -xf "$raw_install" -C "$install"
   echo "Restored the configured Qt installation for packaging and runtime acceptance"
 else
-if [[ "$arch" == loong64 ]]; then
+if [[ "$arch" == loong64* ]]; then
   patch="$source_dir/Patches/0002-qtbase-loongarch64.patch"
   if ! git -C "$source_dir/qtbase" apply --reverse --check "$patch" >/dev/null 2>&1; then
     git -C "$source_dir/qtbase" apply --check "$patch"
@@ -59,11 +77,11 @@ QMAKE_LINK = $cross/bin/clang++
 QMAKE_LINK_SHLIB = $cross/bin/clang++
 QMAKE_LINK_C = $cross/bin/clang
 QMAKE_LINK_C_SHLIB = $cross/bin/clang
-QMAKE_AR = $prefix/llvm/bin/llvm-ar cqs
-QMAKE_RANLIB = $prefix/llvm/bin/llvm-ranlib
-QMAKE_STRIP = $prefix/llvm/bin/llvm-strip
-QMAKE_OBJCOPY = $prefix/llvm/bin/llvm-objcopy
-QMAKE_PKG_CONFIG = $cross/bin/pkg-config
+QMAKE_AR = $tools/llvm-ar cqs
+QMAKE_RANLIB = $tools/llvm-ranlib
+QMAKE_STRIP = $tools/llvm-strip
+QMAKE_OBJCOPY = $tools/llvm-objcopy
+QMAKE_PKG_CONFIG = $cross_pkgconfig
 QMAKE_LFLAGS =
 EOF
 
@@ -71,8 +89,8 @@ tar -xf "$source_dir/openssl/openssl-1.1.1w.tar.gz" -C "$build"
 ssl="$build/openssl"
 (
   cd "$build/openssl-1.1.1w"
-  export CC="$cross/bin/clang" CXX="$cross/bin/clang++" AR="$prefix/llvm/bin/llvm-ar"
-  export RANLIB="$prefix/llvm/bin/llvm-ranlib" CFLAGS=-fPIC
+  export CC="$cross/bin/clang" CXX="$cross/bin/clang++" AR="$tools/llvm-ar"
+  export RANLIB="$tools/llvm-ranlib" CFLAGS=-fPIC
   perl ./Configure "$openssl_target" "--$variant" no-shared no-tests no-asm --prefix="$ssl" --libdir=lib
   make -j"$jobs" build_libs
   make install_dev
@@ -100,13 +118,17 @@ fi
 fi
 
 mkdir -p "$install/host/lib" "$install/host/bin"
-cp -L "$cross/runtime/lib/libstdc++.so.6" "$install/lib/"
-cp -L "$("$cross/bin/clang" -print-file-name=libgcc_s.so.1)" "$install/lib/"
+if [[ -n "${QT_ACCEPTED_CROSS_PREFIX:-}" ]]; then
+  cp -L "$cross/probe-sdk/lib/libstdc++.so.6" "$cross/probe-sdk/lib/libgcc_s.so.1" "$install/lib/"
+else
+  cp -L "$cross/runtime/lib/libstdc++.so.6" "$install/lib/"
+  cp -L "$("$cross/bin/clang" -print-file-name=libgcc_s.so.1)" "$install/lib/"
+fi
 if [[ -d "$cross/dependencies/lib" ]]; then
   cp -a "$cross/dependencies/lib/." "$install/lib/"
 fi
 for runtime in libstdc++.so.6 libgcc_s.so.1; do
-  cp -L "$(clang++ "-print-file-name=$runtime")" "$install/host/lib/$runtime"
+  cp -L "$host_runtime/$runtime" "$install/host/lib/$runtime"
 done
 cat >"$install/host/bin/qt.conf" <<EOF
 [Paths]
@@ -118,11 +140,10 @@ SysrootifyPrefix=false
 HostSpec=linux-clang
 TargetSpec=$spec
 EOF
-tools="$prefix/llvm/bin"
 symbols="$build/symbols"
 python3 "$source_dir/scripts/package-linux.py" "$install" "$symbols" \
   --machine "$machine" --glibc "$baseline" --host-machine 'Advanced Micro Devices X86-64' \
-  --host-glibc 2.27 --interpreter "$loader" --readelf "$tools/llvm-readelf" \
+  --host-glibc "$host_glibc" --interpreter "$loader" --readelf "$tools/llvm-readelf" \
   --objcopy "$tools/llvm-objcopy" --strip "$tools/llvm-strip"
 while IFS= read -r -d '' elf; do
   if "$tools/llvm-readelf" -h "$elf" >/dev/null 2>&1 && patchelf --print-needed "$elf" >/dev/null 2>&1; then
@@ -134,7 +155,7 @@ while IFS= read -r -d '' elf; do
 done < <(find "$install" -type f -print0)
 python3 "$source_dir/scripts/package-linux.py" "$install" --audit-only --require-stripped \
   --machine "$machine" --glibc "$baseline" --host-machine 'Advanced Micro Devices X86-64' \
-  --host-glibc 2.27 --interpreter "$loader" --readelf "$tools/llvm-readelf"
+  --host-glibc "$host_glibc" --interpreter "$loader" --readelf "$tools/llvm-readelf"
 python3 "$source_dir/scripts/audit-linux-cross-runtime.py" "$install" --sysroot "$sysroot" \
   --qemu "$cross/bin/qemu" --loader "$loader" --readelf "$tools/llvm-readelf"
 name="qt5.15.17_${tag//-/_}"

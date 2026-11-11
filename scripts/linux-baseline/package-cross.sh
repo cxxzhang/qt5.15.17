@@ -68,6 +68,16 @@ if [[ "$arch" == loong64-newworld ]]; then
   cp "$root/scripts/sysroots/loong64.lock.json" "$prefix/share/baseline/"
 fi
 cp -a "$root/scripts/linux-baseline/llvm-licenses" "$prefix/share/baseline/"
+python3 - "$prefix/host" <<'PY'
+from pathlib import Path
+import re, sys
+host = Path(sys.argv[1])
+if host.is_dir():
+    for directory in (host / 'lib/pkgconfig', host / 'share/pkgconfig'):
+        for path in directory.glob('*.pc'):
+            text = path.read_text()
+            path.write_text(re.sub(r'^prefix=.*$', 'prefix=${pcfiledir}/../..', text, flags=re.M))
+PY
 git -C "$root" rev-parse HEAD >"$prefix/share/baseline/source-commit.txt"
 ldd "$vendor_compiler" >"$prefix/share/baseline/host-dependencies-ubuntu22.txt"
 python3 - "$prefix" "$arch" "$baseline" "$sysroot_rel" "$gcc_rel" "$triple" "$loader" <<'PY'
@@ -96,6 +106,12 @@ if [[ "$name" == clang++ && "$arch" != mips64el ]]; then
   extra=(-nostdinc++ -isystem "\$prefix/runtime/include/c++/13.3.0" \
     -isystem "\$prefix/runtime/include/c++/13.3.0/loongarch64-linux-gnu" -L"\$prefix/runtime/lib")
 fi
+if [[ "$arch" == mips64el ]]; then
+  extra+=(-L"\$prefix/$sysroot_rel/usr/lib/mips64el-linux-gnuabi64" \
+    -L"\$prefix/$sysroot_rel/lib/mips64el-linux-gnuabi64" \
+    -Wl,-rpath-link,"\$prefix/$sysroot_rel/usr/lib/mips64el-linux-gnuabi64" \
+    -Wl,-rpath-link,"\$prefix/$sysroot_rel/lib/mips64el-linux-gnuabi64")
+fi
 exec "\$prefix/llvm/bin/clang" --driver-mode="$mode" --target="$triple" $target_flags \
   --sysroot="\$prefix/$sysroot_rel" --gcc-install-dir="\$prefix/$gcc_rel" \
   --ld-path="\$prefix/$linker_rel" -Wno-unused-command-line-argument \
@@ -110,9 +126,15 @@ prefix="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")/.." && pwd)"
 export PKG_CONFIG_SYSROOT_DIR="\$prefix/$sysroot_rel"
 export PKG_CONFIG_LIBDIR="\$prefix/$sysroot_rel/usr/lib/$triple/pkgconfig:\$prefix/$sysroot_rel/usr/lib64/pkgconfig:\$prefix/$sysroot_rel/usr/lib/pkgconfig:\$prefix/$sysroot_rel/usr/share/pkgconfig"
 export PKG_CONFIG_PATH="\$prefix/host/lib/pkgconfig:\$prefix/host/share/pkgconfig"
+if [[ "$arch" == mips64el ]]; then
+  export PKG_CONFIG_LIBDIR="\$prefix/$sysroot_rel/usr/lib/mips64el-linux-gnuabi64/pkgconfig:\$PKG_CONFIG_LIBDIR"
+fi
 exec /usr/bin/pkg-config "\$@"
 EOF
 chmod +x "$prefix/bin/pkg-config"
+if [[ -f "$prefix/share/baseline/graphics-glibc-audit.json" ]]; then
+  "$prefix/bin/pkg-config" --exists freetype2 fontconfig x11 xcb xkbcommon wayland-client wayland-server
+fi
 relocated="$(mktemp -d "$root/build-temp/relocated-$arch.XXXXXXXX")"
 trap 'if [[ -d "$relocated/toolchain" && ! -e "$prefix" ]]; then mv "$relocated/toolchain" "$prefix"; fi; rmdir "$relocated"' EXIT
 mv "$prefix" "$relocated/toolchain"

@@ -4,12 +4,13 @@ on:
     inputs:
       target:
         type: choice
-        options: [native, x64, arm64]
+        options: [all, native, x64, arm64, cross, loong64-oldworld, loong64-newworld, mips64el]
         default: native
 permissions:
   contents: read
 jobs:
   native:
+    if: inputs.target == 'all' || inputs.target == 'native' || inputs.target == 'x64' || inputs.target == 'arm64'
     name: Qt glibc 2.17 (${{ matrix.arch }}, ${{ matrix.variant }})
     strategy:
       fail-fast: false
@@ -61,6 +62,83 @@ jobs:
         docker run --rm -v "$PWD:/workspace" -w /workspace "$image" \
           bash scripts/linux-baseline/build-native-sdk.sh "$ARCH" "$VARIANT" \
           2>&1 | tee "build-temp/logs/$ARCH-$VARIANT-sdk.log"
+    - uses: actions/upload-artifact@v4
+      with:
+        name: qt5.15.17_linux_${{ matrix.arch }}_${{ matrix.variant }}
+        if-no-files-found: error
+        compression-level: 0
+        path: Output/*.tar.gz
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: diagnostics-baseline-sdk-${{ matrix.arch }}-${{ matrix.variant }}
+        path: build-temp/logs/
+  cross:
+    if: inputs.target == 'all' || inputs.target == 'cross' || inputs.target == 'loong64-oldworld' || inputs.target == 'loong64-newworld' || inputs.target == 'mips64el'
+    name: Qt cross baseline (${{ matrix.arch }}, ${{ matrix.variant }})
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: ${{ fromJSON((inputs.target == 'all' || inputs.target == 'cross') && '["loong64-oldworld","loong64-newworld","mips64el"]' || format('["{0}"]', inputs.target)) }}
+        variant: [release, debug]
+    runs-on: ubuntu-22.04
+    timeout-minutes: 180
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    - name: Check ELF publishing gates and host runtime dependencies
+      run: |
+        bash scripts/test-package-linux.sh
+        sudo apt-get -o Acquire::Retries=5 update
+        sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends build-essential pkg-config patchelf libtinfo5 libxml2 libedit2
+    - name: Read accepted source archive identities
+      id: toolchain-pin
+      env:
+        ARCH: ${{ matrix.arch }}
+      run: |
+        python3 - <<'PY'
+        import json, os
+        entries = json.load(open('scripts/linux-baseline/toolchains.lock.json'))['targets']
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
+            for key, target in [('host', 'x64'), ('cross', os.environ['ARCH'])]:
+                assert entries[target]['tag'] == 'linux-toolchains-v1'
+                out.write(key + '=' + entries[target]['sha256'] + '\n')
+        PY
+    - uses: actions/cache/restore@v4
+      id: accepted-host
+      with:
+        path: build-temp/accepted-x64
+        key: accepted-native-x64-${{ steps.toolchain-pin.outputs.host }}
+    - uses: actions/cache/restore@v4
+      id: accepted-cross
+      with:
+        path: build-temp/accepted-${{ matrix.arch }}
+        key: accepted-cross-${{ matrix.arch }}-${{ steps.toolchain-pin.outputs.cross }}
+    - name: Download accepted host and target toolchains
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        bash scripts/linux-baseline/download-toolchain.sh x64 build-temp/accepted-x64
+        bash scripts/linux-baseline/download-toolchain.sh "${{ matrix.arch }}" "build-temp/accepted-${{ matrix.arch }}"
+    - uses: actions/cache/save@v4
+      if: steps.accepted-host.outputs.cache-hit != 'true'
+      with:
+        path: build-temp/accepted-x64
+        key: ${{ steps.accepted-host.outputs.cache-primary-key }}
+    - uses: actions/cache/save@v4
+      if: steps.accepted-cross.outputs.cache-hit != 'true'
+      with:
+        path: build-temp/accepted-${{ matrix.arch }}
+        key: ${{ steps.accepted-cross.outputs.cache-primary-key }}
+    - name: Build and verify the target SDK in its real baseline root
+      env:
+        ARCH: ${{ matrix.arch }}
+        VARIANT: ${{ matrix.variant }}
+      run: |
+        set -o pipefail
+        mkdir -p build-temp/logs
+        sudo -E bash scripts/linux-baseline/build-cross-sdk.sh "$ARCH" "$VARIANT" 2>&1 | tee "build-temp/logs/$ARCH-$VARIANT-sdk.log"
     - uses: actions/upload-artifact@v4
       with:
         name: qt5.15.17_linux_${{ matrix.arch }}_${{ matrix.variant }}

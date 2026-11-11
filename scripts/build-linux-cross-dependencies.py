@@ -17,11 +17,15 @@ def run(*command, **kwargs):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("prefix", type=Path)
+    parser.add_argument("--cross", type=Path)
+    parser.add_argument("--sysroot", type=Path)
+    parser.add_argument("--llvm", type=Path)
     args = parser.parse_args()
     source = Path(__file__).resolve().parent.parent
     prefix = args.prefix.resolve()
-    cross = prefix / "cross-loong64"
-    sysroot = prefix / "sysroot-loong64"
+    cross = args.cross.resolve() if args.cross else prefix / "cross-loong64"
+    sysroot = args.sysroot.resolve() if args.sysroot else prefix / "sysroot-loong64"
+    llvm = args.llvm.resolve() if args.llvm else prefix / "llvm"
     triple = "loongarch64-linux-gnu"
     recipe_path = source / "scripts/sysroots/loong64-sources.lock.json"
     recipe_bytes = recipe_path.read_text(encoding="utf-8").encode("utf-8")
@@ -38,7 +42,7 @@ def main():
         print("Using verified old-glibc graphics dependencies")
         return
     run("apt-get", "-o", "Acquire::Retries=5", "install", "-y", "--no-install-recommends",
-        "autoconf", "automake", "libtool", "xutils-dev", "bison", "flex", "gperf")
+        "autoconf", "automake", "libtool", "xutils-dev", "bison", "flex", "gperf", "libexpat1-dev")
     run("python3", source / "scripts/prepare-linux-sysroot.py", recipe_path, prefix, "--sources-only")
     host = cross / "host"
     host.mkdir(parents=True, exist_ok=True)
@@ -47,12 +51,13 @@ def main():
     work = source / "build-temp/loong64-dependencies" / identity
     work.mkdir(parents=True, exist_ok=True)
     target_env = dict(os.environ, CC=str(cross / "bin/clang"), CXX=str(cross / "bin/clang++"),
-                      AR=str(prefix / "llvm/bin/llvm-ar"), RANLIB=str(prefix / "llvm/bin/llvm-ranlib"),
-                      NM=str(prefix / "llvm/bin/llvm-nm"), LD=str(prefix / "llvm/bin/ld.lld"),
-                      STRIP=str(prefix / "llvm/bin/llvm-strip"),
+                      AR=str(llvm / "bin/llvm-ar"), RANLIB=str(llvm / "bin/llvm-ranlib"),
+                      NM=str(llvm / "bin/llvm-nm"), LD=str(llvm / "bin/ld.lld"),
+                      STRIP=str(llvm / "bin/llvm-strip"),
                       CFLAGS="-O2 -g -fPIC", CXXFLAGS="-O2 -g -fsized-deallocation",
                       PKG_CONFIG=str(cross / "bin/pkg-config"),
                       PKG_CONFIG_PATH=str(host / "lib/pkgconfig") + ":" + str(host / "share/pkgconfig"), PYTHON="python3")
+    target_env["PATH"] = str(host / "bin") + os.pathsep + target_env["PATH"]
     target_env.pop("LD_LIBRARY_PATH", None)
     options = {
         "libxcb": ["--enable-xkb", "--enable-xinput"],
@@ -93,6 +98,21 @@ def main():
         for filename in ("config.sub", "config.guess"):
             for path in project.rglob(filename):
                 shutil.copy2(str(cross / "share" / filename), str(path))
+        if name == "wayland":
+            # A newer host scanner can emit client calls absent from the old
+            # target library. Build the scanner from the same pinned source.
+            scanner_build = work / "wayland-host-scanner"
+            scanner_build.mkdir(exist_ok=True)
+            host_env = dict(os.environ, PYTHON="python3")
+            for variable in ("CC", "CXX", "AR", "RANLIB", "LD", "PKG_CONFIG", "PKG_CONFIG_PATH",
+                             "PKG_CONFIG_LIBDIR", "PKG_CONFIG_SYSROOT_DIR", "LD_LIBRARY_PATH"):
+                host_env.pop(variable, None)
+            run(project / "configure", "--prefix=" + str(host), "--disable-libraries",
+                "--disable-documentation", "--disable-dtd-validation", cwd=str(scanner_build), env=host_env)
+            run("make", "-j" + os.environ.get("QT_BUILD_JOBS", "4"), cwd=str(scanner_build), env=host_env)
+            run("make", "install", cwd=str(scanner_build), env=host_env)
+            target_env["WAYLAND_SCANNER"] = str(host / "bin/wayland-scanner")
+            env["WAYLAND_SCANNER"] = target_env["WAYLAND_SCANNER"]
         configure = [project / "configure", "--prefix=" + (str(host) if is_host else "/usr")]
         if not is_host:
             configure += ["--build=x86_64-linux-gnu", "--host=" + triple,
@@ -134,7 +154,7 @@ def main():
     run(cross / "bin/pkg-config", "--exists", *modules, env=target_env)
     run("python3", source / "scripts/package-linux.py", private_libs, "--audit-only",
         "--machine", "LoongArch", "--glibc", lock["glibc"],
-        "--readelf", prefix / "llvm/bin/llvm-readelf")
+        "--readelf", llvm / "bin/llvm-readelf")
     completed.write_text(lock["glibc"] + "\n")
     print("Old-glibc graphics dependency build and ELF audit passed")
 

@@ -54,8 +54,19 @@ EOF
 }
 write_driver clang
 write_driver clang++
+cat >"$prefix/bin/pkg-config" <<EOF
+#!/usr/bin/env bash
+export PKG_CONFIG_SYSROOT_DIR="$sysroot"
+export PKG_CONFIG_LIBDIR="$sysroot/usr/lib/loongarch64-linux-gnu/pkgconfig:$sysroot/usr/share/pkgconfig"
+export PKG_CONFIG_PATH="$prefix/host/lib/pkgconfig:$prefix/host/share/pkgconfig"
+exec /usr/bin/pkg-config "\$@"
+EOF
+chmod +x "$prefix/bin/pkg-config"
 archive="$vendor_work/downloads/gcc-13.3.0.tar.xz"
 vendor_fetch gcc-13.3.0.tar.xz https://gcc.gnu.org/pub/gcc/releases/gcc-13.3.0/gcc-13.3.0.tar.xz 0845e9621c9543a13f484e94584a49ffc0129970e9914624235fc1d061a0c083
+mkdir -p "$prefix/share"
+tar -xf "$archive" -C "$prefix/share" --strip-components=1 \
+  gcc-13.3.0/config.sub gcc-13.3.0/config.guess
 if [[ ! -f "$prefix/runtime/.lld-symvers-verified" ]]; then
   work="$(mktemp -d)"
   trap 'cp "$work/build/config.log" "$root/build-temp/logs/loong-$world-libstdcxx-config.log" 2>/dev/null || true; rm -rf "$work"' EXIT
