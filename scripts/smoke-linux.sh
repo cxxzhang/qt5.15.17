@@ -112,13 +112,13 @@ RESOURCES += tls.qrc
 EOF
 (
   cd "$work"
-  qmake_args=()
+  qmake_args=(smoke.pro)
   if [[ -n "${QT_SMOKE_QMAKE_SPEC:-}" ]]; then
-    qmake_args=(-spec "$QT_SMOKE_QMAKE_SPEC")
+    qmake_args=(-spec "$QT_SMOKE_QMAKE_SPEC" smoke.pro)
   fi
   # Exercise the installed qmake/mkspecs and SDK relocation, not only
   # compilation with manually supplied include/library search paths.
-  env -u LD_LIBRARY_PATH "$qmake" "${qmake_args[@]}" smoke.pro \
+  env -u LD_LIBRARY_PATH "$qmake" "${qmake_args[@]}" \
     "QMAKE_CC=${CC:-clang}" "QMAKE_CXX=${CXX:-clang++}" \
     "QMAKE_LINK=${CXX:-clang++}" "QMAKE_LFLAGS+=-Wl,-rpath,$sdk/lib"
   make -j2
