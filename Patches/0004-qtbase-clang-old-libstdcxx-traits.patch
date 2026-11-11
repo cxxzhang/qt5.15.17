@@ -16,12 +16,7 @@ diff --git a/src/corelib/global/qtypeinfo.h b/src/corelib/global/qtypeinfo.h
 diff --git a/src/corelib/itemmodels/qabstractitemmodel.cpp b/src/corelib/itemmodels/qabstractitemmodel.cpp
 --- a/src/corelib/itemmodels/qabstractitemmodel.cpp
 +++ b/src/corelib/itemmodels/qabstractitemmodel.cpp
-@@ -215,7 +215,7 @@ bool QPersistentModelIndex::operator<(const QPersistentModelIndex &other) const
-     if (d && other.d)
-         return d->index < other.d->index;
- 
+@@ -218,2 +218,2 @@ bool QPersistentModelIndex::operator<(const QPersistentModelIndex &other) const
 -    return std::less<>{}(d, other.d);
 +    return std::less<decltype(d)>{}(d, other.d);
  }
- 
- /*!
