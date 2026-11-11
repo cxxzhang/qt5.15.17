@@ -23,9 +23,14 @@ def audit(path, args):
     host_tool = args.host_machine and relative.parts[0] == "host"
     machine = args.host_machine if host_tool else args.machine
     limit = args.host_limit if host_tool else args.limit
-    if not re.search(r"Machine:\s+" + re.escape(machine) + r"\s*$", header, re.M):
+    machines = re.findall(r"Machine:\s+([^\r\n]+)", header)
+    if not machines or any(value.strip() != machine for value in machines):
         raise ValueError("{}: unexpected ELF architecture".format(path))
-    if not re.search(r"Data:.*little endian", header) or not re.search(r"Class:\s+ELF64", header):
+    classes = re.findall(r"Class:\s+(\S+)", header)
+    encodings = re.findall(r"Data:\s+([^\r\n]+)", header)
+    if (len(classes) != len(machines) or any(value != "ELF64" for value in classes)
+            or len(encodings) != len(machines)
+            or any("little endian" not in value for value in encodings)):
         raise ValueError("{}: expected a 64-bit little-endian ELF".format(path))
     if not host_tool and args.interpreter:
         program = run(args.readelf, "-l", str(path))
@@ -80,16 +85,19 @@ def main():
         if path.is_symlink() or not path.is_file():
             continue
         with path.open("rb") as stream:
-            if stream.read(4) != b"\x7fELF":
+            magic = stream.read(8)
+            if magic == b"!<thin>\n":
+                raise ValueError("{}: thin archive refers to build-tree objects".format(path))
+            if not (magic.startswith(b"\x7fELF") or magic == b"!<arch>\n"):
                 continue
         relocatable = audit(path, args)
         if args.native_dependencies:
             audit_native_dependencies(path, args)
-        files.append((path, relocatable))
+        files.append((path, relocatable, magic == b"!<arch>\n"))
     if not files:
         raise ValueError("No ELF files in {}".format(args.sdk))
     args.symbols.mkdir(parents=True, exist_ok=False)
-    for path, relocatable in files:
+    for path, relocatable, archive in files:
         debug = args.symbols / path.relative_to(args.sdk)
         debug = debug.with_name(debug.name + ".debug")
         sections = run(args.readelf, "-SW", str(path))
@@ -97,11 +105,12 @@ def main():
             debug.parent.mkdir(parents=True, exist_ok=True)
             run(args.objcopy, "--only-keep-debug", str(path), str(debug))
         run(args.strip, "--strip-debug" if relocatable else "--strip-unneeded", str(path))
-        if debug.is_file():
+        # GNU objcopy ignores --add-gnu-debuglink for whole archives.
+        if debug.is_file() and not archive:
             run(args.objcopy, "--add-gnu-debuglink=" + str(debug.resolve()), str(path))
         if re.search(r"\.(?:z?debug_info|gnu_debugdata)\s", run(args.readelf, "-SW", str(path))):
             raise ValueError("{}: debug information survived strip".format(path))
-    print("Audited and stripped {} ELF files (glibc <= {})".format(len(files), args.glibc))
+    print("Audited and stripped {} ELF files/archives (glibc <= {})".format(len(files), args.glibc))
 
 
 if __name__ == "__main__":

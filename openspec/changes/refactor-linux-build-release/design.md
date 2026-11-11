@@ -35,6 +35,20 @@ workflow_dispatch 提供 linux/all 选择，默认 linux。Linux 矩阵覆盖四
 
 ## 尚待实现阶段确认
 
+### 参考 Gateway 的验收方式（2026-11-11）
+
+已读取 `E:\YooDeskGroup\gateway\ci\linux-build.sh`、`cross-tools.sh`、
+`cross-toolchains.md` 及 `.github/workflows/build.yml`。Gateway 当前通过
+`CGO_ENABLED=0`、`GOARCH=loong64/mips64le` 交叉编译静态 Go 程序，实际不使用
+文档通用部分列出的 C/C++ 交叉工具链和 sysroot。因此不能以 Gateway 通过
+QEMU 测试来证明 Qt 的目标 glibc 或 C++20 库已兼容。
+
+Qt 可复用其固定 SHA256 的静态 QEMU、显式调用模拟器（不依赖 binfmt_misc）、
+打包后解压再运行 smoke test 的方法。参考版本为 Loongson 2025.02.21 的
+`qemu-loongarch64`，以及 Gateway 固定的 Ubuntu 8.2.2
+`qemu-mips64el-static`；不采用 desk 旧脚本中的 QEMU 6.2。
+目标 sysroot、Clang/GCC 头文件和 libstdc++ 仍需独立准备与审计。
+
 - LoongArch 最低可用 sysroot、ABI 以及目标发行版范围。
 - MIPS 是否存在满足目标运行系统、Clang 与 C++20 的更低基线组合。
 - 兼容 Ubuntu 18.04 的现代 Clang/libstdc++ 获取方式及构建成本。
