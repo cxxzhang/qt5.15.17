@@ -26,7 +26,7 @@ export CC="${CC:-clang}" CXX="${CXX:-clang++}"
 export CFLAGS=-fPIC
 # configure builds and immediately runs a bootstrap qmake. It needs the
 # selected GCC runtime before the SDK's private runtime has been installed.
-runtime_dir="$(dirname "$("$CXX" -print-file-name=libstdc++.so.6)")"
+runtime_dir="${QT_CXX_RUNTIME_DIR:-$(dirname "$("$CXX" -print-file-name=libstdc++.so.6)")}"
 [[ -f "$runtime_dir/libstdc++.so.6" ]]
 export LD_LIBRARY_PATH="$runtime_dir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 "$CC" --version
@@ -64,7 +64,11 @@ make -j"$jobs"
 make install
 
 for runtime in libstdc++.so.6 libgcc_s.so.1; do
-  runtime_path="$("$CXX" "-print-file-name=$runtime")"
+  if [[ -n "${QT_CXX_RUNTIME_DIR:-}" ]]; then
+    runtime_path="$QT_CXX_RUNTIME_DIR/$runtime"
+  else
+    runtime_path="$("$CXX" "-print-file-name=$runtime")"
+  fi
   [[ -f "$runtime_path" ]]
   cp -L "$runtime_path" "$install/lib/$runtime"
 done

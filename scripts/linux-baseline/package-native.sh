@@ -58,10 +58,14 @@ for name in clang clang++; do
 #!/usr/bin/env bash
 prefix="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")/.." && pwd)"
 for argument in "\$@"; do
-  [[ "\$argument" != -print-multi-os-directory ]] || { echo .; exit 0; }
+  case "\$argument" in
+    -print-multi-os-directory) echo .; exit 0 ;;
+    -print-file-name=libstdc++.so.6|-print-file-name=libgcc_s.so.1)
+      exec "\$prefix/gcc/bin/g++" "\$argument" ;;
+  esac
 done
 exec "\$prefix/clang/bin/$name" --target="$gcc_triple" --sysroot="\$prefix/sysroot" \
-  --gcc-install-dir="\$prefix/gcc/lib/gcc/$gcc_triple/13.3.0" -fuse-ld=lld \
+  --gcc-install-dir="\$prefix/gcc/lib/gcc/$gcc_triple/13.3.0" -fuse-ld=lld -Wno-unused-command-line-argument \
   -B"\$prefix/sysroot/usr/lib64/" -L"\$prefix/gcc/lib64" \
   -L"\$prefix/sysroot/usr/lib64" -L"\$prefix/sysroot/lib64" \
   -Wl,-rpath-link,"\$prefix/sysroot/lib64" "\$@"
