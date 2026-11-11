@@ -36,3 +36,19 @@ diff --git a/src/3rdparty/harfbuzz-ng/src/hb-meta.hh b/src/3rdparty/harfbuzz-ng/
 +#elif defined(__GNUC__) && __GNUC__ < 5
  #define hb_is_trivially_copyable(T) __has_trivial_copy(T)
  #define hb_is_trivially_copy_assignable(T) __has_trivial_assign(T)
+diff --git a/src/platformsupport/input/shared/devicehandlerlist_p.h b/src/platformsupport/input/shared/devicehandlerlist_p.h
+--- a/src/platformsupport/input/shared/devicehandlerlist_p.h
++++ b/src/platformsupport/input/shared/devicehandlerlist_p.h
+@@ -77,3 +77,3 @@
+-        const auto it = std::find_if(v.cbegin(), v.cend(), deviceNodeMatches);
+-        if (it == v.cend())
++        const auto it = std::find_if(v.begin(), v.end(), deviceNodeMatches);
++        if (it == v.end())
+             return false;
+diff --git a/src/widgets/widgets/qtoolbox.cpp b/src/widgets/widgets/qtoolbox.cpp
+--- a/src/widgets/widgets/qtoolbox.cpp
++++ b/src/widgets/widgets/qtoolbox.cpp
+@@ -375,2 +375,2 @@
+-        d->pageList.insert(d->pageList.cbegin() + index, std::move(newPage));
++        d->pageList.insert(d->pageList.begin() + index, std::move(newPage));
+         d->relayout();
