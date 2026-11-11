@@ -17,10 +17,13 @@ mkdir -p "$prefix/bin" "$prefix/probe-sdk/bin" "$prefix/probe-sdk/lib"
 for name in clang clang++; do
   cat >"$prefix/bin/$name" <<EOF
 #!/usr/bin/env bash
+extra=()
+if [[ "$name" == clang++ ]]; then
+  extra=(-fno-sized-deallocation -fno-aligned-allocation)
+fi
 exec "$vendor_compiler" --driver-mode="$([[ "$name" == clang++ ]] && echo g++ || echo gcc)" \
   --target="$triple" -march=mips64r2 -mabi=64 -EL --sysroot="$sysroot" \
-  -fno-sized-deallocation -fno-aligned-allocation \
-  --gcc-install-dir="$gcc_install" --ld-path="$prefix/gcc/bin/$triple-ld" "\$@"
+  --gcc-install-dir="$gcc_install" --ld-path="$prefix/gcc/bin/$triple-ld" "\${extra[@]}" "\$@"
 EOF
   chmod +x "$prefix/bin/$name"
 done

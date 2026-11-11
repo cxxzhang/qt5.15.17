@@ -40,9 +40,11 @@ for argument in "\$@"; do
   [[ "\$argument" != -print-multi-os-directory ]] || { echo .; exit 0; }
 done
 extra=()
+if [[ "$name" == clang++ ]]; then
+  extra=(-fno-sized-deallocation -fno-aligned-allocation)
+fi
 exec "$vendor_compiler" --driver-mode="$([[ "$name" == clang++ ]] && echo g++ || echo gcc)" \
   --target=loongarch64-linux-gnu -mabi="$abi" --sysroot="$sysroot" \
-  -fno-sized-deallocation -fno-aligned-allocation \
   --gcc-install-dir="$gcc_install" --ld-path="$compiler_bin/ld.lld" -Wno-unused-command-line-argument \
   -Wl,-rpath-link,"$sysroot/lib/loongarch64-linux-gnu" \
   -Wl,-rpath-link,"$sysroot/usr/lib/loongarch64-linux-gnu" \${extra[@]+"\${extra[@]}"} "\$@"

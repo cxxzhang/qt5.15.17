@@ -102,6 +102,9 @@ for argument in "\$@"; do
   [[ "\$argument" != -print-multi-os-directory ]] || { echo .; exit 0; }
 done
 extra=()
+if [[ "$name" == clang++ ]]; then
+  extra=(-fno-sized-deallocation -fno-aligned-allocation)
+fi
 if [[ "$arch" == mips64el ]]; then
   extra+=(-L"\$prefix/$sysroot_rel/usr/lib/mips64el-linux-gnuabi64" \
     -L"\$prefix/$sysroot_rel/lib/mips64el-linux-gnuabi64" \
@@ -109,7 +112,6 @@ if [[ "$arch" == mips64el ]]; then
     -Wl,-rpath-link,"\$prefix/$sysroot_rel/lib/mips64el-linux-gnuabi64")
 fi
 exec "\$prefix/llvm/bin/clang" --driver-mode="$mode" --target="$triple" $target_flags \
-  -fno-sized-deallocation -fno-aligned-allocation \
   --sysroot="\$prefix/$sysroot_rel" --gcc-install-dir="\$prefix/$gcc_rel" \
   --ld-path="\$prefix/$linker_rel" -Wno-unused-command-line-argument \
   -Wl,-rpath-link,"\$prefix/$sysroot_rel/lib/$triple" \

@@ -3,8 +3,29 @@
   "elf_flags": "0x3",
   "host_library_dir": "host-libs/usr/lib/x86_64-linux-gnu",
   "base_url": "https://archive.debian.org/debian",
-  "required_modules": ["xcb-icccm", "xcb-ewmh", "xkbcommon", "xkbcommon-x11"],
+  "required_modules": [
+    "xcb-icccm",
+    "xcb-ewmh",
+    "xkbcommon",
+    "xkbcommon-x11"
+  ],
   "sources": [
+    {
+      "name": "xcb-proto",
+      "version": "1.13-1",
+      "host": true,
+      "path": "pool/main/x/xcb-proto/xcb-proto_1.13.orig.tar.gz",
+      "sha256": "0698e8f596e4c0dbad71d3dc754d95eb0edbb42df5464e0f782621216fa33ba7",
+      "size": 191771
+    },
+    {
+      "name": "libxcb",
+      "version": "1.13.1-2",
+      "host": false,
+      "path": "pool/main/libx/libxcb/libxcb_1.13.1.orig.tar.gz",
+      "sha256": "f09a76971437780a602303170fd51b5f7474051722bc39d566a272d2c4bde1b5",
+      "size": 636748
+    },
     {
       "name": "xcb-util-wm",
       "version": "0.4.1-1.1",
@@ -22,7 +43,12 @@
       "sha256": "ab68b25341c99f2218d7cf3dad459c1827f411219901ade05bbccbdb856b6c8d",
       "size": 432692,
       "build_system": "meson",
-      "meson_options": ["-Denable-x11=true", "-Denable-wayland=false", "-Denable-docs=false", "-Denable-xkbregistry=false"]
+      "meson_options": [
+        "-Denable-x11=true",
+        "-Denable-wayland=false",
+        "-Denable-docs=false",
+        "-Denable-xkbregistry=false"
+      ]
     }
   ]
 }

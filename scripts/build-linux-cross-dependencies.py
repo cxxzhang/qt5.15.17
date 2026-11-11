@@ -202,6 +202,8 @@ def main():
         finally:
             if (project / "config.log").is_file():
                 shutil.copy2(str(project / "config.log"), str(log))
+            if meson and (project / "build/meson-logs/meson-log.txt").is_file():
+                shutil.copy2(str(project / "build/meson-logs/meson-log.txt"), str(log))
         marker.write_text(json.dumps({"version": recipe["version"], "libraries": libraries}) + "\n")
     modules = recipes.get("required_modules") or "xcb xcb-glx xcb-render xcb-renderutil xcb-image xcb-icccm xcb-keysyms xcb-randr xcb-sync xcb-xinerama xcb-xkb xcb-shm xcb-present xcb-dri3 xkbcommon xkbcommon-x11 wayland-client wayland-server wayland-egl gl egl glesv2 glu".split()
     run(cross / "bin/pkg-config", "--exists", *modules, env=target_env)
