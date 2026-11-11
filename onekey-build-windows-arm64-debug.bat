@@ -15,7 +15,15 @@ for /f "usebackq tokens=*" %%i in (`"%VSWHERE_EXE%" -latest -products * -require
   set "VisualStudioInstallDir=%%i"
 )
 
-call "%VisualStudioInstallDir%\VC\Auxiliary\Build\vcvarsall.bat" amd64_arm64
+rem Keep both ARM64 variants on the same stable compiler generation.
+call "%VisualStudioInstallDir%\Common7\Tools\VsDevCmd.bat" -no_logo -arch=arm64 -host_arch=arm64 -vcvars_ver=14.44
+if %ERRORLEVEL% NEQ 0 exit /B %ERRORLEVEL%
+if not "%VCToolsVersion:~0,5%"=="14.44" (
+  echo Expected the installed MSVC 14.44 ARM64 toolset, got %VCToolsVersion%.
+  exit /B 1
+)
+echo Using native ARM64 MSVC %VCToolsVersion%
+where cl
 
 set WindowsTargetPlatformMinVersion=10.0.10240.0
 call "%~dp0.github\workflows\VC-LTL helper for nmake.cmd"

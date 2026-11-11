@@ -50,6 +50,28 @@ def advertise_universal(root):
     config.write_text(content)
 
 
+def advertised_architectures(root, work):
+    project = work / 'sdk-architectures.pro'
+    project.write_text('TEMPLATE = aux\nload(qt_config)\nmessage(CI_SDK_ARCHS=$$QT_ARCHS)\n')
+    result = subprocess.check_output([str(root / 'bin/qmake'), '-o', str(work / 'architecture-makefile'),
+                                      str(project)], stderr=subprocess.STDOUT, text=True)
+    values = re.findall(r'CI_SDK_ARCHS=([^\r\n]*)', result)
+    if not values or any(set(value.split()) != set(values[0].split()) for value in values):
+        raise ValueError('Cannot evaluate consistent qmake SDK architectures: ' + result)
+    return set(values[0].split())
+
+
+def relocate(root):
+    count = 0
+    for path in root.rglob('*.prl'):
+        content = path.read_text()
+        content, replacements = re.subn(r'-L\S*/install/macos-(?:x64|arm64)/lib(?=\s|$)', '', content)
+        if replacements:
+            path.write_text(content)
+            count += replacements
+    print('Removed {} private OpenSSL build search paths from delivered PRL metadata'.format(count))
+
+
 def merge(x64, arm64, output):
     audit(x64, ['x86_64'])
     audit(arm64, ['arm64'])
@@ -93,15 +115,18 @@ def merge(x64, arm64, output):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='command', required=True)
-    check = commands.add_parser('audit')
-    check.add_argument('sdk', type=Path)
-    check.add_argument('architectures', nargs='+')
+    for name in ('audit', 'relocate'):
+        check = commands.add_parser(name)
+        check.add_argument('sdk', type=Path)
+        check.add_argument('architectures', nargs='+')
     combine = commands.add_parser('merge')
     combine.add_argument('x64', type=Path)
     combine.add_argument('arm64', type=Path)
     combine.add_argument('output', type=Path)
     args = parser.parse_args()
-    if args.command == 'audit':
+    if args.command in ('audit', 'relocate'):
+        if args.command == 'relocate':
+            relocate(args.sdk)
         audit(args.sdk, args.architectures)
     else:
         merge(args.x64, args.arm64, args.output)

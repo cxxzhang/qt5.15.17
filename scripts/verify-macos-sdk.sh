@@ -12,13 +12,15 @@ tar -xzf "$archive" -C "$work/sdk"
 python3 "$root/scripts/macos-sdk.py" audit "$work/sdk" "$@"
 test "$("$work/sdk/bin/qmake" -query QT_VERSION)" = 5.15.17
 CC=clang CXX=clang++ bash "$root/scripts/smoke-linux.sh" "$work/sdk" "$work/consumer"
-python3 - "$work/sdk" "$work/consumer/smoke" "$consumer_arch" "$@" <<'PY'
+python3 - "$root" "$work/sdk" "$work/consumer/smoke" "$consumer_arch" "$work" "$@" <<'PY'
 from pathlib import Path
-import re, subprocess, sys
-sdk, program, consumer, *architectures = sys.argv[1:]
-config = Path(sdk, 'mkspecs/qconfig.pri').read_text()
-advertised = re.findall(r'^QT_ARCHS\s*=\s*(.*)$', config, re.M)
-assert len(advertised) == 1 and set(advertised[0].split()) == set(architectures), advertised
+import importlib.util, subprocess, sys
+root, sdk, program, consumer, work, *architectures = sys.argv[1:]
+spec = importlib.util.spec_from_file_location('macos_sdk', Path(root, 'scripts/macos-sdk.py'))
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+advertised = module.advertised_architectures(Path(sdk), Path(work))
+assert advertised == set(architectures), advertised
 actual = set(subprocess.check_output(['lipo', '-archs', program], text=True).split())
 assert consumer in actual and actual <= set(architectures), actual
 PY

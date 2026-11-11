@@ -372,7 +372,7 @@ jobs:
       run: bash ./onekey-build-macos-x64.sh
     - name: Audit and archive the x64 SDK with executable permissions
       run: |
-        python3 scripts/macos-sdk.py audit Output/macos-x64 x86_64
+        python3 scripts/macos-sdk.py relocate Output/macos-x64 x86_64
         tar -C Output/macos-x64 -czf Output/qt5.15.17_macos_x64.tar.gz .
     - uses: actions/upload-artifact@v4
       with:
@@ -405,7 +405,7 @@ jobs:
       run: bash ./onekey-build-macos-arm64.sh
     - name: Audit and archive the ARM64 SDK with executable permissions
       run: |
-        python3 scripts/macos-sdk.py audit Output/macos-arm64 arm64
+        python3 scripts/macos-sdk.py relocate Output/macos-arm64 arm64
         tar -C Output/macos-arm64 -czf Output/qt5.15.17_macos_arm64.tar.gz .
     - uses: actions/upload-artifact@v4
       with:

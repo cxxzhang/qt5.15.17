@@ -60,11 +60,13 @@ def inputs(commit, kind, job=None):
         selected = (entry['type'] == 'commit' or name in ('.gitmodules', 'configure', 'configure.bat', 'qt.pro', '.qmake.conf')
                     or '/' not in name and name.endswith(('.pri', '.pro', '.conf')) or name.startswith('openssl/'))
         if kind == 'windows':
-            selected |= name.startswith('onekey-build-windows-') or name == 'apply-patches.bat'
+            script = 'onekey-build-' + job + '.bat' if job else None
+            selected |= (name == script if script else name.startswith('onekey-build-windows-')) or name == 'apply-patches.bat'
             selected |= name == 'Patches/0001-qtbase-support-xp.patch'
             selected |= name in ('.github/workflows/setup-vc-ltl.bat', '.github/workflows/VC-LTL helper for nmake.cmd')
         else:
-            selected |= name.startswith('onekey-build-macos-')
+            script = 'onekey-build-' + job + '.sh' if job else None
+            selected |= name == script if script else name.startswith('onekey-build-macos-')
         if selected:
             result[name] = entry['sha']
     if not any(name == 'qtbase' for name in result):

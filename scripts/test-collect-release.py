@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Metadata/PE rejection fixtures; these are not SDK runtime acceptance."""
 import importlib.util
+import base64
 import json
 from pathlib import Path
 import struct
@@ -21,6 +22,22 @@ mac_spec.loader.exec_module(mac)
 
 
 class UniversalMetadata(unittest.TestCase):
+    def test_architecture_expressions_evaluated_by_qmake(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            with mock.patch.object(mac.subprocess, 'check_output', return_value='Project MESSAGE: CI_SDK_ARCHS=x86_64\n'):
+                self.assertEqual(mac.advertised_architectures(root, root), {'x86_64'})
+            self.assertIn('$$QT_ARCHS', (root / 'sdk-architectures.pro').read_text())
+
+    def test_only_private_openssl_search_paths_removed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = root / 'QtNetwork.prl'
+            config.write_text('QMAKE_PRL_LIBS = -L/build/install/macos-x64/lib -L/another/lib -framework Security\n')
+            mac.relocate(root)
+            self.assertNotIn('/build/install', config.read_text())
+            self.assertIn('-L/another/lib', config.read_text())
+
     def test_both_architectures_advertised(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -41,6 +58,19 @@ class UniversalMetadata(unittest.TestCase):
 
 
 class NativeInputs(unittest.TestCase):
+    def test_unrelated_architecture_script_does_not_invalidate_reuse(self):
+        workflow = 'jobs:\n  windows-x64:\n    runs-on: windows-latest\n    steps:\n    - name: Build qt5\n      run: call onekey-build-windows-x64.bat\n'
+        tree = [dict(path='qtbase', sha='qt', type='commit'),
+                dict(path='onekey-build-windows-x64.bat', sha='x64', type='blob'),
+                dict(path='onekey-build-windows-arm64.bat', sha='arm', type='blob'),
+                dict(path='.github/workflows/BuildBinaries.yml', sha='workflow', type='blob')]
+        def api(path):
+            if '/git/trees/' in path: return dict(tree=tree)
+            return dict(content=base64.b64encode(workflow.encode()).decode())
+        with mock.patch.object(restore, 'api', side_effect=api):
+            original = restore.inputs('sha', 'windows', 'windows-x64')
+            tree[2]['sha'] = 'new-arm-compiler'
+            self.assertEqual(original, restore.inputs('sha', 'windows', 'windows-x64'))
     def test_native_configuration_changes_invalidate_reuse(self):
         config = 'jobs:\n  windows-x64:\n    runs-on: windows-latest\n    steps:\n    - name: Build qt5\n      run: call build.bat\n    - name: Package SDK\n      run: package\n'
         original = restore.native_configuration(config, 'windows-x64')
