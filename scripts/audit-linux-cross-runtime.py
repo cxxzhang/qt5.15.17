@@ -3,6 +3,7 @@
 
 import argparse
 from pathlib import Path
+import posixpath
 import re
 import subprocess
 from linux_cross_runtime import TargetRoot, clean_environment
@@ -44,7 +45,7 @@ def main():
             raise ValueError("{}: unresolved runtime dependency\n{}".format(path, result.stdout))
         for name in ("libstdc++.so.6", "libgcc_s.so.1"):
             match = re.search(r"^\s*" + re.escape(name) + r"\s+=>\s+(\S+)", result.stdout, re.M)
-            resolved = Path(match[1]).resolve() if match and host else Path(match[1]) if match else None
+            resolved = Path(match[1]).resolve() if match and host else Path(posixpath.normpath(match[1])) if match else None
             expected = (runtime / name).resolve() if host else runtime / name
             if match and resolved != expected:
                 raise ValueError("{}: {} resolved outside the SDK: {}".format(path, name, match[1]))
