@@ -1,0 +1,69 @@
+name: Verify an extracted native Linux SDK
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_run:
+        description: Completed Build Binaries run containing the SDK artifact
+        type: string
+        required: true
+      arch:
+        type: choice
+        options: [x64, arm64]
+        default: x64
+      variant:
+        type: choice
+        options: [release, debug]
+        default: release
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  verify:
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-22.04-arm' || 'ubuntu-22.04' }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/download-artifact@v4
+      with:
+        github-token: ${{ github.token }}
+        run-id: ${{ inputs.source_run }}
+        name: qt5.15.17_linux_${{ inputs.arch }}${{ inputs.variant == 'debug' && '_debug' || '' }}
+        path: artifacts
+    - uses: actions/cache/restore@v4
+      with:
+        path: build-temp/toolchain
+        key: bionic-qt-${{ inputs.arch }}-${{ hashFiles('scripts/setup-linux-toolchain.sh') }}
+        restore-keys: bionic-qt-${{ inputs.arch }}-
+    - name: Audit and consume the package in a new Ubuntu 18.04 container
+      env:
+        TARGET: ${{ inputs.arch }}
+        VARIANT: ${{ inputs.variant }}
+      run: |
+        set -o pipefail
+        mkdir -p build-temp/logs
+        docker run --rm -v "$PWD:/workspace" -w /workspace ubuntu:18.04 bash -ec '
+          bash scripts/setup-linux-toolchain.sh "$1"
+          export PATH=/workspace/build-temp/toolchain/bin:$PATH
+          tag="qt5.15.17_linux_$1"
+          [[ "$2" != debug ]] || tag+=_debug
+          test ! -e "/workspace/Output/linux-$1"
+          mkdir /opt/extracted-sdk
+          tar -xzf "artifacts/$tag.tar.gz" -C /opt/extracted-sdk
+          tar -tzf "artifacts/$tag-symbols.tar.gz" >/tmp/debug-files
+          test -s /tmp/debug-files
+          case "$1" in
+            x64) machine="Advanced Micro Devices X86-64" ;;
+            arm64) machine=AArch64 ;;
+          esac
+          python3 scripts/package-linux.py /opt/extracted-sdk --audit-only --require-stripped \
+            --machine "$machine" --glibc 2.27 --native-dependencies
+          test "$(env -u LD_LIBRARY_PATH /opt/extracted-sdk/bin/qmake -query QT_VERSION)" = 5.15.17
+          bash scripts/smoke-linux.sh /opt/extracted-sdk /tmp/sdk-consumer
+        ' bash "$TARGET" "$VARIANT" 2>&1 | tee build-temp/logs/extracted-sdk.log
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: diagnostics-extracted-${{ inputs.arch }}-${{ inputs.variant }}
+        path: build-temp/logs/

@@ -12,7 +12,7 @@ on:
       scope:
         description: Platforms to build
         type: choice
-        options: [linux, all, linux-x64]
+        options: [linux, all, linux-x64, linux-x64-debug]
         default: linux
       publish:
         description: Publish the verified packages as a GitHub release
@@ -208,7 +208,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJSON((github.event_name == 'push' || inputs.scope == 'linux-x64') && '[{"arch":"x64","variant":"release","runner":"ubuntu-22.04","asset":"linux_x64"}]' || '[{"arch":"x64","variant":"release","runner":"ubuntu-22.04","asset":"linux_x64"},{"arch":"x64","variant":"debug","runner":"ubuntu-22.04","asset":"linux_x64_debug"},{"arch":"arm64","variant":"release","runner":"ubuntu-22.04-arm","asset":"linux_arm64"},{"arch":"arm64","variant":"debug","runner":"ubuntu-22.04-arm","asset":"linux_arm64_debug"}]') }}
+        include: ${{ fromJSON((github.event_name == 'push' || inputs.scope == 'linux-x64') && '[{"arch":"x64","variant":"release","runner":"ubuntu-22.04","asset":"linux_x64"}]' || inputs.scope == 'linux-x64-debug' && '[{"arch":"x64","variant":"debug","runner":"ubuntu-22.04","asset":"linux_x64_debug"}]' || '[{"arch":"x64","variant":"release","runner":"ubuntu-22.04","asset":"linux_x64"},{"arch":"x64","variant":"debug","runner":"ubuntu-22.04","asset":"linux_x64_debug"},{"arch":"arm64","variant":"release","runner":"ubuntu-22.04-arm","asset":"linux_arm64"},{"arch":"arm64","variant":"debug","runner":"ubuntu-22.04-arm","asset":"linux_arm64_debug"}]') }}
     steps:
     - uses: actions/checkout@v4
       with:
