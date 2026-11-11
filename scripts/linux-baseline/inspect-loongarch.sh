@@ -19,7 +19,7 @@ fetch llvm20.tar.gz https://ftp.loongnix.cn/toolchain/llvm/llvm20/llvm-toolchain
 fetch sysroot.tar.bz2 https://ftp.loongnix.cn/browser/build/sysroot/debian_bullseye_loong64-sysroot.tar.bz2 34efb077fed691feac2605ec9656c8ecb40e63076fdb76ae06df90f279099a64
 # The new-world candidate is inspection-only until its observed hash and
 # actual libc/ABI are reviewed and pinned. Never publish it based on its name.
-fetch sysroot-newworld.tar.bz2 https://ftp.loongnix.cn/browser/build/sysroot/debian_bullseye_loongarch64-sysroot.tar.bz2
+fetch sysroot-newworld.tar.bz2 https://ftp.loongnix.cn/browser/build/sysroot/debian_bullseye_loongarch64-sysroot.tar.bz2 f5f7eb75744935f228afe7298c66e9faf3c52e3134787906290d5d479d8bb252
 fetch libffi6.deb https://archive.debian.org/debian/pool/main/libf/libffi/libffi6_3.2.1-9_amd64.deb d4d748d897e8e53aa239ead23a18724a1a30085cc6ca41a8c31b3b1e1b3452f4
 # This vendor compiler targets Debian 10 hosts. Keep its legacy libffi
 # private to this invocation; never replace the runner's system libraries.
@@ -65,7 +65,7 @@ for path in (work / 'sysroot').rglob('*'):
     if not path.is_file() or path.is_symlink(): continue
     if path.name in ('crt1.o', 'Scrt1.o', 'crtbegin.o', 'libgcc_s.so.1'):
         report['crt'].append(str(path.relative_to(work)))
-    if not re.fullmatch(r'libc-[0-9.]+\.so', path.name): continue
+    if not (re.fullmatch(r'libc-[0-9.]+\.so', path.name) or path.name == 'libc.so.6'): continue
     with path.open('rb') as stream: data = stream.read(64)
     versions = subprocess.check_output(['readelf', '-V', str(path)], text=True)
     names = sorted(set(re.findall(r'GLIBC_[0-9.]+', versions)),

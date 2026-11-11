@@ -35,12 +35,19 @@ concurrently with the other Linux targets.
 
 `MirrorLinuxLLVM.yml` verifies both original static LLVM archives on their
 native glibc 2.17 runners before publishing a separate immutable compiler
-mirror release. It preserves upstream archives, embedded licenses, SHA256
+mirror release. It preserves upstream archives, supplementary licenses, SHA256
 and provenance. This mirror is not Qt SDK acceptance. GNU toolchains and
 sysroots must also pass their runtime checks and be released before SDK
 workflows consume pinned repository assets. Native compiler wrappers now
 locate their installed GCC and LLVM relative to their own directory;
 relocation of a complete sysroot bundle still requires separate validation.
+
+The native LLVM mirrors are published in this repository as
+`toolchain-llvm-20.1.8-v1`; `targets.json` pins their API asset IDs and
+original SHA256 values while retaining the upstream API URLs for provenance.
+The mirror validation run was `42989460116`. The original static compiler
+has X86/AArch64 backends but no MIPS/LoongArch backend; cross targets require
+a separately validated compiler and must not silently use this native bundle.
 
 After these targets pass, build every configured Windows/macOS platform,
 verify the complete selected asset set, then publish the first release
