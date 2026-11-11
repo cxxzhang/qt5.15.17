@@ -12,6 +12,7 @@ import subprocess
 import tempfile
 import time
 import urllib.request
+import urllib.error
 import zipfile
 
 
@@ -21,8 +22,19 @@ def api(path):
                                      headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
                                               'Accept': 'application/vnd.github+json', 'User-Agent': 'qt-native-reuse',
                                               'Cache-Control': 'no-cache'})
-    with urllib.request.urlopen(request, timeout=45) as response:
-        return json.load(response)
+    for attempt in range(6):
+        try:
+            with urllib.request.urlopen(request, timeout=45) as response:
+                return json.load(response)
+        except urllib.error.HTTPError as error:
+            if error.code not in (429, 500, 502, 503, 504) or attempt == 5:
+                raise
+            print('Transient GitHub API status {}; retrying'.format(error.code), flush=True)
+        except (urllib.error.URLError, TimeoutError):
+            if attempt == 5:
+                raise
+            print('Transient GitHub API connection failure; retrying', flush=True)
+        time.sleep(min(2 ** (attempt + 1), 60))
 
 
 def native_configuration(content, job):
@@ -64,6 +76,7 @@ def inputs(commit, kind, job=None):
             selected |= (name == script if script else name.startswith('onekey-build-windows-')) or name == 'apply-patches.bat'
             selected |= name == 'Patches/0001-qtbase-support-xp.patch'
             selected |= name in ('.github/workflows/setup-vc-ltl.bat', '.github/workflows/VC-LTL helper for nmake.cmd')
+            selected |= name == 'scripts/force-runtime.ps1'
         else:
             script = 'onekey-build-' + job + '.sh' if job else None
             selected |= name == script if script else name.startswith('onekey-build-macos-')
@@ -92,6 +105,7 @@ def main():
     parser.add_argument('--artifact', required=True)
     parser.add_argument('--kind', choices=('windows', 'macos'), required=True)
     parser.add_argument('--destination', type=Path, required=True)
+    parser.add_argument('--wait-seconds', type=int, default=5 * 3600)
     args = parser.parse_args()
     if not args.run.isdigit() or args.run == os.environ['GITHUB_RUN_ID']:
         raise ValueError('Expected a different numeric source run')
@@ -103,7 +117,7 @@ def main():
         print('Native compilation inputs changed; rebuild instead of reusing this run')
         output(False)
         return
-    deadline = time.monotonic() + 5 * 3600
+    deadline = time.monotonic() + args.wait_seconds
     while True:
         jobs = api('/actions/runs/' + args.run + '/jobs?per_page=100')['jobs']
         matches = [job for job in jobs if job['name'] == args.job]
@@ -113,7 +127,9 @@ def main():
         if job['status'] == 'completed':
             break
         if time.monotonic() > deadline:
-            raise TimeoutError('Source native build did not finish')
+            print('No completed source SDK within the reuse wait budget; build in this job')
+            output(False)
+            return
         print('Waiting for source build ' + args.job, flush=True)
         time.sleep(30)
     if job['conclusion'] != 'success':

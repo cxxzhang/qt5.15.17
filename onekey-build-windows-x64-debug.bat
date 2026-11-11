@@ -15,7 +15,11 @@ for /f "usebackq tokens=*" %%i in (`"%VSWHERE_EXE%" -latest -products * -require
   set "VisualStudioInstallDir=%%i"
 )
 
-call "%VisualStudioInstallDir%\VC\Auxiliary\Build\vcvarsall.bat" amd64
+call "%VisualStudioInstallDir%\Common7\Tools\VsDevCmd.bat" -no_logo -arch=amd64 -host_arch=amd64 -vcvars_ver=14.44
+if %ERRORLEVEL% NEQ 0 exit /B %ERRORLEVEL%
+if not "%VCToolsVersion:~0,5%"=="14.44" exit /B 1
+echo Using stable MSVC %VCToolsVersion% for the Debug SDK
+where cl
 
 set WindowsTargetPlatformMinVersion=5.1.2600.0
 call "%~dp0.github\workflows\VC-LTL helper for nmake.cmd"

@@ -213,12 +213,21 @@ jobs:
       working-directory: C:/workspaces/qt5.15.17
       env:
         GH_TOKEN: ${{ github.token }}
-      run: python scripts/restore-native-sdk.py --run "${{ inputs.reuse_native_run }}" --job windows-x86-debug --artifact qt5.15.17_windows_x86_debug.zip --kind windows --destination Output/x86d
+      run: python scripts/restore-native-sdk.py --run "${{ inputs.reuse_native_run }}" --job windows-x86-debug --artifact qt5.15.17_windows_x86_debug.zip --kind windows --destination Output/x86d --wait-seconds 0
     - name: Set up VC-LTL
       if: steps.native-cache.outputs.restored != 'true'
       shell: cmd
       working-directory: C:\workspaces\qt5.15.17
       run: call C:\workspaces\qt5.15.17\.github\workflows\setup-vc-ltl.bat
+    - name: Watch SDK code generators
+      if: steps.native-cache.outputs.restored != 'true'
+      shell: pwsh
+      run: |
+        $sdkRoot = 'C:/workspaces/qt5.15.17'
+        $logs = Join-Path $sdkRoot 'build-temp/logs'
+        New-Item -ItemType Directory -Force -Path $logs | Out-Null
+        $watcher = Start-Process -FilePath (Get-Process -Id $PID).Path -WindowStyle Hidden -PassThru -ArgumentList @('-NoProfile','-File',"$sdkRoot/scripts/watch-windows-build.ps1",'-SdkRoot',$sdkRoot) -RedirectStandardOutput "$logs/watcher-output.txt" -RedirectStandardError "$logs/watcher-errors.txt"
+        $watcher.Id | Set-Content (Join-Path $logs 'watcher.pid')
     - name: Build qt5 debug x86
       if: steps.native-cache.outputs.restored != 'true'
       shell: cmd
@@ -228,6 +237,21 @@ jobs:
           git config --global user.name "GitHub Actions"
           call C:\workspaces\qt5.15.17\apply-patches.bat
           call C:\workspaces\qt5.15.17\onekey-build-windows-x86-debug.bat
+    - name: Stop SDK generator diagnostics
+      if: always()
+      shell: pwsh
+      run: |
+        $marker = 'C:/workspaces/qt5.15.17/build-temp/logs/watcher.pid'
+        if (Test-Path -LiteralPath $marker) {
+          $watcherId = [int](Get-Content -LiteralPath $marker)
+          $owned = Get-CimInstance Win32_Process -Filter "ProcessId=$watcherId" -ErrorAction SilentlyContinue
+          if ($owned -and $owned.CommandLine -like '*watch-windows-build.ps1*') { Stop-Process -Id $watcherId -Force -ErrorAction SilentlyContinue }
+        }
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: diagnostics-windows-x86-debug
+        path: C:/workspaces/qt5.15.17/build-temp/logs/
     - name: Verify the installed Windows qmake
       shell: pwsh
       run: |
@@ -264,12 +288,21 @@ jobs:
       working-directory: C:/workspaces/qt5.15.17
       env:
         GH_TOKEN: ${{ github.token }}
-      run: python scripts/restore-native-sdk.py --run "${{ inputs.reuse_native_run }}" --job windows-x64-debug --artifact qt5.15.17_windows_x64_debug.zip --kind windows --destination Output/x64d
+      run: python scripts/restore-native-sdk.py --run "${{ inputs.reuse_native_run }}" --job windows-x64-debug --artifact qt5.15.17_windows_x64_debug.zip --kind windows --destination Output/x64d --wait-seconds 0
     - name: Set up VC-LTL
       if: steps.native-cache.outputs.restored != 'true'
       shell: cmd
       working-directory: C:\workspaces\qt5.15.17
       run: call C:\workspaces\qt5.15.17\.github\workflows\setup-vc-ltl.bat
+    - name: Watch SDK code generators
+      if: steps.native-cache.outputs.restored != 'true'
+      shell: pwsh
+      run: |
+        $sdkRoot = 'C:/workspaces/qt5.15.17'
+        $logs = Join-Path $sdkRoot 'build-temp/logs'
+        New-Item -ItemType Directory -Force -Path $logs | Out-Null
+        $watcher = Start-Process -FilePath (Get-Process -Id $PID).Path -WindowStyle Hidden -PassThru -ArgumentList @('-NoProfile','-File',"$sdkRoot/scripts/watch-windows-build.ps1",'-SdkRoot',$sdkRoot) -RedirectStandardOutput "$logs/watcher-output.txt" -RedirectStandardError "$logs/watcher-errors.txt"
+        $watcher.Id | Set-Content (Join-Path $logs 'watcher.pid')
     - name: Build qt5 debug x64
       if: steps.native-cache.outputs.restored != 'true'
       shell: cmd
@@ -279,6 +312,21 @@ jobs:
           git config --global user.name "GitHub Actions"
           call C:\workspaces\qt5.15.17\apply-patches.bat
           call C:\workspaces\qt5.15.17\onekey-build-windows-x64-debug.bat
+    - name: Stop SDK generator diagnostics
+      if: always()
+      shell: pwsh
+      run: |
+        $marker = 'C:/workspaces/qt5.15.17/build-temp/logs/watcher.pid'
+        if (Test-Path -LiteralPath $marker) {
+          $watcherId = [int](Get-Content -LiteralPath $marker)
+          $owned = Get-CimInstance Win32_Process -Filter "ProcessId=$watcherId" -ErrorAction SilentlyContinue
+          if ($owned -and $owned.CommandLine -like '*watch-windows-build.ps1*') { Stop-Process -Id $watcherId -Force -ErrorAction SilentlyContinue }
+        }
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: diagnostics-windows-x64-debug
+        path: C:/workspaces/qt5.15.17/build-temp/logs/
     - name: Verify the installed Windows qmake
       shell: pwsh
       run: |
@@ -315,12 +363,21 @@ jobs:
       working-directory: C:/workspaces/qt5.15.17
       env:
         GH_TOKEN: ${{ github.token }}
-      run: python scripts/restore-native-sdk.py --run "${{ inputs.reuse_native_run }}" --job windows-arm64-debug --artifact qt5.15.17_windows_arm64_debug.zip --kind windows --destination Output/arm64d
+      run: python scripts/restore-native-sdk.py --run "${{ inputs.reuse_native_run }}" --job windows-arm64-debug --artifact qt5.15.17_windows_arm64_debug.zip --kind windows --destination Output/arm64d --wait-seconds 0
     - name: Set up VC-LTL
       if: steps.native-cache.outputs.restored != 'true'
       shell: cmd
       working-directory: C:\workspaces\qt5.15.17
       run: call C:\workspaces\qt5.15.17\.github\workflows\setup-vc-ltl.bat
+    - name: Watch SDK code generators
+      if: steps.native-cache.outputs.restored != 'true'
+      shell: pwsh
+      run: |
+        $sdkRoot = 'C:/workspaces/qt5.15.17'
+        $logs = Join-Path $sdkRoot 'build-temp/logs'
+        New-Item -ItemType Directory -Force -Path $logs | Out-Null
+        $watcher = Start-Process -FilePath (Get-Process -Id $PID).Path -WindowStyle Hidden -PassThru -ArgumentList @('-NoProfile','-File',"$sdkRoot/scripts/watch-windows-build.ps1",'-SdkRoot',$sdkRoot) -RedirectStandardOutput "$logs/watcher-output.txt" -RedirectStandardError "$logs/watcher-errors.txt"
+        $watcher.Id | Set-Content (Join-Path $logs 'watcher.pid')
     - name: Build qt5 debug arm64
       if: steps.native-cache.outputs.restored != 'true'
       shell: cmd
@@ -330,6 +387,21 @@ jobs:
           git config --global user.name "GitHub Actions"
           call C:\workspaces\qt5.15.17\apply-patches.bat
           call C:\workspaces\qt5.15.17\onekey-build-windows-arm64-debug.bat
+    - name: Stop SDK generator diagnostics
+      if: always()
+      shell: pwsh
+      run: |
+        $marker = 'C:/workspaces/qt5.15.17/build-temp/logs/watcher.pid'
+        if (Test-Path -LiteralPath $marker) {
+          $watcherId = [int](Get-Content -LiteralPath $marker)
+          $owned = Get-CimInstance Win32_Process -Filter "ProcessId=$watcherId" -ErrorAction SilentlyContinue
+          if ($owned -and $owned.CommandLine -like '*watch-windows-build.ps1*') { Stop-Process -Id $watcherId -Force -ErrorAction SilentlyContinue }
+        }
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: diagnostics-windows-arm64-debug
+        path: C:/workspaces/qt5.15.17/build-temp/logs/
     - name: Verify the installed Windows qmake
       shell: pwsh
       run: |

@@ -3,6 +3,8 @@
 import importlib.util
 import base64
 import json
+import io
+import os
 from pathlib import Path
 import struct
 import tempfile
@@ -58,6 +60,21 @@ class UniversalMetadata(unittest.TestCase):
 
 
 class NativeInputs(unittest.TestCase):
+    def test_transient_api_failure_retried(self):
+        error = restore.urllib.error.HTTPError('https://api.github.com/test', 502, 'temporary', None, None)
+        with mock.patch.dict(os.environ, {'GITHUB_REPOSITORY': 'fixture/repo', 'GH_TOKEN': 'fixture'}), \
+                mock.patch.object(restore.urllib.request, 'urlopen', side_effect=[error, io.BytesIO(b'{"ready":true}')]) as request, \
+                mock.patch.object(restore.time, 'sleep'):
+            self.assertEqual(restore.api('/test'), {'ready': True})
+            self.assertEqual(request.call_count, 2)
+
+    def test_permission_failure_not_retried(self):
+        error = restore.urllib.error.HTTPError('https://api.github.com/test', 403, 'denied', None, None)
+        with mock.patch.dict(os.environ, {'GITHUB_REPOSITORY': 'fixture/repo', 'GH_TOKEN': 'fixture'}), \
+                mock.patch.object(restore.urllib.request, 'urlopen', side_effect=error) as request, \
+                mock.patch.object(restore.time, 'sleep'):
+            with self.assertRaises(restore.urllib.error.HTTPError): restore.api('/test')
+            self.assertEqual(request.call_count, 1)
     def test_unrelated_architecture_script_does_not_invalidate_reuse(self):
         workflow = 'jobs:\n  windows-x64:\n    runs-on: windows-latest\n    steps:\n    - name: Build qt5\n      run: call onekey-build-windows-x64.bat\n'
         tree = [dict(path='qtbase', sha='qt', type='commit'),
