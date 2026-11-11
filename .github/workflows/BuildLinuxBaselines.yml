@@ -1,0 +1,62 @@
+name: Build accepted Linux baseline SDKs
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        type: choice
+        options: [native, x64, arm64]
+        default: native
+permissions:
+  contents: read
+jobs:
+  native:
+    name: Qt glibc 2.17 (${{ matrix.arch }}, ${{ matrix.variant }})
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: ${{ fromJSON(inputs.target == 'x64' && '["x64"]' || inputs.target == 'arm64' && '["arm64"]' || '["x64","arm64"]') }}
+        variant: [release, debug]
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-22.04-arm' || 'ubuntu-22.04' }}
+    timeout-minutes: 180
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    - name: Check ELF packaging rejection gates
+      run: bash scripts/test-package-linux.sh
+    - uses: actions/cache/restore@v4
+      id: accepted-toolchain
+      with:
+        path: build-temp/accepted-${{ matrix.arch }}
+        key: accepted-native-${{ matrix.arch }}-${{ hashFiles('scripts/linux-baseline/toolchains.lock.json') }}
+    - name: Download the accepted repository toolchain
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: bash scripts/linux-baseline/download-toolchain.sh "${{ matrix.arch }}" "build-temp/accepted-${{ matrix.arch }}"
+    - uses: actions/cache/save@v4
+      if: steps.accepted-toolchain.outputs.cache-hit != 'true'
+      with:
+        path: build-temp/accepted-${{ matrix.arch }}
+        key: ${{ steps.accepted-toolchain.outputs.cache-primary-key }}
+    - name: Build, relocate and verify the baseline SDK
+      env:
+        ARCH: ${{ matrix.arch }}
+        VARIANT: ${{ matrix.variant }}
+      run: |
+        set -o pipefail
+        mkdir -p build-temp/logs
+        image=$(python3 -c 'import json,os; print(json.load(open("scripts/linux-baseline/targets.json"))["targets"][os.environ["ARCH"]]["image"])')
+        docker run --rm -v "$PWD:/workspace" -w /workspace "$image" \
+          bash scripts/linux-baseline/build-native-sdk.sh "$ARCH" "$VARIANT" \
+          2>&1 | tee "build-temp/logs/$ARCH-$VARIANT-sdk.log"
+    - uses: actions/upload-artifact@v4
+      with:
+        name: qt5.15.17_linux_${{ matrix.arch }}_${{ matrix.variant }}
+        if-no-files-found: error
+        compression-level: 0
+        path: Output/*.tar.gz
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: diagnostics-baseline-sdk-${{ matrix.arch }}-${{ matrix.variant }}
+        path: build-temp/logs/

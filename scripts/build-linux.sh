@@ -8,10 +8,12 @@ case "$variant" in release|debug) ;; *) exit 2;; esac
 tag="linux-$arch"
 [[ "$variant" != debug ]] || tag+=-debug
 case "$arch" in
-  x64) openssl_target=linux-x86_64; machine='Advanced Micro Devices X86-64'; baseline=2.27 ;;
-  arm64) openssl_target=linux-aarch64; machine=AArch64; baseline=2.27 ;;
+  x64) openssl_target=linux-x86_64; machine='Advanced Micro Devices X86-64' ;;
+  arm64) openssl_target=linux-aarch64; machine=AArch64 ;;
   *) echo "Unsupported target: $arch" >&2; exit 2 ;;
 esac
+baseline="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["targets"][sys.argv[2]]["glibc"])' "$source_dir/scripts/linux-baseline/targets.json" "$arch")"
+test "$(getconf GNU_LIBC_VERSION)" = "glibc $baseline"
 
 work="${QT_BUILD_TEMP:-$source_dir/build-temp}/$tag"
 install="$source_dir/Output/$tag"

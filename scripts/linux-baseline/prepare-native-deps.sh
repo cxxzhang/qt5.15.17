@@ -26,4 +26,12 @@ cp -a /usr/lib64/. "$prefix/sysroot/usr/lib64/"
 cp -a /usr/share/pkgconfig/. "$prefix/sysroot/usr/share/pkgconfig/"
 cp -a /usr/share/fonts/. "$prefix/sysroot/usr/share/fonts/"
 cp -a /etc/fonts/. "$prefix/sysroot/etc/fonts/"
+mkdir -p "$prefix/host/bin"
+cp /usr/bin/wayland-scanner "$prefix/host/bin/"
+for directory in wayland wayland-protocols; do
+  if [[ -d "/usr/share/$directory" ]]; then
+    mkdir -p "$prefix/sysroot/usr/share/$directory"
+    cp -a "/usr/share/$directory/." "$prefix/sysroot/usr/share/$directory/"
+  fi
+done
 echo "$arch: glibc 2.17 Qt graphical dependency sysroot prepared"
