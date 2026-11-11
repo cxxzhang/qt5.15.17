@@ -173,7 +173,7 @@ while IFS= read -r -d '' elf; do
     library_dir="$install/lib"
     [[ "$elf" != "$install/host/"* ]] || library_dir="$install/host/lib"
     rel="$(realpath --relative-to="$(dirname "$elf")" "$library_dir")"
-    patchelf --set-rpath "\$ORIGIN/$rel" "$elf"
+    python3 "$source_dir/scripts/elf-load-alignment.py" "$elf" "\$ORIGIN/$rel"
   fi
 done < <(find "$install" -type f -print0)
 python3 "$source_dir/scripts/package-linux.py" "$install" --audit-only --require-stripped \

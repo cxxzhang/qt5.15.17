@@ -16,6 +16,7 @@ import shutil
 import socket
 import stat
 import subprocess
+import sys
 
 
 def clean_environment():
@@ -152,7 +153,8 @@ def main():
         if not args.sdk:
             parser.error("smoke requires --sdk")
         sdk = root.stage_sdk(args.sdk)
-        subprocess.check_call(["patchelf", "--set-rpath", "$ORIGIN/../sdk/lib", str(program)])
+        subprocess.check_call([sys.executable, str(Path(__file__).with_name('elf-load-alignment.py')),
+                               str(program), "$ORIGIN/../sdk/lib"])
         root.execute(program, {"QT_QPA_PLATFORM": "offscreen", "QML2_IMPORT_PATH": root.guest_path(sdk / "qml")},
                      debug_symbols=args.sdk.parent / "symbols")
         print("Extracted target SDK consumer passed inside its baseline filesystem")

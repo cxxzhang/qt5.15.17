@@ -87,5 +87,16 @@ then the Linux-first Windows/macOS chain before the authorized SDK release.
 
 ## Workspace protection
 
+Update: native end-to-end run `43036480483` at `542cab2` is building
+all four x64/ARM64 variants after the QtQuick old-header helper fix.
+MIPS run `43025278752` and new-world run `43025273164` completed Qt
+compilation and installation (226 and 210 audited ELF/archive files),
+then failed after RPATH editing with a target-loader PT_LOAD alignment
+error in libstdc++. Old-world run `43030047088` instead failed configure
+because xcb-keysyms was absent. The next changes add its pinned source,
+target page-size-aware RPATH editing, an actual strip/relocate/load probe
+before expensive Qt compilation, and unverified raw-install caching.
+These fixes still require actual Linux CI validation; no SDK is accepted.
+
 Preserve the six submodules' user untracked content. Keep the original
 `HANDOFF-LINUX-PIPELINE.md` uncommitted. No product-icon changes remain.

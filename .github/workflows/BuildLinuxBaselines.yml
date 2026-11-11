@@ -118,6 +118,10 @@ jobs:
                 assert entries[target]['tag'] == 'linux-toolchains-v1'
                 assert entries[target].get('gnu_runtime_policy') == 'baseline-system'
                 out.write(key + '=' + entries[target]['sha256'] + '\n')
+        import hashlib, subprocess
+        modules = subprocess.check_output(['git', 'submodule', 'status', '--recursive'])
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
+            out.write('modules=' + hashlib.sha256(modules).hexdigest() + '\n')
         PY
     - uses: actions/cache/restore@v4
       id: accepted-host
@@ -145,14 +149,28 @@ jobs:
       with:
         path: build-temp/accepted-${{ matrix.arch }}
         key: ${{ steps.accepted-cross.outputs.cache-primary-key }}
+    - name: Test target ELF packaging with the real baseline loader
+      run: sudo -E bash scripts/linux-baseline/test-cross-packaging.sh "${{ matrix.arch }}"
+    - uses: actions/cache/restore@v4
+      id: raw-install
+      with:
+        path: build-temp/installed-sdk
+        key: unverified-qt-install-${{ matrix.arch }}-${{ matrix.variant }}-${{ steps.toolchain-pin.outputs.host }}-${{ steps.toolchain-pin.outputs.cross }}-${{ steps.toolchain-pin.outputs.modules }}-${{ hashFiles('Patches/**', 'scripts/build-linux-cross.sh', 'scripts/linux-baseline/build-cross-sdk.sh') }}
     - name: Build and verify the target SDK in its real baseline root
       env:
         ARCH: ${{ matrix.arch }}
         VARIANT: ${{ matrix.variant }}
+        QT_CACHE_INSTALL: 'true'
+        QT_REUSE_INSTALL: 'true'
       run: |
         set -o pipefail
         mkdir -p build-temp/logs
         sudo -E bash scripts/linux-baseline/build-cross-sdk.sh "$ARCH" "$VARIANT" 2>&1 | tee "build-temp/logs/$ARCH-$VARIANT-sdk.log"
+    - uses: actions/cache/save@v4
+      if: always() && steps.raw-install.outputs.cache-hit != 'true' && hashFiles('build-temp/installed-sdk/*.tar') != ''
+      with:
+        path: build-temp/installed-sdk
+        key: ${{ steps.raw-install.outputs.cache-primary-key }}
     - uses: actions/upload-artifact@v4
       with:
         name: qt5.15.17_linux_${{ matrix.arch }}_${{ matrix.variant }}

@@ -86,7 +86,7 @@ for package in freetype2 fontconfig x11 xcb xcb-renderutil xcb-icccm xkbcommon x
   "$context/pkg-config" --modversion "$package" || true
 done
 "$context/pkg-config" --print-errors --exists freetype2 fontconfig x11 xcb xcb-renderutil \
-  xcb-icccm xkbcommon xkbcommon-x11 wayland-client wayland-server
+  xcb-icccm xcb-keysyms xkbcommon xkbcommon-x11 wayland-client wayland-server
 export QT_ACCEPTED_CROSS_PREFIX="$cross" QT_ACCEPTED_HOST_PREFIX="$host" QT_ACCEPTED_SYSROOT="$sysroot"
 export QT_CROSS_PKG_CONFIG="$context/pkg-config" WAYLAND_SCANNER="$scanner"
 export QT_NATIVE_COMPILER_BIN="$context"
