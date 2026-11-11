@@ -53,6 +53,7 @@ jobs:
           tar -xzf "artifacts/$tag.tar.gz" -C /opt/extracted-sdk
           tar -tzf "artifacts/$tag-symbols.tar.gz" >/tmp/debug-files
           test -s /tmp/debug-files
+          grep -q '\.debug$' /tmp/debug-files
           case "$1" in
             x64) machine="Advanced Micro Devices X86-64" ;;
             arm64) machine=AArch64 ;;

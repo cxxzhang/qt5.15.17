@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import stat
 import subprocess
 
 
@@ -24,7 +25,7 @@ def clean_environment():
 
 
 class TargetRoot:
-    def __init__(self, sysroot, qemu, identity):
+    def __init__(self, sysroot, qemu, identity, devices=False):
         self.root = Path(sysroot).resolve()
         if not any(self.root.glob(".sysroot-*")):
             raise ValueError("Not a prepared target sysroot: " + str(self.root))
@@ -37,10 +38,21 @@ class TargetRoot:
         (self.root / "tmp").mkdir(exist_ok=True)
         (self.root / "tmp").chmod(0o1777)
         self.emulator = self.root / ".qt-acceptance/qemu-host"
+        self.devices = []
         atexit.register(self.close)
         shutil.copy2(str(qemu), str(self.emulator))
+        if devices:
+            (self.root / "dev").mkdir(exist_ok=True)
+            for name, minor in (("null", 3), ("zero", 5), ("random", 8), ("urandom", 9)):
+                node = self.root / "dev" / name
+                if not node.exists() and not node.is_symlink():
+                    os.mknod(str(node), stat.S_IFCHR | 0o666, os.makedev(1, minor))
+                    self.devices.append(node)
 
     def close(self):
+        for node in self.devices:
+            if node.exists():
+                node.unlink()
         if self.base.is_dir():
             shutil.rmtree(str(self.base))
         if self.emulator.is_file():
@@ -94,7 +106,7 @@ def main():
     parser.add_argument("--libgcc", type=Path)
     parser.add_argument("--sdk", type=Path)
     args = parser.parse_args()
-    root = TargetRoot(args.sysroot, args.qemu, args.program.resolve())
+    root = TargetRoot(args.sysroot, args.qemu, args.program.resolve(), devices=args.mode == "smoke")
     program = root.stage_program(args.program)
     if args.mode == "probe":
         if not (args.loader and args.stdlib and args.libgcc):
