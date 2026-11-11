@@ -25,9 +25,19 @@ libraries and must exercise the actual extracted SDK.
 The initial native toolchain preparation runs x64 and ARM64 concurrently
 inside manylinux2014/glibc 2.17 containers. It records the exact container
 digest before execution, downloads checksum-pinned static Clang 20.1.8,
-builds full GCC 13.3 (using GCC) and its libstdc++ against that old libc,
-then uses Clang to compile, audit and run
-the C++20/thread probe with the selected private C++ runtime.
+reuses the image's GNU tools together with its original CentOS 7 C++
+headers and libstdc++ 4.8.5, then uses Clang to compile, audit and run
+the thread/string/exception probe. Compiler age and runtime age are separate.
+The C++20 requirement was explicitly cancelled on 2026-11-11. Qt builds
+as C++11; an extracted SDK consumer checks C++17 language support without
+requiring newer standard-library APIs. Native SDKs use the baseline system
+GNU shared runtimes instead of forcing deployment of GCC 13 libraries.
+
+Both GLIBC and GNU runtime requirements are acceptance gates. The GNU gate
+checks imported symbols and their versions against the actual baseline
+libstdc++/libgcc providers. It must cover every installed target ELF,
+including plugins and tools. Newer compiler consumers must match the target
+ABI; using new standard-library APIs can raise the application's own floor.
 
 Container digest recording is a preparation step. Final SDK builds must
 use the recorded digests as committed inputs. Cross-target sysroots and

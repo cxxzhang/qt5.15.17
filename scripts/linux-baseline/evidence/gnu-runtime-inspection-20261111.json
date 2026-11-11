@@ -1,0 +1,167 @@
+{
+  "purpose": "Historical SDK inspection; not acceptance of the newer old-system-runtime requirement",
+  "reports": [
+    {
+      "report": "gnu-requirements-x64-release.json",
+      "inspection_run": 43016083628,
+      "inspection_artifact": 13852128638,
+      "source_run": "43007057520",
+      "source_commit": "dd29561d983050d675619287d44897cc66055051",
+      "maximum_required_versions": {
+        "GLIBCXX": "GLIBCXX_3.4.32",
+        "CXXABI": "CXXABI_1.3.13",
+        "GCC": "GCC_4.3.0"
+      },
+      "baseline_system_gnu_compatible": false,
+      "incompatible_files": 150,
+      "qt_core": [
+        "CXXABI_1.3",
+        "CXXABI_1.3.13",
+        "CXXABI_1.3.2",
+        "CXXABI_1.3.3",
+        "CXXABI_1.3.7",
+        "CXXABI_1.3.9",
+        "GCC_3.0",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.11",
+        "GLIBCXX_3.4.14",
+        "GLIBCXX_3.4.18",
+        "GLIBCXX_3.4.21",
+        "GLIBCXX_3.4.26",
+        "GLIBCXX_3.4.28",
+        "GLIBCXX_3.4.29"
+      ],
+      "qt_qml": [
+        "CXXABI_1.3",
+        "CXXABI_1.3.9",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.14",
+        "GLIBCXX_3.4.20",
+        "GLIBCXX_3.4.29",
+        "GLIBCXX_3.4.32"
+      ]
+    },
+    {
+      "report": "gnu-requirements-x64-debug.json",
+      "inspection_run": 43016088080,
+      "inspection_artifact": 13852148981,
+      "source_run": "43007057520",
+      "source_commit": "dd29561d983050d675619287d44897cc66055051",
+      "maximum_required_versions": {
+        "GLIBCXX": "GLIBCXX_3.4.32",
+        "CXXABI": "CXXABI_1.3.13",
+        "GCC": "GCC_4.3.0"
+      },
+      "baseline_system_gnu_compatible": false,
+      "incompatible_files": 150,
+      "qt_core": [
+        "CXXABI_1.3",
+        "CXXABI_1.3.13",
+        "CXXABI_1.3.2",
+        "CXXABI_1.3.3",
+        "CXXABI_1.3.7",
+        "CXXABI_1.3.9",
+        "GCC_3.0",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.11",
+        "GLIBCXX_3.4.14",
+        "GLIBCXX_3.4.18",
+        "GLIBCXX_3.4.21",
+        "GLIBCXX_3.4.26",
+        "GLIBCXX_3.4.28",
+        "GLIBCXX_3.4.29"
+      ],
+      "qt_qml": [
+        "CXXABI_1.3",
+        "CXXABI_1.3.9",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.14",
+        "GLIBCXX_3.4.20",
+        "GLIBCXX_3.4.29",
+        "GLIBCXX_3.4.32"
+      ]
+    },
+    {
+      "report": "gnu-requirements-arm64-release.json",
+      "inspection_run": 43016092102,
+      "inspection_artifact": 13852732446,
+      "source_run": "43002661756",
+      "source_commit": "21e88929e540c70db50efc7b3a875318dea9b8b1",
+      "maximum_required_versions": {
+        "GLIBCXX": "GLIBCXX_3.4.32",
+        "CXXABI": "CXXABI_1.3.13",
+        "GCC": "GCC_4.5.0"
+      },
+      "baseline_system_gnu_compatible": false,
+      "incompatible_files": 150,
+      "qt_core": [
+        "CXXABI_1.3",
+        "CXXABI_1.3.13",
+        "CXXABI_1.3.2",
+        "CXXABI_1.3.3",
+        "CXXABI_1.3.7",
+        "CXXABI_1.3.9",
+        "GCC_3.0",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.11",
+        "GLIBCXX_3.4.14",
+        "GLIBCXX_3.4.18",
+        "GLIBCXX_3.4.21",
+        "GLIBCXX_3.4.26",
+        "GLIBCXX_3.4.28",
+        "GLIBCXX_3.4.29"
+      ],
+      "qt_qml": [
+        "CXXABI_1.3",
+        "CXXABI_1.3.9",
+        "GCC_3.0",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.14",
+        "GLIBCXX_3.4.20",
+        "GLIBCXX_3.4.29",
+        "GLIBCXX_3.4.32"
+      ]
+    },
+    {
+      "report": "gnu-requirements-arm64-debug.json",
+      "inspection_run": 43016096725,
+      "inspection_artifact": 13852592479,
+      "source_run": "43002661756",
+      "source_commit": "21e88929e540c70db50efc7b3a875318dea9b8b1",
+      "maximum_required_versions": {
+        "GLIBCXX": "GLIBCXX_3.4.32",
+        "CXXABI": "CXXABI_1.3.13",
+        "GCC": "GCC_4.5.0"
+      },
+      "baseline_system_gnu_compatible": false,
+      "incompatible_files": 150,
+      "qt_core": [
+        "CXXABI_1.3",
+        "CXXABI_1.3.13",
+        "CXXABI_1.3.2",
+        "CXXABI_1.3.3",
+        "CXXABI_1.3.7",
+        "CXXABI_1.3.9",
+        "GCC_3.0",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.11",
+        "GLIBCXX_3.4.14",
+        "GLIBCXX_3.4.18",
+        "GLIBCXX_3.4.21",
+        "GLIBCXX_3.4.26",
+        "GLIBCXX_3.4.28",
+        "GLIBCXX_3.4.29"
+      ],
+      "qt_qml": [
+        "CXXABI_1.3",
+        "CXXABI_1.3.9",
+        "GCC_3.0",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.14",
+        "GLIBCXX_3.4.20",
+        "GLIBCXX_3.4.29",
+        "GLIBCXX_3.4.32"
+      ]
+    }
+  ]
+}

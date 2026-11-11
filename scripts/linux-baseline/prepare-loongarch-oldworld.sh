@@ -64,7 +64,7 @@ cp /usr/share/misc/config.sub /usr/share/misc/config.guess "$prefix/share/"
 bash "$prefix/share/config.sub" loongarch64-linux-gnu
 # Only select regular target runtime files. Absolute vendor symlinks must
 # never resolve to the x86_64 host's libraries.
-stdlib="$(find "$sysroot" -type f -name 'libstdc++.so.6*' -print -quit)"
+stdlib="$(find "$sysroot" -type f -name 'libstdc++.so.6*' ! -name '*.py' -print -quit)"
 libgcc="$(find "$sysroot" -type f -name libgcc_s.so.1 -print -quit)"
 test -n "$stdlib"
 test -n "$libgcc"
@@ -78,7 +78,7 @@ patchelf --set-rpath '$ORIGIN' "$prefix/probe-sdk/lib/libstdc++.so.6"
 patchelf --set-rpath '$ORIGIN' "$prefix/probe-sdk/lib/libgcc_s.so.1"
 cp "$root/scripts/linux-baseline/probe.cpp" "$prefix/probe.cpp"
 "$prefix/bin/clang++" -std=c++17 -pthread "$prefix/probe.cpp" \
-  '-Wl,-rpath,$ORIGIN/../lib' -o "$prefix/probe-sdk/bin/probe"
+  '-Wl,-rpath,$ORIGIN/lib' -o "$prefix/probe-sdk/bin/probe"
 python3 "$root/scripts/package-linux.py" "$prefix/probe-sdk" --audit-only \
   --machine LoongArch --glibc "$baseline" --interpreter "$loader" --readelf "$compiler_bin/llvm-readelf" \
   --elf-flags "$elf_flags"
