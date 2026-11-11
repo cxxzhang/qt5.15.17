@@ -25,9 +25,9 @@ jobs="${QT_BUILD_JOBS:-$(nproc)}"
 export CC="${CC:-clang}" CXX="${CXX:-clang++}"
 export CFLAGS=-fPIC
 patch="$source_dir/Patches/0004-qtbase-clang-old-libstdcxx-traits.patch"
-if ! git -C "$source_dir/qtbase" apply --reverse --check "$patch" >/dev/null 2>&1; then
-  git -C "$source_dir/qtbase" apply --check "$patch"
-  git -C "$source_dir/qtbase" apply "$patch"
+if ! git -c safe.directory="$source_dir/qtbase" -C "$source_dir/qtbase" apply --reverse --check "$patch" >/dev/null 2>&1; then
+  git -c safe.directory="$source_dir/qtbase" -C "$source_dir/qtbase" apply --check "$patch"
+  git -c safe.directory="$source_dir/qtbase" -C "$source_dir/qtbase" apply "$patch"
 fi
 # configure builds and immediately runs a bootstrap qmake. It needs the
 # selected GCC runtime before the SDK's private runtime has been installed.
