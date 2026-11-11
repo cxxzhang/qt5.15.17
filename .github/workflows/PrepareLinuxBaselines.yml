@@ -29,6 +29,12 @@ jobs:
             pkg-config --modversion "$name" || true
           done
         ' 2>&1 | tee build-temp/logs/native-environment.log
+    - name: Prepare missing Qt dependencies on the baseline
+      run: |
+        set -o pipefail
+        image=$(python3 -c 'import json; print(json.load(open("scripts/linux-baseline/targets.json"))["targets"]["x64"]["image"])')
+        docker run --rm -v "$PWD:/workspace" -w /workspace "$image" bash scripts/linux-baseline/prepare-native-deps.sh x64 \
+          2>&1 | tee build-temp/logs/native-qt-dependencies.log
     - uses: actions/upload-artifact@v4
       if: always()
       with:
