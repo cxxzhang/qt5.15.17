@@ -86,13 +86,16 @@ int main(int argc, char **argv) {
     QGuiApplication app(argc, argv);
     const std::string message = "qt-sdk-standard-string";
     const bool stringsMatch = QString::fromStdString(message).toStdString() == message;
+    const std::wstring wideMessage = L"qt-sdk-wide-string-\u4e2d\u6587-\U0001f642";
+    const bool wideStringsMatch = QString::fromStdWString(wideMessage).toStdWString() == wideMessage
+            && QString().toStdWString().empty();
     int result = 0;
     probe(41, result);
     QQmlEngine engine;
     QQmlComponent component(&engine);
     component.setData("import QtQml 2.0\nQtObject { property int answer: 6 * 7 }", QUrl());
     QScopedPointer<QObject> object(component.create());
-    return !(stringsMatch && QString::number(result) == QStringLiteral("42") && QSslSocket::supportsSsl() && tlsProbe()
+    return !(stringsMatch && wideStringsMatch && QString::number(result) == QStringLiteral("42") && QSslSocket::supportsSsl() && tlsProbe()
              && QString::number(1.25, 'f', 2) == QStringLiteral("1.25")
              && object && object->property("answer").toInt() == 42
              && !QFontDatabase().families().isEmpty());

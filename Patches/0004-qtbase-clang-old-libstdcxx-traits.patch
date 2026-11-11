@@ -23,6 +23,17 @@ diff --git a/src/corelib/global/qflags.h b/src/corelib/global/qflags.h
 +    { return static_cast<Ret>(static_cast<typename std::underlying_type<LHS>::type>(lhs) op static_cast<typename std::underlying_type<RHS>::type>(rhs)); } \
      /* end */
  #else
+diff --git a/src/corelib/text/qstring.h b/src/corelib/text/qstring.h
+--- a/src/corelib/text/qstring.h
++++ b/src/corelib/text/qstring.h
+@@ -1559,7 +1559,3 @@
+-#if __cplusplus >= 201703L
+-    str.resize(toWCharArray(str.data()));
+-#else
+     if (length())
+         str.resize(toWCharArray(&str.front()));
+-#endif
+     return str;
 diff --git a/src/corelib/itemmodels/qabstractitemmodel.cpp b/src/corelib/itemmodels/qabstractitemmodel.cpp
 --- a/src/corelib/itemmodels/qabstractitemmodel.cpp
 +++ b/src/corelib/itemmodels/qabstractitemmodel.cpp
