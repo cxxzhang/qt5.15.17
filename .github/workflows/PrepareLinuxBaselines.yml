@@ -4,7 +4,7 @@ on:
     inputs:
       target:
         type: choice
-        options: [all, native, cross, loongarch, mips]
+        options: [all, native, cross, loongarch, loongarch-oldworld, mips]
         default: all
 permissions:
   contents: read
@@ -175,4 +175,47 @@ jobs:
       if: always()
       with:
         name: diagnostics-baseline-loong28
+        path: build-temp/logs/
+  loongarch-oldworld:
+    if: inputs.target == 'all' || inputs.target == 'cross' || inputs.target == 'loongarch-oldworld'
+    name: Clang C++20 on LoongArch old-world glibc 2.28
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install host packaging tool
+      run: sudo apt-get -o Acquire::Retries=5 update && sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends patchelf
+    - uses: actions/cache/restore@v4
+      id: oldworld-runtime
+      with:
+        path: build-temp/baseline-loong64-oldworld
+        key: loong-oldworld-228-${{ hashFiles('scripts/linux-baseline/prepare-loongarch-oldworld.sh') }}
+        restore-keys: loong-oldworld-228-
+    - uses: actions/cache/restore@v4
+      id: oldworld-inputs
+      with:
+        path: build-temp/loong28-inspection/downloads
+        key: loong-oldworld-downloads-${{ hashFiles('scripts/linux-baseline/load-vendor-clang.sh') }}
+        restore-keys: loong28-vendor-inputs-
+    - name: Build and execute the old-world runtime
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        set -o pipefail
+        mkdir -p build-temp/logs
+        bash scripts/linux-baseline/prepare-loongarch-oldworld.sh 2>&1 | tee build-temp/logs/loong-oldworld-228.log
+    - uses: actions/cache/save@v4
+      if: always() && steps.oldworld-runtime.outputs.cache-hit != 'true' && hashFiles('build-temp/baseline-loong64-oldworld/runtime/.ready') != ''
+      with:
+        path: build-temp/baseline-loong64-oldworld
+        key: ${{ steps.oldworld-runtime.outputs.cache-primary-key }}
+    - uses: actions/cache/save@v4
+      if: always() && steps.oldworld-inputs.outputs.cache-hit != 'true'
+      with:
+        path: build-temp/loong28-inspection/downloads
+        key: ${{ steps.oldworld-inputs.outputs.cache-primary-key }}
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: diagnostics-baseline-loong-oldworld-228
         path: build-temp/logs/
