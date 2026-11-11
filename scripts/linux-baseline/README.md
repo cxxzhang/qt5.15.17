@@ -40,8 +40,9 @@ including plugins and tools. Newer compiler consumers must match the target
 ABI; using new standard-library APIs can raise the application's own floor.
 
 Container digest recording is a preparation step. Final SDK builds must
-use the recorded digests as committed inputs. Cross-target sysroots and
-toolchains are still being prepared against the exact limits above.
+use the recorded digests as committed inputs. All five low-GNU-runtime
+toolchain bundles have now been validated, published and pinned. Their
+successful preparation does not constitute complete Qt SDK acceptance.
 
 Acceptance requires Release and Debug SDKs, separate matching symbols,
 ELF architecture/ABI/version/dependency checks, relocated Qt consumers,
@@ -73,3 +74,18 @@ a separately validated compiler and must not silently use this native bundle.
 After these targets pass, build every configured Windows/macOS platform,
 verify the complete selected asset set, then publish the first release
 from the rebuilt pipeline. Publication is explicitly authorized by the user.
+
+`LinuxPipeline.yml` runs builds, independent extracted SDK verification,
+modern GCC/Clang consumers for native SDKs, and a complete archive-hash
+manifest gate. `BuildBinaries.yml` now calls this pipeline; Windows/macOS
+jobs depend on its success. Release collection repeats the full five-target,
+Release/Debug proof and hash checks and includes the acceptance manifest.
+Use Linux-only dispatches while acceptance remains incomplete. No new Qt
+SDK release has passed this complete sequence yet.
+
+Cross jobs first strip and relocate a small C++ program and both GNU
+runtimes, then execute it with the real target loader in the baseline root.
+RPATH edits explicitly preserve target load-segment page alignment.
+Completed raw Qt installs are cached separately as unverified inputs, bound
+to source-module identities, build scripts, patches and both toolchain hashes.
+Restoration always repeats packaging and runtime acceptance.

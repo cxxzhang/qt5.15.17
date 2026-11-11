@@ -81,9 +81,12 @@ separately downloaded dynamic cross LLVM process.
 Independent native verification now includes modern GCC and Clang C++17
 consumers on Ubuntu 22.04, in addition to the baseline old-system run.
 This new modern-consumer job has not passed against a complete new SDK yet.
-The main all-platform workflow remains unwired to the final five-target
-acceptance gate. Complete all Release/Debug SDKs, independent verification,
-then the Linux-first Windows/macOS chain before the authorized SDK release.
+The main all-platform workflow is now wired to the final five-target
+acceptance gate (`565b34e`), including release-time proof/hash revalidation.
+This wiring passed actionlint and the seven collector tests locally;
+the complete SDK acceptance sequence has not passed yet. Complete all
+Release/Debug SDKs and independent verification, then the Linux-first
+Windows/macOS chain before the authorized SDK release.
 
 ## Workspace protection
 
@@ -97,6 +100,11 @@ because xcb-keysyms was absent. The next changes add its pinned source,
 target page-size-aware RPATH editing, an actual strip/relocate/load probe
 before expensive Qt compilation, and unverified raw-install caching.
 These fixes still require actual Linux CI validation; no SDK is accepted.
+At `5bb329c`, MIPS retry `43038651680` and new-world retry `43038658081`
+use the new preflight and raw-install cache. Old-world supplement run
+`43038645737` adds xcb-keysyms and publishes an additional immutable cache
+asset only after toolchain relocation/runtime gates. Pin its new asset
+before restarting old-world Qt builds. Existing assets are retained.
 
 Preserve the six submodules' user untracked content. Keep the original
 `HANDOFF-LINUX-PIPELINE.md` uncommitted. No product-icon changes remain.
