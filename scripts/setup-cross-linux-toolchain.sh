@@ -102,11 +102,13 @@ assert source.count("-gno-as-loc-support") == 2
 path.write_text(source.replace("-gno-as-loc-support", "-g0"))
 PY
   mkdir "$work/build"
+  stdlib_ldflags=""
+  [[ "$arch" != loong64 ]] || stdlib_ldflags=-Wl,--undefined-version
   (
     cd "$work/build"
     CC="$cross/bin/clang" CXX="$cross/bin/clang++" \
     CFLAGS='-O2 -g -fPIC' CXXFLAGS='-O2 -g -fsized-deallocation' \
-    LDFLAGS='-Wl,--undefined-version' \
+    LDFLAGS="$stdlib_ldflags" \
     AR="$prefix/llvm/bin/llvm-ar" RANLIB="$prefix/llvm/bin/llvm-ranlib" \
     NM="$prefix/llvm/bin/llvm-nm" LD="$linker" \
     STRIP="$prefix/llvm/bin/llvm-strip" \
@@ -188,7 +190,20 @@ int main() {
 EOF
 "$cross/bin/clang++" -std=c++20 -pthread "$cross/probe.cpp" \
   -Wl,-rpath,"$cross/runtime/lib" -o "$cross/probe"
-env -u LD_LIBRARY_PATH "$cross/bin/qemu" -L "$sysroot" "$cross/probe"
+if env -u LD_LIBRARY_PATH "$cross/bin/qemu" -L "$sysroot" "$cross/probe"; then
+  echo "$arch: target C++20 and POSIX thread probe passed"
+else
+  probe_status=$?
+  # Capture the target loader's actual search paths and syscall failures.
+  # A failed probe remains a failure after collecting diagnostics.
+  env -u LD_LIBRARY_PATH "$cross/bin/qemu" -strace -L "$sysroot" \
+    -E LD_DEBUG=libs "$cross/probe" || true
+  find "$sysroot" -name 'libm.so.6' -o -name 'ld-linux-*.so*'
+  if [[ "$arch" == loong64 ]]; then
+    "$cross/bin/qemu" -L "$sysroot" "$sysroot/lib64/ld-linux-loongarch-lp64d.so.1" --list-diagnostics || true
+  fi
+  exit "$probe_status"
+fi
 if [[ "$arch" == loong64 ]] && python3 -c 'import json,sys; sys.exit("recipes_sha256" not in json.load(open(sys.argv[1])))' "$root/scripts/sysroots/$arch.lock.json"; then
   python3 "$root/scripts/build-linux-cross-dependencies.py" "$prefix"
 fi
