@@ -4,11 +4,36 @@ on:
     inputs:
       target:
         type: choice
-        options: [all, native, cross, loongarch, loongarch-oldworld, mips]
+        options: [all, native, native-inputs, cross, loongarch, loongarch-oldworld, mips]
         default: all
 permissions:
   contents: read
 jobs:
+  native-inputs:
+    if: inputs.target == 'native-inputs'
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+    - name: Inspect the pinned native SDK build environment
+      run: |
+        set -o pipefail
+        mkdir -p build-temp/logs
+        image=$(python3 -c 'import json; print(json.load(open("scripts/linux-baseline/targets.json"))["targets"]["x64"]["image"])')
+        docker run --rm "$image" bash -ec '
+          getconf GNU_LIBC_VERSION
+          rpm -qa | sort
+          command -v patchelf
+          pkg-config --list-all | sort
+          for name in freetype2 fontconfig x11 xcb xcb-renderutil xcb-icccm xkbcommon wayland-client wayland-server gl egl; do
+            printf "DEPENDENCY %s: " "$name"
+            pkg-config --modversion "$name" || true
+          done
+        ' 2>&1 | tee build-temp/logs/native-environment.log
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: diagnostics-native-environment
+        path: build-temp/logs/
   native:
     if: inputs.target == 'all' || inputs.target == 'native'
     name: glibc 2.17 (${{ matrix.arch }})
