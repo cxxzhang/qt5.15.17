@@ -1,4 +1,9 @@
-# Linux pipeline acceptance evidence
+# Historical Linux baseline evidence (superseded)
+
+The user replaced these baselines on 2026-11-11. These successful builds
+do not count as acceptance of the requested glibc 2.17/2.28 SDKs. The
+current target specification is `linux-baseline/targets.json` and its
+acceptance scope is described in `linux-baseline/README.md`.
 
 Updated 2026-11-11. Acceptance of the full pipeline is still in progress.
 Run numbers identify GitHub Actions runs in `cxxzhang/qt5.15.17`.

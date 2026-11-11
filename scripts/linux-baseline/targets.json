@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "targets": {
+    "x64": {"glibc": "2.17", "machine": "Advanced Micro Devices X86-64", "triple": "x86_64-linux-gnu", "image_candidate": "quay.io/pypa/manylinux2014_x86_64"},
+    "arm64": {"glibc": "2.17", "machine": "AArch64", "triple": "aarch64-linux-gnu", "image_candidate": "quay.io/pypa/manylinux2014_aarch64"},
+    "mips64el": {"glibc": "2.17", "machine": "MIPS R3000", "triple": "mips64el-linux-gnuabi64"},
+    "loong64-oldworld": {"glibc": "2.28", "machine": "LoongArch", "triple": "loongarch64-linux-gnu", "elf_flags": 3, "interpreter": "/lib64/ld.so.1"},
+    "loong64-newworld": {"glibc": "2.28", "machine": "LoongArch", "triple": "loongarch64-linux-gnu", "elf_flags": 67, "interpreter": "/lib64/ld-linux-loongarch-lp64d.so.1"}
+  },
+  "clang": {
+    "version": "20.1.8.0",
+    "x64": {"api_url": "https://api.github.com/repos/mayeut/static-clang-images/releases/assets/285677756", "sha256": "3a25cb4eae724cad96d7e504ce7669a824f61d57d27716fd47d0a9f1fe2d8fdf"},
+    "arm64": {"api_url": "https://api.github.com/repos/mayeut/static-clang-images/releases/assets/285677753", "sha256": "da56c2b13a0c3e676e010d61a87753a975de18ae9eaa65247ca6a6d22bb95ab4"}
+  },
+  "libstdcxx": {"version": "13.3.0", "url": "https://gcc.gnu.org/pub/gcc/releases/gcc-13.3.0/gcc-13.3.0.tar.xz", "sha256": "0845e9621c9543a13f484e94584a49ffc0129970e9914624235fc1d061a0c083"}
+}

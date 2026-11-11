@@ -1,5 +1,10 @@
 # Linux Qt SDK builds
 
+The current requested glibc limits are x64/ARM64/MIPS64EL 2.17 and both
+LoongArch worlds 2.28. See `linux-baseline/README.md` for the replacement
+pipeline. The instructions and results below describe the superseded
+2.27/2.24/2.36 implementation and are retained as historical reference.
+
 The native build uses an Ubuntu 18.04 container with Clang 18.1.8 and
 GCC 13.3.0's libstdc++. The intended runtime baseline for x64 and ARM64 is
 glibc 2.27. The pipeline rejects newer glibc requirements in SDK ELF files.

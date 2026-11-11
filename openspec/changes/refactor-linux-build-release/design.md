@@ -1,5 +1,10 @@
 # Linux 构建与发布设计
 
+> 2026-11-11 用户更新了基准：x64/ARM64/MIPS64EL 均为 glibc 2.17，
+> 龙芯旧世界、新世界分别为 glibc 2.28，ARM64 可同步构建。
+> 当前目标以 `scripts/linux-baseline/targets.json` 和更新后的 spec 为准。
+> 下文的 Ubuntu 18.04/Stretch/早期 Debian 端口方案是此前初案，不作为新基准验收依据。
+
 ## 基线与架构
 
 | 目标 | 初始兼容目标 | 决策 |

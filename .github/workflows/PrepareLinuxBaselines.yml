@@ -1,0 +1,49 @@
+name: Prepare requested Linux baselines
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native:
+    name: glibc 2.17 (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - arch: x64
+          runner: ubuntu-22.04
+        - arch: arm64
+          runner: ubuntu-22.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/cache/restore@v4
+      id: baseline-cache
+      with:
+        path: build-temp/baseline-${{ matrix.arch }}
+        key: baseline-217-${{ matrix.arch }}-${{ hashFiles('scripts/linux-baseline/prepare-native.sh', 'scripts/linux-baseline/targets.json') }}
+    - name: Prepare and execute the native baseline probe
+      env:
+        TARGET: ${{ matrix.arch }}
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        set -o pipefail
+        mkdir -p build-temp/logs
+        image=$(python3 -c 'import json,os; print(json.load(open("scripts/linux-baseline/targets.json"))["targets"][os.environ["TARGET"]]["image_candidate"])')
+        docker pull "$image"
+        pinned=$(docker image inspect "$image" --format '{{index .RepoDigests 0}}')
+        printf '%s\n' "$pinned" >"build-temp/logs/$TARGET-image.txt"
+        docker run --rm -e GITHUB_TOKEN -v "$PWD:/workspace" -w /workspace "$pinned" \
+          bash scripts/linux-baseline/prepare-native.sh "$TARGET" \
+          2>&1 | tee "build-temp/logs/$TARGET-217-toolchain.log"
+    - uses: actions/cache/save@v4
+      if: steps.baseline-cache.outputs.cache-hit != 'true'
+      with:
+        path: build-temp/baseline-${{ matrix.arch }}
+        key: ${{ steps.baseline-cache.outputs.cache-primary-key }}
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: diagnostics-baseline-217-${{ matrix.arch }}
+        path: build-temp/logs/
