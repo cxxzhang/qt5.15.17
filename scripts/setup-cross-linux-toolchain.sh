@@ -6,10 +6,11 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 prefix="$root/build-temp/toolchain"
 cross="$prefix/cross-$arch"
 case "$arch" in
-  loong64) triple=loongarch64-linux-gnu; gcc_version=13 ;;
-  mips64el) triple=mips64el-linux-gnuabi64; gcc_version=8 ;;
+  loong64) triple=loongarch64-linux-gnu ;;
+  mips64el) triple=mips64el-linux-gnuabi64 ;;
   *) echo "Unsupported cross target: $arch" >&2; exit 2 ;;
 esac
+gcc_version="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["gcc_version"])' "$root/scripts/sysroots/$arch.lock.json")"
 [[ "$(uname -m)" == x86_64 ]]
 [[ -x "$prefix/llvm/bin/ld.lld" ]]
 python3 "$root/scripts/prepare-linux-sysroot.py" "$root/scripts/sysroots/$arch.lock.json" "$prefix"
@@ -25,6 +26,10 @@ write_driver() {
   fi
   cat >"$cross/bin/$language" <<EOF
 #!/usr/bin/env bash
+if [[ "\$#" == 1 && "\$1" == -print-multi-os-directory ]]; then
+  printf '.\\n'
+  exit 0
+fi
 exec "$prefix/llvm/bin/$language" --target="$triple" --sysroot="$sysroot" \
   --gcc-install-dir="$gcc_install" -fuse-ld="$prefix/llvm/bin/ld.lld" \
   -Wl,-rpath-link,"$sysroot/lib/$triple" -Wl,-rpath-link,"$sysroot/usr/lib/$triple" \
@@ -50,10 +55,21 @@ if [[ ! -f "$cross/runtime/.ready" ]]; then
   mkdir -p "$root/build-temp/logs"
   trap 'cp "$work/build/config.log" "$root/build-temp/logs/$arch-libstdcxx-config.log" 2>/dev/null || true; rm -rf "$work"' EXIT
   tar -xf "$archive" -C "$work"
+  # The dual-ABI ios_failure bridge rewrites generated assembly. Its GCC-only
+  # flag suppresses assembler line directives; Clang uses -g0 for that file.
+  python3 - "$work/gcc-13.3.0/libstdc++-v3/src/c++11/Makefile.in" <<'PY'
+from pathlib import Path
+import sys
+path = Path(sys.argv[1])
+source = path.read_text()
+assert source.count("-gno-as-loc-support") == 1
+path.write_text(source.replace("-gno-as-loc-support", "-g0"))
+PY
   mkdir "$work/build"
   (
     cd "$work/build"
     CC="$cross/bin/clang" CXX="$cross/bin/clang++" \
+    CFLAGS='-O2 -g -fPIC' CXXFLAGS='-O2 -g' \
     AR="$prefix/llvm/bin/llvm-ar" RANLIB="$prefix/llvm/bin/llvm-ranlib" \
     "$work/gcc-13.3.0/libstdc++-v3/configure" \
       --build=x86_64-linux-gnu --host="$triple" --target="$triple" \

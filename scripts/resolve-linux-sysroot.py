@@ -101,12 +101,16 @@ def main():
         packages.update({fields["Package"]: fields for fields in paragraphs(lzma.decompress(supplement).decode("utf-8"))
                          if fields.get("Architecture") in (args.arch, "all") and "Filename" in fields})
     roots = list(ROOTS)
-    if args.arch == "loong64":
-        roots.extend(["libfreetype-dev", "libstdc++-13-dev", "libgcc-13-dev"])
-        baseline = "2.38"
-    else:
-        roots.extend(["libfreetype6-dev", "libstdc++-8-dev", "libgcc-8-dev"])
-        baseline = "2.28"
+    freetype = "libfreetype6-dev" if "libfreetype6-dev" in packages else "libfreetype-dev"
+    gcc_versions = [version for version in range(13, 5, -1)
+                    if "libstdc++-{}-dev".format(version) in packages
+                    and "libgcc-{}-dev".format(version) in packages]
+    if not gcc_versions:
+        raise ValueError("No compatible target GCC development package pair")
+    gcc_version = gcc_versions[0]
+    roots.extend([freetype, "libstdc++-{}-dev".format(gcc_version),
+                  "libgcc-{}-dev".format(gcc_version)])
+    baseline = re.match(r"([0-9]+\.[0-9]+)", packages["libc6"]["Version"])[1]
     records = []
     for fields in resolve(packages, roots):
         sha = fields.get("SHA256", "")
@@ -117,7 +121,7 @@ def main():
                         "sha256": sha, "size": int(fields["Size"]),
                         "depends": fields.get("Depends", ""),
                         "pre_depends": fields.get("Pre-Depends", "")})
-    result = {"architecture": args.arch, "glibc": baseline,
+    result = {"architecture": args.arch, "glibc": baseline, "gcc_version": gcc_version,
               "base_url": args.base_url.rstrip("/"), "index_sha256": hashlib.sha256(data).hexdigest(),
               "roots": roots, "packages": records}
     if args.supplement:

@@ -68,11 +68,13 @@ def main():
     raw = args.lock.read_bytes()
     lock = json.loads(raw.decode("utf-8"))
     marker_name = ".sysroot-" + hashlib.sha256(raw).hexdigest()
+    pending_name = ".unpacking-" + hashlib.sha256(raw).hexdigest()
     root = args.prefix / ("sysroot-" + lock["architecture"])
     if (root / marker_name).is_file() and not args.download_only:
         print("Using verified sysroot:", root)
         return
-    if root.exists() and any(root.iterdir()) and not args.download_only:
+    if (root.exists() and any(root.iterdir()) and not (root / pending_name).is_file()
+            and not args.download_only):
         raise ValueError("Move the previous sysroot before changing its lock: " + str(root))
     cache = args.prefix / "downloads" / "debs"
     cache.mkdir(parents=True, exist_ok=True)
@@ -83,10 +85,12 @@ def main():
     if args.download_only:
         return
     root.mkdir(parents=True, exist_ok=True)
+    (root / pending_name).touch()
     for path in paths:
         subprocess.check_call(["dpkg-deb", "-x", str(path), str(root)])
     relative_symlinks(root)
     (root / marker_name).write_text(lock["architecture"] + " glibc " + lock["glibc"] + "\n")
+    (root / pending_name).unlink()
     print("Prepared", root)
 
 

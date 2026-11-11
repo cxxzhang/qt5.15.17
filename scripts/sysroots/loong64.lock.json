@@ -1,6 +1,7 @@
 {
   "architecture": "loong64",
   "glibc": "2.38",
+  "gcc_version": 13,
   "base_url": "https://snapshot.debian.org/archive/debian-ports/20240601T000000Z",
   "index_sha256": "cb40f097317b1831758b9ddb46ee1a5dd24a982857b90e1c93f49068bedf60e3",
   "roots": [
