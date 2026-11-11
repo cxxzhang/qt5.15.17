@@ -29,6 +29,11 @@ if ! git -c safe.directory="$source_dir/qtbase" -C "$source_dir/qtbase" apply --
   git -c safe.directory="$source_dir/qtbase" -C "$source_dir/qtbase" apply --check "$patch"
   git -c safe.directory="$source_dir/qtbase" -C "$source_dir/qtbase" apply "$patch"
 fi
+patch="$source_dir/Patches/0005-qtdeclarative-old-libstdcxx-unique.patch"
+if ! git -c safe.directory="$source_dir/qtdeclarative" -C "$source_dir/qtdeclarative" apply --reverse --check "$patch" >/dev/null 2>&1; then
+  git -c safe.directory="$source_dir/qtdeclarative" -C "$source_dir/qtdeclarative" apply --check "$patch"
+  git -c safe.directory="$source_dir/qtdeclarative" -C "$source_dir/qtdeclarative" apply "$patch"
+fi
 # Compile the failing vendored translation unit before the expensive Qt
 # build, so old-header template incompatibilities fail immediately.
 "$CXX" -std=c++11 -fPIC -fno-exceptions -fno-rtti -DHB_NO_UNICODE_FUNCS \

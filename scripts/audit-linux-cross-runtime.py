@@ -34,14 +34,18 @@ def main():
             continue
         host = path.relative_to(args.sdk).parts[0] == "host"
         if host:
-            command = ["ldd", "-v", str(path)]
+            command = ["ldd", "-r", "-v", str(path)]
             runtime = args.sdk / "host/lib"
         else:
-            command = target.command(args.loader, "--list", target.guest_path(staged / path.relative_to(args.sdk)))
+            # Pass trace/binding flags to the guest, not the host chroot
+            # executable. This is ldd -r's relocation check in the real root.
+            command = target.command("-E", "LD_TRACE_LOADED_OBJECTS=1", "-E", "LD_WARN=1",
+                                     "-E", "LD_BIND_NOW=1", args.loader,
+                                     target.guest_path(staged / path.relative_to(args.sdk)))
             runtime = Path(target.guest_path(staged / "lib"))
         result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                 universal_newlines=True, env=env)
-        if result.returncode or "not found" in result.stdout:
+        if result.returncode or "not found" in result.stdout or "undefined symbol:" in result.stdout:
             raise ValueError("{}: unresolved runtime dependency\n{}".format(path, result.stdout))
         for name in ("libstdc++.so.6", "libgcc_s.so.1"):
             match = re.search(r"^\s*" + re.escape(name) + r"\s+=>\s+(\S+)", result.stdout, re.M)

@@ -1,0 +1,34 @@
+diff --git a/src/quick/items/qquickgridview.cpp b/src/quick/items/qquickgridview.cpp
+--- a/src/quick/items/qquickgridview.cpp
++++ b/src/quick/items/qquickgridview.cpp
+@@ -44,2 +44,3 @@
+ #include <private/qqmlobjectmodel_p.h>
++#include <private/qmemory_p.h>
+ #include <private/qquicksmoothedanimation_p_p.h>
+@@ -723,2 +724,2 @@
+-                    = std::make_unique<FxGridItemSG>(item, q, true);
++                    = qt_make_unique<FxGridItemSG>(item, q, true);
+             newHighlight->trackGeometry(true);
+diff --git a/src/quick/items/qquicklistview.cpp b/src/quick/items/qquicklistview.cpp
+--- a/src/quick/items/qquicklistview.cpp
++++ b/src/quick/items/qquicklistview.cpp
+@@ -43,2 +43,3 @@
+ #include <private/qqmlobjectmodel_p.h>
++#include <private/qmemory_p.h>
+ #include <QtQml/qqmlexpression.h>
+@@ -999,2 +1000,2 @@
+-                    = std::make_unique<FxListItemSG>(item, q, true);
++                    = qt_make_unique<FxListItemSG>(item, q, true);
+             newHighlight->trackGeometry(true);
+@@ -1007,2 +1008,2 @@
+-            highlightPosAnimator = std::make_unique<QSmoothedAnimation>();
++            highlightPosAnimator = qt_make_unique<QSmoothedAnimation>();
+             highlightPosAnimator->target = QQmlProperty(item, posProp);
+@@ -1012,2 +1013,2 @@
+-            highlightWidthAnimator = std::make_unique<QSmoothedAnimation>();
++            highlightWidthAnimator = qt_make_unique<QSmoothedAnimation>();
+             highlightWidthAnimator->velocity = highlightResizeVelocity;
+@@ -1017,2 +1018,2 @@
+-            highlightHeightAnimator = std::make_unique<QSmoothedAnimation>();
++            highlightHeightAnimator = qt_make_unique<QSmoothedAnimation>();
+             highlightHeightAnimator->velocity = highlightResizeVelocity;

@@ -69,6 +69,17 @@ if env -u LD_LIBRARY_PATH python3 "$root/scripts/package-linux.py" \
   exit 1
 fi
 grep -q 'unresolved runtime dependency' "$work/error.log"
+# A missing lazy function relocation must fail even when every SONAME exists.
+mkdir "$work/unresolved-symbol"
+printf '#include <stdio.h>\nint missing_runtime_api(void); int probe(void) { puts("probe"); return missing_runtime_api(); }\n' >"$work/unresolved.c"
+cc -shared -fPIC "$work/unresolved.c" -o "$work/unresolved-symbol/libprobe.so"
+if python3 "$root/scripts/package-linux.py" "$work/unresolved-symbol" --audit-only \
+    --machine "$machine" --glibc 99.0 --native-dependencies >"$work/error.log" 2>&1; then
+  echo 'The runtime gate accepted an unresolved lazy function symbol' >&2
+  exit 1
+fi
+grep -q 'undefined symbol: missing_runtime_api' "$work/error.log"
+
 # Check real system C++ providers, including deliberate mismatches.
 mkdir "$work/system-cxx"
 printf '#include <string>\nint main() { return std::string("system").size() != 6; }\n' >"$work/system-cxx.cpp"

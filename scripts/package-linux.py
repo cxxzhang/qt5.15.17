@@ -58,9 +58,9 @@ def audit_native_dependencies(path, args):
     env = dict(os.environ)
     for key in ("LD_LIBRARY_PATH", "LD_PRELOAD", "LD_AUDIT"):
         env.pop(key, None)
-    result = subprocess.run(["ldd", "-v", str(path)], stdout=subprocess.PIPE,
+    result = subprocess.run(["ldd", "-r", "-v", str(path)], stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT, universal_newlines=True, env=env)
-    if result.returncode or "not found" in result.stdout:
+    if result.returncode or "not found" in result.stdout or "undefined symbol:" in result.stdout:
         raise ValueError("{}: unresolved runtime dependency\n{}".format(path, result.stdout))
     for runtime in ("libstdc++.so.6", "libgcc_s.so.1"):
         match = re.search(r"^\s*" + re.escape(runtime) + r"\s+=>\s+(\S+)", result.stdout, re.M)

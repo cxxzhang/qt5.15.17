@@ -84,6 +84,11 @@ if ! git -C "$source_dir/qtdeclarative" apply --reverse --check "$patch" >/dev/n
   git -C "$source_dir/qtdeclarative" apply "$patch"
 fi
 
+patch="$source_dir/Patches/0005-qtdeclarative-old-libstdcxx-unique.patch"
+if ! git -C "$source_dir/qtdeclarative" apply --reverse --check "$patch" >/dev/null 2>&1; then
+  git -C "$source_dir/qtdeclarative" apply --check "$patch"
+  git -C "$source_dir/qtdeclarative" apply "$patch"
+fi
 mkdir -p "$source_dir/qtbase/mkspecs/$spec"
 cp "$source_dir/qtbase/mkspecs/linux-clang/qplatformdefs.h" "$source_dir/qtbase/mkspecs/$spec/"
 cat >"$source_dir/qtbase/mkspecs/$spec/qmake.conf" <<EOF
