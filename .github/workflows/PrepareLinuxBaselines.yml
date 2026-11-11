@@ -28,7 +28,8 @@ jobs:
       id: baseline-cache
       with:
         path: build-temp/baseline-${{ matrix.arch }}
-        key: baseline-217-${{ matrix.arch }}-${{ hashFiles('scripts/linux-baseline/prepare-native.sh', 'scripts/linux-baseline/targets.json') }}
+        key: baseline-217-${{ matrix.arch }}-${{ hashFiles('scripts/linux-baseline/prepare-native.sh', 'scripts/linux-baseline/probe-mixed-cxx.sh', 'scripts/linux-baseline/targets.json') }}
+        restore-keys: baseline-217-${{ matrix.arch }}-
     - name: Prepare and execute the native baseline probe
       env:
         TARGET: ${{ matrix.arch }}
@@ -44,7 +45,7 @@ jobs:
           bash scripts/linux-baseline/prepare-native.sh "$TARGET" \
           2>&1 | tee "build-temp/logs/$TARGET-217-toolchain.log"
     - uses: actions/cache/save@v4
-      if: steps.baseline-cache.outputs.cache-hit != 'true'
+      if: always() && steps.baseline-cache.outputs.cache-hit != 'true' && hashFiles(format('build-temp/baseline-{0}/gcc/.ready', matrix.arch)) != ''
       with:
         path: build-temp/baseline-${{ matrix.arch }}
         key: ${{ steps.baseline-cache.outputs.cache-primary-key }}

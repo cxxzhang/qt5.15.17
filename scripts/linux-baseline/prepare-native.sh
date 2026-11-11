@@ -77,6 +77,7 @@ if [[ ! -f "$gcc_root/.ready" ]]; then
   touch "$gcc_root/.ready"
 fi
 test "$("$gcc_root/bin/gcc" -dumpfullversion)" = 13.3.0
+gcc_triple="$("$gcc_root/bin/gcc" -dumpmachine)"
 mkdir -p "$prefix/bin"
 for name in clang clang++; do
   cat >"$prefix/bin/$name" <<EOF
@@ -131,6 +132,7 @@ int main() {
 CPP
 "$prefix/bin/clang++" -std=c++20 -pthread "$prefix/probe.cpp" \
   '-Wl,-rpath,$ORIGIN/../lib' -o "$prefix/probe-sdk/bin/probe"
+bash "$root/scripts/linux-baseline/probe-mixed-cxx.sh" "$prefix"
 machine="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["targets"][sys.argv[2]]["machine"])' "$root/scripts/linux-baseline/targets.json" "$arch")"
 python3 "$root/scripts/package-linux.py" "$prefix/probe-sdk" --audit-only \
   --machine "$machine" --glibc 2.17 --native-dependencies --readelf "$compiler/llvm-readelf"

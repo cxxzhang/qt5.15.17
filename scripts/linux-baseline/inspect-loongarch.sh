@@ -5,16 +5,21 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 work="$root/build-temp/loong28-inspection"
 mkdir -p "$work/downloads" "$work/compiler" "$work/sysroot" "$root/build-temp/logs"
 fetch() {
-  local name="$1" url="$2" checksum="$3"
+  local name="$1" url="$2" checksum="${3:-}"
   if [[ ! -s "$work/downloads/$name" ]]; then
     curl -fSL --retry 5 --connect-timeout 30 --max-time 1200 "$url" -o "$work/downloads/$name.tmp"
     mv "$work/downloads/$name.tmp" "$work/downloads/$name"
   fi
-  echo "$checksum  $work/downloads/$name" | sha256sum -c -
+  if [[ -n "$checksum" ]]; then
+    echo "$checksum  $work/downloads/$name" | sha256sum -c -
+  fi
   sha256sum "$work/downloads/$name" >>"$root/build-temp/logs/loong28-source-sha256.txt"
 }
 fetch llvm20.tar.gz https://ftp.loongnix.cn/toolchain/llvm/llvm20/llvm-toolchain_20.1.8-1_amd64-linux-gnu_debian-10.tar.gz b552f93326948c7292cceaf11db7eb442327448d9f45b4b25eafdbfa9b60c25e
 fetch sysroot.tar.bz2 https://ftp.loongnix.cn/browser/build/sysroot/debian_bullseye_loong64-sysroot.tar.bz2 34efb077fed691feac2605ec9656c8ecb40e63076fdb76ae06df90f279099a64
+# The new-world candidate is inspection-only until its observed hash and
+# actual libc/ABI are reviewed and pinned. Never publish it based on its name.
+fetch sysroot-newworld.tar.bz2 https://ftp.loongnix.cn/browser/build/sysroot/debian_bullseye_loongarch64-sysroot.tar.bz2
 fetch libffi6.deb https://archive.debian.org/debian/pool/main/libf/libffi/libffi6_3.2.1-9_amd64.deb d4d748d897e8e53aa239ead23a18724a1a30085cc6ca41a8c31b3b1e1b3452f4
 # This vendor compiler targets Debian 10 hosts. Keep its legacy libffi
 # private to this invocation; never replace the runner's system libraries.
@@ -23,6 +28,7 @@ dpkg-deb -x "$work/downloads/libffi6.deb" "$work/host-libs"
 export LD_LIBRARY_PATH="$work/host-libs/usr/lib/x86_64-linux-gnu${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 tar -xf "$work/downloads/llvm20.tar.gz" -C "$work/compiler"
 tar -xf "$work/downloads/sysroot.tar.bz2" -C "$work/sysroot"
+tar -xf "$work/downloads/sysroot-newworld.tar.bz2" -C "$work/sysroot"
 compiler="$(find "$work/compiler" -type f -name clang -print -quit)"
 if [[ -z "$compiler" ]]; then
   compiler="$(find "$work/compiler" -type f -name 'clang-[0-9]*' -print -quit)"
@@ -35,6 +41,8 @@ if grep -q 'not found' "$root/build-temp/logs/loong28-host-dependencies.txt"; th
 fi
 "$compiler" --version
 "$compiler" --print-targets
+"$compiler" --help-hidden >"$root/build-temp/logs/loong28-compiler-options.txt"
+find "$work/compiler" -name '*clang*' -print >"$root/build-temp/logs/loong28-compiler-files.txt"
 printf 'int probe(void) { return 42; }\n' >"$work/probe.c"
 python3 - "$work" "$compiler" <<'PY'
 import json, re, struct, subprocess, sys
