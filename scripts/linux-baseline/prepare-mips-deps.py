@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Audit graphical packages before merging into the source-built glibc 2.17 root."""
 
+import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -19,19 +20,44 @@ def digest(path):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--base-toolchain', type=Path)
+    args = parser.parse_args()
     prefix = ROOT / "build-temp/baseline-mips64el"
     prepared = prefix / "graphics-inputs"
     lock = ROOT / "scripts/linux-baseline/mips-graphics.lock.json"
     config = json.loads(lock.read_text())
+    base_record = None
+    if args.base_toolchain:
+        base = args.base_toolchain.resolve()
+        base_record = json.loads((ROOT / 'scripts/linux-baseline/toolchains.lock.json').read_text())['targets']['mips64el']
+        if not (base / ('.accepted-' + base_record['sha256'])).is_file():
+            raise ValueError('MIPS supplement requires the checksum-verified released base')
+        manifest = json.loads((base / 'toolchain.json').read_text())
+        if manifest['target'] != 'mips64el' or manifest['glibc'] != '2.17':
+            raise ValueError('MIPS supplement base target/baseline mismatch')
+        prefix.mkdir(parents=True, exist_ok=True)
+        subprocess.check_call(['cp', '-a', str(base) + '/.', str(prefix) + '/'])
+        for marker in prefix.glob('.accepted-*'):
+            marker.unlink()
+        (prefix / '.reuse-published-llvm').touch()
     excluded = set(config["excluded_core_packages"])
     if any(p["name"] in excluded for p in config["packages"]):
         raise ValueError("Core glibc/GNU packages must not enter the graphics supplement")
-    subprocess.check_call([sys.executable, str(ROOT / "scripts/prepare-linux-sysroot.py"), str(lock), str(prepared)])
+    selected_lock = lock
+    if base_record:
+        config['packages'] = [p for p in config['packages'] if p['name'] == 'liblzma5']
+        if len(config['packages']) != 1:
+            raise ValueError('Expected the pinned liblzma supplement')
+        prepared.mkdir(parents=True, exist_ok=True)
+        selected_lock = prepared / 'runtime-supplement.lock.json'
+        selected_lock.write_text(json.dumps(config, indent=2) + '\n')
+    subprocess.check_call([sys.executable, str(ROOT / "scripts/prepare-linux-sysroot.py"), str(selected_lock), str(prepared)])
     stage = prepared / "sysroot-mips64el-graphics"
     for path in stage.rglob("*"):
         if path.name in ("libc.so.6", "libc.so", "features.h", "ld.so.1") or path.name.startswith("ld-2."):
             raise ValueError("Core glibc file in graphics supplement: " + str(path))
-    llvm = ROOT / "build-temp/loong-newworld-inputs/compiler/bin/llvm-readelf"
+    llvm = prefix / 'llvm/bin/llvm-readelf' if base_record else ROOT / "build-temp/loong-newworld-inputs/compiler/bin/llvm-readelf"
     # The source distribution's glibc version is not an acceptance claim.
     # Reject any actual ELF that needs a newer libc before copying a byte.
     audit = runpy.run_path(str(ROOT / "scripts/package-linux.py"))["audit"]
@@ -89,6 +115,9 @@ def main():
             shutil.copy2(library, output, follow_symlinks=False)
     provenance = prefix / "share/baseline"
     provenance.mkdir(parents=True, exist_ok=True)
+    if base_record:
+        (provenance / 'runtime-supplement-base.json').write_text(json.dumps(
+            dict(base=base_record, added_packages=config['packages']), indent=2) + '\n')
     (provenance / lock.name).write_bytes(lock.read_bytes())
     (provenance / "graphics-glibc-audit.json").write_text(json.dumps(
         dict(glibc="2.17", libc_sha256=before, packages=len(config["packages"]),

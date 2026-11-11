@@ -319,6 +319,16 @@
       "pre_depends": ""
     },
     {
+      "name": "liblzma5",
+      "version": "5.2.2-1.2+b1",
+      "architecture": "mips64el",
+      "path": "pool/main/x/xz-utils/liblzma5_5.2.2-1.2+b1_mips64el.deb",
+      "sha256": "6aa3d2446b33c914a121f09204a254114e2c5809c32b18f25014aa135d00a80d",
+      "size": 232206,
+      "depends": "libc6 (>= 2.17)",
+      "pre_depends": ""
+    },
+    {
       "name": "libpcre3",
       "version": "2:8.39-3",
       "architecture": "mips64el",
@@ -1229,10 +1239,9 @@
   "excluded_target_host_tools": {
     "packages": [
       "libicu57",
-      "liblzma5",
       "libwayland-bin",
       "libxml2"
     ],
-    "reason": "The target Wayland scanner is not run during a cross build; use the published native host scanner. Its XML/ICU dependency closure must not raise the target GNU runtime floor."
+    "reason": "The target Wayland scanner is not run during a cross build; omit its XML/ICU closure. liblzma remains required by target libsystemd."
   }
 }

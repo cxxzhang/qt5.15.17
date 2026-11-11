@@ -3,7 +3,7 @@
 set -euo pipefail
 arch="${1:?cross target required}"
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-prefix="$root/build-temp/accepted-$arch"
+prefix="${QT_PACKAGING_PREFIX:-$root/build-temp/accepted-$arch}"
 mkdir -p "$root/build-temp/logs"
 if [[ -n "${SUDO_UID:-}" && -n "${SUDO_GID:-}" ]]; then
   chown "$SUDO_UID:$SUDO_GID" "$root/build-temp/logs"
@@ -21,7 +21,11 @@ PY
 "$prefix/bin/clang++" -std=c++17 -pthread "$root/scripts/linux-baseline/probe.cpp" \
   '-Wl,-rpath,$ORIGIN/../lib' -o "$work/bin/probe"
 bash "$root/scripts/linux-baseline/copy-cross-runtime.sh" "$prefix" "$work/lib"
+if [[ -d "$prefix/dependencies/lib" ]]; then
+  cp -a "$prefix/dependencies/lib/." "$work/lib/"
+fi
 for elf in "$work/bin/probe" "$work/lib/"*; do
+  [[ ! -L "$elf" ]] || continue
   "$prefix/llvm/bin/llvm-readelf" -lW "$elf" >"$work/$(basename "$elf").original.txt"
   "$prefix/llvm/bin/llvm-strip" --strip-unneeded "$elf"
   "$prefix/llvm/bin/llvm-readelf" -lW "$elf" >"$work/$(basename "$elf").stripped.txt"

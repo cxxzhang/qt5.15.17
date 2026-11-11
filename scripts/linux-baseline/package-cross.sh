@@ -26,7 +26,11 @@ case "$arch" in
     qemu="$vendor_work/downloads/qemu-loongarch64"
     ;;
   mips64el)
-    source "$root/scripts/linux-baseline/load-upstream-clang.sh"
+    if [[ -f "$prefix/.reuse-published-llvm" ]]; then
+      vendor_compiler="$prefix/llvm/bin/clang"
+    else
+      source "$root/scripts/linux-baseline/load-upstream-clang.sh"
+    fi
     gcc="$(find -L "$prefix/gcc/bin" -name '*-gcc' -type f -print -quit)"
     triple="$("$gcc" -dumpmachine)"
     sysroot="$("$gcc" -print-sysroot)"
@@ -36,6 +40,7 @@ case "$arch" in
     target_flags='-march=mips64r2 -mabi=64 -EL'
     linker_rel="gcc/bin/$triple-ld"
     qemu="$prefix/qemu/usr/bin/qemu-mips64el-static"
+    [[ ! -f "$prefix/.reuse-published-llvm" ]] || qemu="$prefix/bin/qemu"
     ;;
   *) exit 2 ;;
 esac
@@ -60,7 +65,7 @@ if [[ "$arch" == loong64-oldworld ]]; then
   cp -a "$vendor_work/host-libs" "$prefix/"
   python3 "$root/scripts/linux-baseline/wrap-vendor-host-tools.py" "$prefix"
 fi
-cp "$qemu" "$prefix/bin/qemu"
+[[ "$qemu" == "$prefix/bin/qemu" ]] || cp "$qemu" "$prefix/bin/qemu"
 cp "$root/scripts/linux-baseline/targets.json" "$root/scripts/linux-baseline/package-cross.sh" \
   "$root/scripts/linux-baseline/prepare-loongarch-oldworld.sh" "$root/scripts/linux-baseline/probe-mips.sh" \
   "$root/scripts/linux-baseline/prepare-mips.sh" "$root/scripts/linux-baseline/load-upstream-clang.sh" \
@@ -174,6 +179,7 @@ PY
 mv "$rel" "$prefix"
 rmdir "$relocated"
 trap - EXIT
+sudo env QT_PACKAGING_PREFIX="$prefix" bash "$root/scripts/linux-baseline/test-cross-packaging.sh" "$arch"
 name="toolchain-linux-$arch-glibc${baseline//./}.tar.xz"
 XZ_OPT='-T2 -3' tar -C "$prefix" --exclude=./graphics-inputs --exclude=./downloads \
   --exclude=./qemu -cJf "$root/Output/toolchains/$name" .
