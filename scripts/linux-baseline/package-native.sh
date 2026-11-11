@@ -29,6 +29,7 @@ tar -C / --no-recursion -cf - -T "$prefix/share/baseline/sysroot-files.txt" \
   | tar -C "$prefix/sysroot" -xf -
 test -f "$prefix/sysroot/usr/include/features.h"
 test -e "$prefix/sysroot/lib64/libc.so.6"
+test -f "$prefix/sysroot/usr/lib64/Scrt1.o"
 cp -a "$root/scripts/linux-baseline/glibc-licenses" "$prefix/share/baseline/"
 cp "$root/scripts/linux-baseline/targets.json" "$prefix/share/baseline/"
 cp -a "$root/scripts/linux-baseline/llvm-licenses" "$prefix/share/baseline/"
@@ -60,7 +61,10 @@ for argument in "\$@"; do
   [[ "\$argument" != -print-multi-os-directory ]] || { echo .; exit 0; }
 done
 exec "\$prefix/clang/bin/$name" --target="$gcc_triple" --sysroot="\$prefix/sysroot" \
-  --gcc-toolchain="\$prefix/gcc" --gcc-triple="$gcc_triple" -fuse-ld=lld "\$@"
+  --gcc-install-dir="\$prefix/gcc/lib/gcc/$gcc_triple/13.3.0" -fuse-ld=lld \
+  -B"\$prefix/sysroot/usr/lib64/" -L"\$prefix/gcc/lib64" \
+  -L"\$prefix/sysroot/usr/lib64" -L"\$prefix/sysroot/lib64" \
+  -Wl,-rpath-link,"\$prefix/sysroot/lib64" "\$@"
 EOF
   chmod +x "$prefix/bin/$name"
 done
@@ -80,6 +84,8 @@ bash "$root/scripts/linux-baseline/probe-mixed-cxx.sh" "$rel"
 python3 "$root/scripts/package-linux.py" "$rel/probe-sdk" --audit-only \
   --machine "$machine" --glibc 2.17 --native-dependencies --readelf "$rel/clang/bin/llvm-readelf"
 env -u LD_LIBRARY_PATH -u LD_PRELOAD "$rel/gcc/bin/g++" --sysroot="$rel/sysroot" -std=c++20 -pthread "$rel/probe.cpp" \
+  -B"$rel/sysroot/usr/lib64/" -L"$rel/gcc/lib64" \
+  -L"$rel/sysroot/usr/lib64" -L"$rel/sysroot/lib64" \
   '-Wl,-rpath,$ORIGIN/../lib' -o "$rel/probe-sdk/bin/gcc-probe"
 env -u LD_LIBRARY_PATH -u LD_PRELOAD "$rel/probe-sdk/bin/gcc-probe"
 mv "$rel" "$prefix"

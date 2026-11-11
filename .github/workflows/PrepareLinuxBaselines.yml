@@ -76,7 +76,7 @@ jobs:
           bash scripts/linux-baseline/prepare-native.sh "$TARGET" \
           2>&1 | tee "build-temp/logs/$TARGET-217-toolchain.log"
         docker run --rm -v "$PWD:/workspace" -w /workspace "$pinned" \
-          bash -ec 'export PATH=/opt/python/cp311-cp311/bin:$PATH; bash scripts/linux-baseline/package-native.sh "$1"' _ "$TARGET" \
+          bash -ec 'export PATH=/opt/python/cp311-cp311/bin:$PATH; bash scripts/linux-baseline/prepare-native-deps.sh "$1"; bash scripts/linux-baseline/package-native.sh "$1"' _ "$TARGET" \
           2>&1 | tee "build-temp/logs/$TARGET-217-packaging.log"
     - uses: actions/cache/save@v4
       if: always() && steps.baseline-cache.outputs.cache-hit != 'true' && hashFiles(format('build-temp/baseline-{0}/gcc/.ready', matrix.arch)) != ''

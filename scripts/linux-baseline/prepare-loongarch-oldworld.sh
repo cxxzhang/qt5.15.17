@@ -40,13 +40,13 @@ for argument in "\$@"; do
   [[ "\$argument" != -print-multi-os-directory ]] || { echo .; exit 0; }
 done
 extra=()
-if [[ "$name" == clang++ && -f "$prefix/runtime/.symvers-gnu" ]]; then
+if [[ "$name" == clang++ && -f "$prefix/runtime/.lld-symvers-verified" ]]; then
   extra=(-nostdinc++ -isystem "$prefix/runtime/include/c++/13.3.0" \
     -isystem "$prefix/runtime/include/c++/13.3.0/loongarch64-linux-gnu" -L"$prefix/runtime/lib")
 fi
 exec "$vendor_compiler" --driver-mode="$([[ "$name" == clang++ ]] && echo g++ || echo gcc)" \
   --target=loongarch64-linux-gnu -mabi="$abi" --sysroot="$sysroot" \
-  --gcc-install-dir="$gcc_install" --ld-path="$compiler_bin/ld.lld" \
+  --gcc-install-dir="$gcc_install" --ld-path="$compiler_bin/ld.lld" -Wno-unused-command-line-argument \
   -Wl,-rpath-link,"$sysroot/lib/loongarch64-linux-gnu" \
   -Wl,-rpath-link,"$sysroot/usr/lib/loongarch64-linux-gnu" \${extra[@]+"\${extra[@]}"} "\$@"
 EOF
@@ -56,10 +56,33 @@ write_driver clang
 write_driver clang++
 archive="$vendor_work/downloads/gcc-13.3.0.tar.xz"
 vendor_fetch gcc-13.3.0.tar.xz https://gcc.gnu.org/pub/gcc/releases/gcc-13.3.0/gcc-13.3.0.tar.xz 0845e9621c9543a13f484e94584a49ffc0129970e9914624235fc1d061a0c083
-if [[ ! -f "$prefix/runtime/.symvers-gnu" ]]; then
+if [[ ! -f "$prefix/runtime/.lld-symvers-verified" ]]; then
   work="$(mktemp -d)"
   trap 'cp "$work/build/config.log" "$root/build-temp/logs/loong-$world-libstdcxx-config.log" 2>/dev/null || true; rm -rf "$work"' EXIT
   tar -xf "$archive" -C "$work"
+  # GCC 13 mistakes LLD's version string for an obsolete GNU ld version,
+  # disabling GNU symbol versions even when explicitly requested. Test the
+  # real linker capability and teach configure to recognize that linker.
+  printf 'int baseline_symbol(void) { return 42; }\n' >"$work/symver.c"
+  printf 'BASELINE_1 { global: baseline_symbol; local: *; };\n' >"$work/symver.map"
+  "$prefix/bin/clang" -shared -fPIC "$work/symver.c" \
+    -Wl,--version-script="$work/symver.map" -o "$work/symver.so"
+  "$compiler_bin/llvm-readelf" -V "$work/symver.so" >"$work/symver.txt"
+  grep -q BASELINE_1 "$work/symver.txt"
+  python3 - "$work/gcc-13.3.0/libstdc++-v3" <<'PY'
+from pathlib import Path
+import sys
+root = Path(sys.argv[1])
+needle = '  elif test $glibcxx_gnu_ld_version -lt $glibcxx_min_gnu_ld_version ; then'
+replacement = '''  elif "$LD" --version 2>/dev/null | grep -q 'LLD'; then
+    : LLD GNU symbol versioning was verified by the baseline builder.
+''' + needle
+for name in ('configure', 'acinclude.m4'):
+    path = root / name
+    text = path.read_text()
+    assert text.count(needle) == 1, name
+    path.write_text(text.replace(needle, replacement))
+PY
   ln -s gthr-posix.h "$work/gcc-13.3.0/libgcc/gthr-default.h"
   python3 - "$work/gcc-13.3.0/libstdc++-v3/src/c++11/Makefile.in" <<'PY'
 from pathlib import Path
@@ -92,8 +115,9 @@ PY
   touch "$prefix/runtime/.ready"
   touch "$prefix/runtime/.symvers-gnu"
 fi
-readelf -V "$prefix/runtime/lib/libstdc++.so.6" >"$root/build-temp/logs/loong-$world-libstdcxx-versions.txt"
+"$compiler_bin/llvm-readelf" -V "$prefix/runtime/lib/libstdc++.so.6" >"$root/build-temp/logs/loong-$world-libstdcxx-versions.txt"
 grep -q 'GLIBCXX_3.4.32' "$root/build-temp/logs/loong-$world-libstdcxx-versions.txt"
+touch "$prefix/runtime/.lld-symvers-verified"
 mkdir -p "$prefix/probe-sdk/bin" "$prefix/probe-sdk/lib"
 cp -L "$prefix/runtime/lib/libstdc++.so.6" "$prefix/probe-sdk/lib/"
 cp -L "$("$prefix/bin/clang" -print-file-name=libgcc_s.so.1)" "$prefix/probe-sdk/lib/"
@@ -133,7 +157,7 @@ CPP
 "$prefix/bin/clang++" -std=c++20 -pthread "$prefix/probe.cpp" \
   '-Wl,-rpath,$ORIGIN/lib' -o "$prefix/probe-sdk/bin/probe"
 python3 "$root/scripts/package-linux.py" "$prefix/probe-sdk" --audit-only \
-  --machine LoongArch --glibc "$baseline" --interpreter "$loader"
+  --machine LoongArch --glibc "$baseline" --interpreter "$loader" --readelf "$compiler_bin/llvm-readelf"
 python3 - "$prefix/probe-sdk" "$elf_flags" <<'PY'
 from pathlib import Path
 import struct, sys

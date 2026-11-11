@@ -46,7 +46,7 @@ fi
 exec "\$prefix/llvm/bin/clang-20" --driver-mode="$mode" --target=loongarch64-linux-gnu \
   -mabi=lp64 --sysroot="\$prefix/sysroot" \
   --gcc-install-dir="\$prefix/sysroot/usr/lib/gcc/loongarch64-linux-gnu/8" \
-  --ld-path="\$prefix/llvm/bin/ld.lld" \
+  --ld-path="\$prefix/llvm/bin/ld.lld" -Wno-unused-command-line-argument \
   -Wl,-rpath-link,"\$prefix/sysroot/lib/loongarch64-linux-gnu" \
   -Wl,-rpath-link,"\$prefix/sysroot/usr/lib/loongarch64-linux-gnu" "\${extra[@]}" "\$@"
 EOF
