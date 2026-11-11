@@ -31,14 +31,14 @@
     "mips64el": {
       "schema": 1,
       "tag": "linux-toolchains-v1",
-      "filename": "toolchain-linux-mips64el-glibc217-9b6f345e44ff.tar.xz",
+      "filename": "toolchain-linux-mips64el-glibc217-ecd3d59eb546.tar.xz",
       "original_filename": "toolchain-linux-mips64el-glibc217.tar.xz",
-      "sha256": "9b6f345e44ffb7292e0cd0498dd8ba14ca3343b69d910d174a805853b82aa4a1",
-      "size": 1497891076,
-      "asset_id": 735103858,
-      "api_url": "https://api.github.com/repos/cxxzhang/qt5.15.17/releases/assets/735103858",
-      "source_commit": "cf0895478d6bf54f2672baf2a16eb2ace43b3ce8",
-      "source_run": "43002856553",
+      "sha256": "ecd3d59eb5462eb31dad4c3514c472e44e903cd3afc95f8e9aee2d995ad769dd",
+      "size": 1510301136,
+      "asset_id": 735271486,
+      "api_url": "https://api.github.com/repos/cxxzhang/qt5.15.17/releases/assets/735271486",
+      "source_commit": "d663d45d7cf70a7aec6d35b3cba48c4a99092509",
+      "source_run": "43009985057",
       "source_repository": "cxxzhang/qt5.15.17"
     },
     "loong64-oldworld": {

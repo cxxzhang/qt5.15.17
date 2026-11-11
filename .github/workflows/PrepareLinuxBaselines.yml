@@ -395,6 +395,8 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
         set -o pipefail
+        # The dependency installer runs as root; packaging rewrites host .pc files.
+        sudo chown -R "$(id -u):$(id -g)" build-temp/baseline-loong64-newworld
         bash scripts/linux-baseline/package-cross.sh loong64-newworld 2>&1 | tee build-temp/logs/loong-newworld-packaging.log
     - uses: actions/upload-artifact@v4
       with:
