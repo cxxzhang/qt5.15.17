@@ -18,6 +18,7 @@ install="$source_dir/Output/$tag"
 mkdir -p "$work" "$source_dir/Output"
 [[ ! -e "$install" ]] || { echo "Remove or move the previous SDK: $install" >&2; exit 1; }
 build="$(mktemp -d "$work/build.XXXXXXXX")"
+source "$source_dir/scripts/linux-build-diagnostics.sh"
 jobs="${QT_BUILD_JOBS:-$(nproc)}"
 export CC="${CC:-clang}" CXX="${CXX:-clang++}"
 export CFLAGS=-fPIC
