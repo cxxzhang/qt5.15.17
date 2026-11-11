@@ -5,6 +5,9 @@ arch="${1:?cross target required}"
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 prefix="$root/build-temp/accepted-$arch"
 mkdir -p "$root/build-temp/logs"
+if [[ -n "${SUDO_UID:-}" && -n "${SUDO_GID:-}" ]]; then
+  chown "$SUDO_UID:$SUDO_GID" "$root/build-temp/logs"
+fi
 work="$(mktemp -d "$root/build-temp/logs/packaging-probe-$arch.XXXXXXXX")"
 trap 'chmod -R a+rX "$work"' EXIT
 echo "Packaging probe evidence: $work"
