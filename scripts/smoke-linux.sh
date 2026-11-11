@@ -116,6 +116,9 @@ EOF
   if [[ -n "${QT_SMOKE_QMAKE_SPEC:-}" ]]; then
     qmake_args=(-spec "$QT_SMOKE_QMAKE_SPEC" smoke.pro)
   fi
+  if [[ -n "${QT_SMOKE_APPLE_ARCHS:-}" ]]; then
+    qmake_args+=("QMAKE_APPLE_DEVICE_ARCHS=$QT_SMOKE_APPLE_ARCHS")
+  fi
   # Exercise the installed qmake/mkspecs and SDK relocation, not only
   # compilation with manually supplied include/library search paths.
   env -u LD_LIBRARY_PATH "$qmake" "${qmake_args[@]}" \

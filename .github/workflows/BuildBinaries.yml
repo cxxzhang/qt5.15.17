@@ -24,6 +24,13 @@ permissions:
   actions: read
 
 jobs:
+  release-gates:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+    - name: Check complete-platform publication rejection gates
+      run: python3 -B scripts/test-collect-release.py
+
   windows-x86:
     needs: linux
     if: inputs.scope == 'all'
@@ -54,9 +61,15 @@ jobs:
           git config --global user.name "GitHub Actions"
           call C:\workspaces\qt5.15.17\apply-patches.bat
           call C:\workspaces\qt5.15.17\onekey-build-windows-x86.bat
+    - name: Verify the installed Windows qmake
+      shell: pwsh
+      run: |
+        $version = & "C:/workspaces/qt5.15.17/Output/x86/bin/qmake.exe" -query QT_VERSION
+        if ($LASTEXITCODE -ne 0 -or $version.Trim() -ne "5.15.17") { throw "Invalid installed qmake" }
     - uses: actions/upload-artifact@v4
       with:
         name: qt5.15.17_windows_x86.zip
+        if-no-files-found: error
         path: C:\workspaces\qt5.15.17\Output\x86
 
   windows-x64:
@@ -89,9 +102,15 @@ jobs:
           git config --global user.name "GitHub Actions"
           call C:\workspaces\qt5.15.17\apply-patches.bat
           call C:\workspaces\qt5.15.17\onekey-build-windows-x64.bat
+    - name: Verify the installed Windows qmake
+      shell: pwsh
+      run: |
+        $version = & "C:/workspaces/qt5.15.17/Output/x64/bin/qmake.exe" -query QT_VERSION
+        if ($LASTEXITCODE -ne 0 -or $version.Trim() -ne "5.15.17") { throw "Invalid installed qmake" }
     - uses: actions/upload-artifact@v4
       with:
         name: qt5.15.17_windows_x64.zip
+        if-no-files-found: error
         path: C:\workspaces\qt5.15.17\Output\x64
 
   windows-arm64:
@@ -124,9 +143,15 @@ jobs:
           git config --global user.name "GitHub Actions"
           call C:\workspaces\qt5.15.17\apply-patches.bat
           call C:\workspaces\qt5.15.17\onekey-build-windows-arm64.bat
+    - name: Verify the installed Windows qmake
+      shell: pwsh
+      run: |
+        $version = & "C:/workspaces/qt5.15.17/Output/arm64/bin/qmake.exe" -query QT_VERSION
+        if ($LASTEXITCODE -ne 0 -or $version.Trim() -ne "5.15.17") { throw "Invalid installed qmake" }
     - uses: actions/upload-artifact@v4
       with:
         name: qt5.15.17_windows_arm64.zip
+        if-no-files-found: error
         path: C:\workspaces\qt5.15.17\Output\arm64
 
   windows-x86-debug:
@@ -159,9 +184,15 @@ jobs:
           git config --global user.name "GitHub Actions"
           call C:\workspaces\qt5.15.17\apply-patches.bat
           call C:\workspaces\qt5.15.17\onekey-build-windows-x86-debug.bat
+    - name: Verify the installed Windows qmake
+      shell: pwsh
+      run: |
+        $version = & "C:/workspaces/qt5.15.17/Output/x86d/bin/qmake.exe" -query QT_VERSION
+        if ($LASTEXITCODE -ne 0 -or $version.Trim() -ne "5.15.17") { throw "Invalid installed qmake" }
     - uses: actions/upload-artifact@v4
       with:
         name: qt5.15.17_windows_x86_debug.zip
+        if-no-files-found: error
         path: C:\workspaces\qt5.15.17\Output\x86d
 
   windows-x64-debug:
@@ -194,9 +225,15 @@ jobs:
           git config --global user.name "GitHub Actions"
           call C:\workspaces\qt5.15.17\apply-patches.bat
           call C:\workspaces\qt5.15.17\onekey-build-windows-x64-debug.bat
+    - name: Verify the installed Windows qmake
+      shell: pwsh
+      run: |
+        $version = & "C:/workspaces/qt5.15.17/Output/x64d/bin/qmake.exe" -query QT_VERSION
+        if ($LASTEXITCODE -ne 0 -or $version.Trim() -ne "5.15.17") { throw "Invalid installed qmake" }
     - uses: actions/upload-artifact@v4
       with:
         name: qt5.15.17_windows_x64_debug.zip
+        if-no-files-found: error
         path: C:\workspaces\qt5.15.17\Output\x64d
 
   windows-arm64-debug:
@@ -229,9 +266,15 @@ jobs:
           git config --global user.name "GitHub Actions"
           call C:\workspaces\qt5.15.17\apply-patches.bat
           call C:\workspaces\qt5.15.17\onekey-build-windows-arm64-debug.bat
+    - name: Verify the installed Windows qmake
+      shell: pwsh
+      run: |
+        $version = & "C:/workspaces/qt5.15.17/Output/arm64d/bin/qmake.exe" -query QT_VERSION
+        if ($LASTEXITCODE -ne 0 -or $version.Trim() -ne "5.15.17") { throw "Invalid installed qmake" }
     - uses: actions/upload-artifact@v4
       with:
         name: qt5.15.17_windows_arm64_debug.zip
+        if-no-files-found: error
         path: C:\workspaces\qt5.15.17\Output\arm64d
 
   linux:
@@ -256,10 +299,15 @@ jobs:
         git config --global user.name "GitHub Actions"
     - name: Build qt5 macOS x64
       run: bash ./onekey-build-macos-x64.sh
+    - name: Audit and archive the x64 SDK with executable permissions
+      run: |
+        python3 scripts/macos-sdk.py audit Output/macos-x64 x86_64
+        tar -C Output/macos-x64 -czf Output/qt5.15.17_macos_x64.tar.gz .
     - uses: actions/upload-artifact@v4
       with:
         name: qt5.15.17_macos_x64
-        path: ${{ github.workspace }}/Output/macos-x64
+        path: Output/qt5.15.17_macos_x64.tar.gz
+        if-no-files-found: error
 
   macos-arm64:
     needs: linux
@@ -277,10 +325,15 @@ jobs:
         git config --global user.name "GitHub Actions"
     - name: Build qt5 macOS arm64
       run: bash ./onekey-build-macos-arm64.sh
+    - name: Audit and archive the ARM64 SDK with executable permissions
+      run: |
+        python3 scripts/macos-sdk.py audit Output/macos-arm64 arm64
+        tar -C Output/macos-arm64 -czf Output/qt5.15.17_macos_arm64.tar.gz .
     - uses: actions/upload-artifact@v4
       with:
         name: qt5.15.17_macos_arm64
-        path: ${{ github.workspace }}/Output/macos-arm64
+        path: Output/qt5.15.17_macos_arm64.tar.gz
+        if-no-files-found: error
 
 
   macos-universal:
@@ -289,49 +342,59 @@ jobs:
     - macos-arm64
     runs-on: macos-14
     steps:
+    - uses: actions/checkout@v4
     - name: Download macOS x64 artifact
       uses: actions/download-artifact@v4
       with:
         name: qt5.15.17_macos_x64
-        path: ./macos-x64
+        path: ./archives
     - name: Download macOS arm64 artifact
       uses: actions/download-artifact@v4
       with:
         name: qt5.15.17_macos_arm64
-        path: ./macos-arm64
+        path: ./archives
     - name: Create universal binaries
       run: |
-        mkdir -p macos-universal
-
-        # Copy arm64 as base (preserves directory structure)
-        cp -R macos-arm64/* macos-universal/
-
-        # Find and merge all Mach-O binaries using lipo
-        find macos-arm64 -type f | while read arm64_file; do
-          rel_path="${arm64_file#macos-arm64/}"
-          x64_file="macos-x64/$rel_path"
-          universal_file="macos-universal/$rel_path"
-
-          # Check if x64 counterpart exists
-          if [ -f "$x64_file" ]; then
-            # Check if it's a Mach-O binary
-            if file "$arm64_file" | grep -q "Mach-O"; then
-              echo "Creating universal binary: $rel_path"
-              lipo -create "$x64_file" "$arm64_file" -output "$universal_file"
-            fi
-          fi
-        done
-
-        echo "Universal binary creation completed"
+        mkdir -p macos-x64 macos-arm64
+        tar -xzf archives/qt5.15.17_macos_x64.tar.gz -C macos-x64
+        tar -xzf archives/qt5.15.17_macos_arm64.tar.gz -C macos-arm64
+        python3 scripts/macos-sdk.py merge macos-x64 macos-arm64 macos-universal
+        tar -C macos-universal -czf qt5.15.17_macos_universal.tar.gz .
     - uses: actions/upload-artifact@v4
       with:
         name: qt5.15.17_macos_universal
-        path: ./macos-universal
+        path: qt5.15.17_macos_universal.tar.gz
+        if-no-files-found: error
+
+  verify-macos:
+    needs: [macos-x64, macos-arm64, macos-universal]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - {target: x64, consumer: x86_64, architectures: x86_64, runner: macos-15-intel}
+        - {target: arm64, consumer: arm64, architectures: arm64, runner: macos-14}
+        - {target: universal, consumer: x86_64, architectures: 'x86_64 arm64', runner: macos-15-intel}
+        - {target: universal, consumer: arm64, architectures: 'x86_64 arm64', runner: macos-14}
+    runs-on: ${{ matrix.runner }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/download-artifact@v4
+      with:
+        name: qt5.15.17_macos_${{ matrix.target }}
+        path: archives
+    - name: Consume the extracted SDK on its native architecture
+      run: bash scripts/verify-macos-sdk.sh "archives/qt5.15.17_macos_${{ matrix.target }}.tar.gz" "${{ matrix.target }}" "${{ matrix.consumer }}" ${{ matrix.architectures }}
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: verification-macos-${{ matrix.target }}-${{ matrix.consumer }}
+        path: build-temp/logs/
 
   release:
-    needs: [linux, windows-x86, windows-x64, windows-arm64, windows-x86-debug, windows-x64-debug, windows-arm64-debug, macos-x64, macos-arm64, macos-universal]
+    needs: [release-gates, linux, windows-x86, windows-x64, windows-arm64, windows-x86-debug, windows-x64-debug, windows-arm64-debug, macos-x64, macos-arm64, macos-universal, verify-macos]
     if: >-
-      ${{ !cancelled() && inputs.publish && needs.linux.result == 'success' &&
+      ${{ !cancelled() && inputs.publish && needs.linux.result == 'success' && needs.release-gates.result == 'success' &&
       (inputs.scope == 'linux' || inputs.scope == 'all' &&
       !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'skipped')) }}
     runs-on: ubuntu-22.04
@@ -359,10 +422,12 @@ jobs:
           case "$name" in
             diagnostics-*|verification-*|modern-consumers-*|linux-acceptance-manifest|qt5.15.17_linux_*) continue ;;
             qt5.15.17_windows_*.zip) (cd "$artifact" && zip -qr "../../release_zips/$name" .) ;;
-            qt5.15.17_macos_*) tar -C "$artifact" -czf "release_zips/$name.tar.gz" . ;;
+            qt5.15.17_macos_*) cp "$artifact/$name.tar.gz" release_zips/ ;;
             *) echo "Unexpected artifact: $name" >&2; exit 1 ;;
           esac
         done
+        python3 scripts/collect-release.py --packages release_zips --proofs release_work \
+          --scope "${{ inputs.scope }}" --run "${{ github.run_id }}" --commit "${{ github.sha }}"
     - name: Publish verified packages
       env:
         GH_TOKEN: ${{ github.token }}

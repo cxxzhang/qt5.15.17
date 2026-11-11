@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+"""Require the exact platform archive set and bind it to successful verifiers."""
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import struct
+import zipfile
+
+
+def digest(path):
+    result = hashlib.sha256()
+    with path.open('rb') as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b''):
+            result.update(block)
+    return result.hexdigest()
+
+
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+
+def collect(packages, proofs, scope, run, commit):
+    linux = json.loads((packages / 'linux-acceptance-manifest.json').read_text())
+    require(linux['accepted'] is True and linux['source_run'] == str(run)
+            and linux['source_commit'] == commit, 'Linux release provenance mismatch')
+    require({(s['target'], s['variant']) for s in linux['sdks']} ==
+            {(a, v) for a in ('x64', 'arm64', 'mips64el', 'loong64-oldworld', 'loong64-newworld')
+             for v in ('release', 'debug')} and len(linux['sdks']) == 10, 'Incomplete Linux matrix')
+    expected = {'linux-acceptance-manifest.json'}
+    for sdk in linux['sdks']:
+        for filename, checksum in sdk['archives'].items():
+            expected.add(filename)
+            require(digest(packages / filename) == checksum, 'Linux archive changed: ' + filename)
+    if scope == 'all':
+        for arch, machine in (('x86', 0x14c), ('x64', 0x8664), ('arm64', 0xaa64)):
+            for debug in (False, True):
+                filename = 'qt5.15.17_windows_' + arch + ('_debug' if debug else '') + '.zip'
+                expected.add(filename)
+                with zipfile.ZipFile(packages / filename) as sdk:
+                    names = set(sdk.namelist())
+                    require('bin/qmake.exe' in names, filename + ': missing qmake')
+                    suffix = 'd' if debug else ''
+                    for module in ('Core', 'Gui', 'Network', 'Qml'):
+                        require('bin/Qt5' + module + suffix + '.dll' in names,
+                                filename + ': missing Qt module ' + module)
+                    require('lib/Qt5Core' + suffix + '.lib' in names, filename + ': missing import library')
+                    count = 0
+                    for name in names:
+                        if not name.lower().endswith('.dll'):
+                            continue
+                        with sdk.open(name) as stream:
+                            header = stream.read(64)
+                            require(header[:2] == b'MZ', filename + ': invalid DLL ' + name)
+                            offset = struct.unpack_from('<I', header, 60)[0]
+                            stream.seek(offset)
+                            coff = stream.read(6)
+                        require(coff[:4] == b'PE\0\0' and struct.unpack_from('<H', coff, 4)[0] == machine,
+                                filename + ': incorrect DLL architecture ' + name)
+                        count += 1
+                    require(count > 0, filename + ': no DLLs')
+        for target, architectures, consumers in (
+                ('x64', {'x86_64'}, ('x86_64',)), ('arm64', {'arm64'}, ('arm64',)),
+                ('universal', {'x86_64', 'arm64'}, ('x86_64', 'arm64'))):
+            filename = 'qt5.15.17_macos_' + target + '.tar.gz'
+            expected.add(filename)
+            for consumer in consumers:
+                name = 'verified-macos-' + target + '-' + consumer + '.json'
+                matches = list(proofs.rglob(name))
+                require(len(matches) == 1, 'Expected one macOS proof: ' + name)
+                proof = json.loads(matches[0].read_text())
+                require(proof.get('accepted') is True and proof.get('source_run') == str(run)
+                        and proof.get('source_commit') == commit, 'macOS proof provenance: ' + name)
+                require(proof.get('target') == target and proof.get('consumer_arch') == consumer
+                        and set(proof.get('architectures', [])) == architectures, 'macOS proof architecture: ' + name)
+                require({'extracted executable permissions', 'all Mach-O and static archive architectures',
+                         'qmake C++17 consumer', 'offscreen GUI/QML/fonts/TLS execution'}
+                        <= set(proof.get('checks', [])), 'Incomplete macOS checks: ' + name)
+                require(proof.get('archive') == filename and proof.get('sha256') == digest(packages / filename),
+                        'macOS archive hash mismatch: ' + name)
+    actual = {p.name for p in packages.iterdir() if p.is_file()}
+    require(actual == expected, 'Unexpected/missing release assets: ' + str(sorted(actual ^ expected)))
+    manifest = dict(accepted=True, source_run=str(run), source_commit=commit, scope=scope,
+                    assets={name: digest(packages / name) for name in sorted(expected)})
+    (packages / 'release-acceptance-manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
+    (packages / 'SHA256SUMS').write_text(''.join(
+        digest(path) + '  ' + path.name + '\n' for path in sorted(packages.iterdir())
+        if path.is_file() and path.name != 'SHA256SUMS'))
+    print('Validated {} release inputs; wrote complete provenance and SHA256SUMS'.format(len(expected)))
+    return manifest
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--packages', type=Path, required=True)
+    parser.add_argument('--proofs', type=Path, required=True)
+    parser.add_argument('--scope', choices=('all', 'linux'), required=True)
+    parser.add_argument('--run', required=True)
+    parser.add_argument('--commit', required=True)
+    args = parser.parse_args()
+    collect(args.packages, args.proofs, args.scope, args.run, args.commit)
