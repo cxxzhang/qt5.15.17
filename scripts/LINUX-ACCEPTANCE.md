@@ -39,8 +39,11 @@ libtool following an absolute target library path outside the sysroot. The
 dependency configure commands now pass libtool's explicit `--with-sysroot`;
 run `42968482270` then built the XCB, Wayland, xkbcommon and GLVND libraries.
 The final GLU dependency needed an explicit `stddef.h` include for `NULL`
-with the newer GL headers. That source fix is now applied; the next run must
-prove the complete dependency chain and Qt SDK.
+with the newer GL headers. Run `42969467526` passed that C compilation and
+then reached legacy C++ code using `register`, which Clang's default C++17
+rejects. GLU is now compiled as C++11 with the same Clang/libstdc++ toolchain;
+the Qt SDK consumer remains C++20. The next run must prove the complete
+dependency chain and Qt SDK.
 
 The fixed upstream toolchain digests were recorded successfully in run
 `42964385726` and committed in `69020f2c`. Configured target baselines and

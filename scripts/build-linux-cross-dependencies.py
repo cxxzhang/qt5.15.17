@@ -84,7 +84,10 @@ def main():
             error_source.write_text(content.replace('#include "gluos.h"',
                                                    '#include <stddef.h>\n#include "gluos.h"'))
         # Native source packages may omit the generated autotools files.
-        env = dict(os.environ, PYTHON="python3") if is_host else target_env
+        env = dict(os.environ, PYTHON="python3") if is_host else dict(target_env)
+        if name == "libglu":
+            # GLU 9.0 predates C++17's removal of the register keyword.
+            env["CXXFLAGS"] += " -std=gnu++11"
         if not (project / "configure").is_file():
             run("autoreconf", "-fi", cwd=str(project), env=env)
         for filename in ("config.sub", "config.guess"):
