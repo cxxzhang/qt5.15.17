@@ -19,7 +19,7 @@ for name in libstdc++.so.6 libgcc_s.so.1; do
   cp -L "$prefix/probe-sdk/lib/$name" "$work/lib/$name"
 done
 for elf in "$work/bin/probe" "$work/lib/"*; do
-  "$prefix/llvm/bin/llvm-strip" --strip-debug "$elf"
+  "$prefix/llvm/bin/llvm-strip" --strip-unneeded "$elf"
   rel="$(realpath --relative-to="$(dirname "$elf")" "$work/lib")"
   python3 "$root/scripts/elf-load-alignment.py" "$elf" "\$ORIGIN/$rel"
 done
@@ -39,3 +39,6 @@ try:
 finally:
     target.close()
 PY
+python3 "$root/scripts/audit-linux-cross-runtime.py" "$work" \
+  --sysroot "$prefix/${settings[0]}" --qemu "$prefix/bin/qemu" \
+  --loader "${settings[1]}" --readelf "$prefix/llvm/bin/llvm-readelf"
