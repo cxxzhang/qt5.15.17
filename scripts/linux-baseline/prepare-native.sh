@@ -36,6 +36,16 @@ if [[ ! -x "$prefix/clang/bin/clang++" ]]; then
   tar -xf "$work/clang.tar.xz" -C "$prefix"
 fi
 compiler="$prefix/clang/bin"
+for pair in llvm-ranlib:llvm-ar llvm-strip:llvm-objcopy llvm-readelf:llvm-readobj; do
+  alias_name="${pair%%:*}"
+  executable="${pair#*:}"
+  if [[ ! -e "$compiler/$alias_name" && -x "$compiler/$executable" ]]; then
+    ln -s "$executable" "$compiler/$alias_name"
+  fi
+done
+for tool in clang clang++ llvm-ar llvm-ranlib llvm-nm llvm-strip llvm-readelf ld.lld; do
+  [[ -x "$compiler/$tool" ]] || { echo "Missing required LLVM tool: $tool" >&2; exit 1; }
+done
 "$compiler/clang++" --version
 gcc_triple="$(gcc -dumpmachine)"
 gcc_root="${DEVTOOLSET_ROOTPATH:-}/usr"
