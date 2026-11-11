@@ -30,7 +30,7 @@ EOF
 done
 "$gnu_cxx" --version >"$root/build-temp/logs/modern-gcc-$arch-$variant.txt"
 "$work/bin/clang++" --version >"$root/build-temp/logs/modern-clang-$arch-$variant.txt"
-CC="$gnu_cc" CXX="$gnu_cxx" bash "$root/scripts/smoke-linux.sh" "$work/sdk" "$work/gnu"
+QT_SMOKE_QMAKE_SPEC=linux-g++ CC="$gnu_cc" CXX="$gnu_cxx" bash "$root/scripts/smoke-linux.sh" "$work/sdk" "$work/gnu"
 CC="$work/bin/clang" CXX="$work/bin/clang++" bash "$root/scripts/smoke-linux.sh" "$work/sdk" "$work/clang"
 python3 - "$arch" "$variant" "$artifacts" "$root/build-temp/logs" <<'PY'
 import hashlib, json, os, sys
