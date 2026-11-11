@@ -65,7 +65,7 @@ record = dict(target=arch, variant=variant, glibc=baseline, accepted=True,
               verifier_commit=os.environ.get('GITHUB_SHA'),
               archives={suffix: digest(Path(artifacts, name + suffix)) for suffix in ('.tar.gz', '-symbols.tar.gz')},
               checks=['ELF ABI/versions/strip', 'matching symbols/debuglink CRC', 'private C++ runtime resolution',
-                      'extracted qmake C++20 consumer', 'offscreen GUI/QML/fonts/TLS runtime'])
+                      'extracted qmake C++17 consumer', 'offscreen GUI/QML/fonts/TLS runtime'])
 Path(logs, 'verified-' + arch + '-' + variant + '.json').write_text(json.dumps(record, indent=2) + '\n')
 PY
 echo "$arch/$variant: independent extracted SDK acceptance passed"

@@ -25,25 +25,13 @@ cat >"$work/main.cpp" <<'EOF'
 #include <QtQml/QQmlEngine>
 #include <QtCore/QScopedPointer>
 #include <algorithm>
-#include <concepts>
-#include <coroutine>
 #include <exception>
-#include <ranges>
-#include <span>
+#include <utility>
 
-struct Done {
-    struct promise_type {
-        Done get_return_object() { return {}; }
-        std::suspend_never initial_suspend() noexcept { return {}; }
-        std::suspend_never final_suspend() noexcept { return {}; }
-        void return_void() {}
-        void unhandled_exception() { std::terminate(); }
-    };
-};
-Done probe(std::integral auto value, int &result) {
-    int values[]{value, value + 1};
-    result = *std::ranges::find(std::span{values}, value + 1);
-    co_return;
+void probe(int value, int &result) {
+    // C++17 language support does not require a new GNU standard library.
+    auto [first, second] = std::make_pair(value, value + 1);
+    result = std::max(first, second);
 }
 class TlsServer : public QTcpServer {
 public:
@@ -110,7 +98,7 @@ cat >"$work/smoke.pro" <<'EOF'
 QT += core gui network qml
 TEMPLATE = app
 TARGET = smoke
-CONFIG += console c++2a
+CONFIG += console c++17
 CONFIG -= app_bundle
 SOURCES += main.cpp
 RESOURCES += tls.qrc

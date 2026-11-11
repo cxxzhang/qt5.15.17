@@ -47,95 +47,79 @@ for tool in clang clang++ llvm-ar llvm-ranlib llvm-nm llvm-strip llvm-readelf ld
   [[ -x "$compiler/$tool" ]] || { echo "Missing required LLVM tool: $tool" >&2; exit 1; }
 done
 "$compiler/clang++" --version
-gcc_triple="$(gcc -dumpmachine)"
 gcc_root="$prefix/gcc"
-# Build GCC with GCC: libstdc++ uses GCC-specific target builtins. Qt and
-# consumers below still use Clang exclusively. Install the full GNU toolchain
-# so it can be released instead of depending on the image's /opt/rh tree.
-if [[ ! -f "$gcc_root/.ready" ]]; then
-  fetch libstdcxx "$work/gcc.tar.xz"
-  tar -xf "$work/gcc.tar.xz" -C "$work"
-  (
-    cd "$work/gcc-13.3.0"
-    ./contrib/download_prerequisites
-  )
-  mkdir "$work/build"
-  (
-    cd "$work/build"
-    "$work/gcc-13.3.0/configure" --prefix="$gcc_root" \
-      --disable-bootstrap --disable-multilib --disable-libsanitizer \
-      --disable-libquadmath --disable-libgomp --disable-libssp \
-      --disable-libvtv --disable-nls --enable-languages=c,c++ \
-      --with-pkgversion='Qt Linux baseline GNU support 13.3.0'
-    make -j"${BASELINE_JOBS:-4}"
-    make install
-    cp config.log "$root/build-temp/logs/$arch-gcc-config.log"
-    cp "$work/gcc-13.3.0/contrib/prerequisites.sha512" "$gcc_root/"
-    cp "$work/gcc-13.3.0/COPYING" "$work/gcc-13.3.0/COPYING3" \
-      "$work/gcc-13.3.0/COPYING.RUNTIME" "$gcc_root/"
-  )
-  touch "$gcc_root/.ready"
+# Reuse the image's GNU tools, but use its original system C++ headers and
+# shared runtime. SCL compiler age must not raise the target runtime floor.
+if [[ ! -f "$gcc_root/.system-runtime" ]]; then
+  test ! -e "$gcc_root/.ready"
+  image_gcc="$(command -v gcc)"
+  image_gnu="$(cd "$(dirname "$image_gcc")/.." && pwd)"
+  [[ "$image_gnu" == /opt/rh/*/root/usr ]]
+  cp -a "$image_gnu" "$gcc_root"
+  headers="$(find /usr/include/c++ -mindepth 1 -maxdepth 1 -type d | sort -V | head -n1)"
+  test -n "$headers"
+  mkdir -p "$gcc_root/system-headers" "$gcc_root/lib64" "$prefix/share/baseline"
+  cp -a "$headers/." "$gcc_root/system-headers/"
+  for library in libstdc++.so.6 libgcc_s.so.1; do
+    if [[ -L "$gcc_root/lib64/$library" ]]; then unlink "$gcc_root/lib64/$library"; fi
+  done
+  cp -L /usr/lib64/libstdc++.so.6 "$gcc_root/lib64/libstdc++.so.6"
+  cp -L /lib64/libgcc_s.so.1 "$gcc_root/lib64/libgcc_s.so.1"
+  ln -sfn libstdc++.so.6 "$gcc_root/lib64/libstdc++.so"
+  rpm -q libstdc++ libstdc++-devel libgcc >"$prefix/share/baseline/system-gnu-rpms.txt"
+  printf '%s\n' "$headers" >"$prefix/share/baseline/system-gnu-headers.txt"
+  touch "$gcc_root/.system-runtime" "$gcc_root/.ready"
 fi
-test "$("$gcc_root/bin/gcc" -dumpfullversion)" = 13.3.0
 gcc_triple="$("$gcc_root/bin/gcc" -dumpmachine)"
+gcc_install="$(dirname "$("$gcc_root/bin/gcc" -print-libgcc-file-name)")"
+gcc_install_rel="${gcc_install#"$prefix/"}"
+header_config="$(find "$gcc_root/system-headers" -name c++config.h -print -quit)"
+test -n "$header_config"
+header_config_rel="$(dirname "$(dirname "${header_config#"$prefix/"}")")"
+python3 - "$prefix" "$gcc_install_rel" "$header_config_rel" <<'PY'
+import json, sys
+from pathlib import Path
+prefix, install, config = sys.argv[1:]
+Path(prefix, 'gnu-support.json').write_text(json.dumps(dict(
+    gcc_install=install, header_config=config, runtime_policy='baseline-system')) + '\n')
+PY
 mkdir -p "$prefix/bin"
 for name in clang clang++; do
+  mode=gcc
+  [[ "$name" != clang++ ]] || mode=g++
   cat >"$prefix/bin/$name" <<EOF
 #!/usr/bin/env bash
-for argument in "\$@"; do
-  [[ "\$argument" != -print-multi-os-directory ]] || { echo .; exit 0; }
-done
 prefix="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")/.." && pwd)"
-exec "\$prefix/clang/bin/$name" --target="$gcc_triple" --gcc-toolchain="\$prefix/gcc" --gcc-triple="$gcc_triple" -fuse-ld=lld "\$@"
+extra=()
+if [[ "$name" == clang++ ]]; then
+  extra=(-nostdinc++ -isystem "\$prefix/gcc/system-headers" \
+    -isystem "\$prefix/$header_config_rel" -isystem "\$prefix/gcc/system-headers/backward")
+fi
+exec "\$prefix/clang/bin/clang" --driver-mode=$mode --target="$gcc_triple" \
+  --gcc-install-dir="\$prefix/$gcc_install_rel" -fuse-ld=lld \
+  -L"\$prefix/gcc/lib64" "\${extra[@]}" "\$@"
 EOF
   chmod +x "$prefix/bin/$name"
 done
-stdlib="$("$gcc_root/bin/g++" -print-file-name=libstdc++.so.6)"
+stdlib="$gcc_root/lib64/libstdc++.so.6"
 test -n "$stdlib"
 runtime_lib="$(dirname "$stdlib")"
 mkdir -p "$prefix/probe-sdk/bin" "$prefix/probe-sdk/lib"
 cp -L "$stdlib" "$prefix/probe-sdk/lib/libstdc++.so.6"
-cp -L "$("$gcc_root/bin/gcc" -print-file-name=libgcc_s.so.1)" "$prefix/probe-sdk/lib/"
+cp -L "$gcc_root/lib64/libgcc_s.so.1" "$prefix/probe-sdk/lib/"
 # DT_RUNPATH on the executable is not inherited by libstdc++'s libgcc
 # dependency. Each private shared runtime must resolve its own siblings.
 patchelf --set-rpath '$ORIGIN' "$prefix/probe-sdk/lib/libstdc++.so.6"
 patchelf --set-rpath '$ORIGIN' "$prefix/probe-sdk/lib/libgcc_s.so.1"
-cat >"$prefix/probe.cpp" <<'CPP'
-#include <algorithm>
-#include <concepts>
-#include <coroutine>
-#include <exception>
-#include <format>
-#include <mutex>
-#include <ranges>
-#include <span>
-#include <thread>
-static_assert(_GLIBCXX_RELEASE == 13);
-struct Done { struct promise_type {
-    Done get_return_object() { return {}; }
-    std::suspend_never initial_suspend() noexcept { return {}; }
-    std::suspend_never final_suspend() noexcept { return {}; }
-    void return_void() {}
-    void unhandled_exception() { std::terminate(); }
-}; };
-Done calculate(std::integral auto x, int &result) {
-    int a[]{x, x + 1};
-    result = *std::ranges::find(std::span{a}, x + 1);
-    co_return;
-}
-int main() {
-    int answer = 0;
-    std::mutex mutex;
-    std::thread worker([&] { std::lock_guard lock(mutex); calculate(41, answer); });
-    worker.join();
-    return answer != 42 || std::format("{} {:.1f}", answer, 1.5) != "42 1.5";
-}
-CPP
-"$prefix/bin/clang++" -std=c++20 -pthread "$prefix/probe.cpp" \
+cp "$root/scripts/linux-baseline/probe.cpp" "$prefix/probe.cpp"
+"$prefix/bin/clang++" -std=c++17 -pthread "$prefix/probe.cpp" \
   '-Wl,-rpath,$ORIGIN/../lib' -o "$prefix/probe-sdk/bin/probe"
 bash "$root/scripts/linux-baseline/probe-mixed-cxx.sh" "$prefix"
 machine="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["targets"][sys.argv[2]]["machine"])' "$root/scripts/linux-baseline/targets.json" "$arch")"
 python3 "$root/scripts/package-linux.py" "$prefix/probe-sdk" --audit-only \
   --machine "$machine" --glibc 2.17 --native-dependencies --readelf "$compiler/llvm-readelf"
+python3 "$root/scripts/audit-linux-gnu-runtime.py" "$prefix/probe-sdk" \
+  --libstdcxx /usr/lib64/libstdc++.so.6 --libgcc /lib64/libgcc_s.so.1 \
+  --readelf "$compiler/llvm-readelf" --output "$root/build-temp/logs/$arch-system-gnu-probe.json"
 env -u LD_LIBRARY_PATH -u LD_PRELOAD "$prefix/probe-sdk/bin/probe"
-echo "$arch: Clang/libstdc++13 C++20/thread probe passed on glibc 2.17"
+echo "$arch: Clang/system-libstdc++ C++17/thread probe passed on glibc 2.17"

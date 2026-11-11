@@ -38,20 +38,28 @@ cp "$root/scripts/linux-baseline/prepare-native.sh" "$root/scripts/linux-baselin
   "$root/scripts/linux-baseline/package-native.sh" "$prefix/share/baseline/"
 cp "$root/build-temp/logs/$arch-image.txt" "$prefix/share/baseline/"
 gcc_triple="$("$prefix/gcc/bin/gcc" -dumpmachine)"
+read -r gcc_install_rel header_config_rel < <(python3 - "$prefix/gnu-support.json" <<'PY'
+import json, sys
+entry = json.load(open(sys.argv[1]))
+print(entry['gcc_install'], entry['header_config'])
+PY
+)
 # GCC host tools were built by the container compiler and also need private
 # GNU runtime resolution when used outside that container's devtoolset PATH.
 python3 - "$prefix/gcc" <<'PY'
 import os, subprocess, sys
 from pathlib import Path
 gcc = Path(sys.argv[1])
-runtime = Path(subprocess.check_output([str(gcc / 'bin/g++'), '-print-file-name=libstdc++.so.6'], text=True).strip()).resolve().parent
+runtime = gcc / 'lib64'
 for path in gcc.rglob('*'):
     if not path.is_file() or path.is_symlink(): continue
     with path.open('rb') as stream:
         if stream.read(4) != b'\x7fELF': continue
     result = subprocess.run(['patchelf', '--print-needed', str(path)], capture_output=True, text=True)
     if result.returncode: continue
-    subprocess.check_call(['patchelf', '--set-rpath', '$ORIGIN/' + os.path.relpath(runtime, path.parent), str(path)])
+    rpath = ':'.join('$ORIGIN/' + os.path.relpath(directory, path.parent)
+                     for directory in (runtime, gcc.parent / 'sysroot/usr/lib64', gcc.parent / 'sysroot/lib64'))
+    subprocess.check_call(['patchelf', '--set-rpath', rpath, str(path)])
 PY
 for name in clang clang++; do
   cat >"$prefix/bin/$name" <<EOF
@@ -61,14 +69,19 @@ for argument in "\$@"; do
   case "\$argument" in
     -print-multi-os-directory) echo .; exit 0 ;;
     -print-file-name=libstdc++.so.6|-print-file-name=libgcc_s.so.1)
-      exec "\$prefix/gcc/bin/g++" "\$argument" ;;
+      printf '%s\\n' "\$prefix/gcc/lib64/\${argument#-print-file-name=}"; exit 0 ;;
   esac
 done
+extra=()
+if [[ "$name" == clang++ ]]; then
+  extra=(-nostdinc++ -isystem "\$prefix/gcc/system-headers" \
+    -isystem "\$prefix/$header_config_rel" -isystem "\$prefix/gcc/system-headers/backward")
+fi
 exec "\$prefix/clang/bin/$name" --target="$gcc_triple" --sysroot="\$prefix/sysroot" \
-  --gcc-install-dir="\$prefix/gcc/lib/gcc/$gcc_triple/13.3.0" -fuse-ld=lld -Wno-unused-command-line-argument \
+  --gcc-install-dir="\$prefix/$gcc_install_rel" -fuse-ld=lld -Wno-unused-command-line-argument \
   -B"\$prefix/sysroot/usr/lib64/" -L"\$prefix/gcc/lib64" \
   -L"\$prefix/sysroot/usr/lib64" -L"\$prefix/sysroot/lib64" \
-  -Wl,-rpath-link,"\$prefix/sysroot/lib64" "\$@"
+  -Wl,-rpath-link,"\$prefix/sysroot/lib64" "\${extra[@]}" "\$@"
 EOF
   chmod +x "$prefix/bin/$name"
 done
@@ -81,13 +94,15 @@ relocated="$(mktemp -d "$root/build-temp/relocated-$arch.XXXXXXXX")"
 trap 'if [[ -d "$relocated/toolchain" && ! -e "$prefix" ]]; then mv "$relocated/toolchain" "$prefix"; fi; rmdir "$relocated"' EXIT
 mv "$prefix" "$relocated/toolchain"
 rel="$relocated/toolchain"
-"$rel/bin/clang++" -std=c++20 -pthread "$rel/probe.cpp" \
+"$rel/bin/clang++" -std=c++17 -pthread "$rel/probe.cpp" \
   '-Wl,-rpath,$ORIGIN/../lib' -o "$rel/probe-sdk/bin/probe"
 env -u LD_LIBRARY_PATH -u LD_PRELOAD "$rel/probe-sdk/bin/probe"
 bash "$root/scripts/linux-baseline/probe-mixed-cxx.sh" "$rel"
 python3 "$root/scripts/package-linux.py" "$rel/probe-sdk" --audit-only \
   --machine "$machine" --glibc 2.17 --native-dependencies --readelf "$rel/clang/bin/llvm-readelf"
-env -u LD_LIBRARY_PATH -u LD_PRELOAD "$rel/gcc/bin/g++" --sysroot="$rel/sysroot" -std=c++20 -pthread "$rel/probe.cpp" \
+env -u LD_LIBRARY_PATH -u LD_PRELOAD "$rel/gcc/bin/g++" --sysroot="$rel/sysroot" -std=c++17 -pthread "$rel/probe.cpp" \
+  -nostdinc++ -isystem "$rel/gcc/system-headers" -isystem "$rel/$header_config_rel" \
+  -isystem "$rel/gcc/system-headers/backward" \
   -B"$rel/sysroot/usr/lib64/" -L"$rel/gcc/lib64" \
   -L"$rel/sysroot/usr/lib64" -L"$rel/sysroot/lib64" \
   '-Wl,-rpath,$ORIGIN/../lib' -o "$rel/probe-sdk/bin/gcc-probe"

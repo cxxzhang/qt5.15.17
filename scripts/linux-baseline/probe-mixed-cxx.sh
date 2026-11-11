@@ -43,7 +43,7 @@ for abi in 0 1; do
   "$legacy_cxx" -std=c++11 -D_GLIBCXX_USE_CXX11_ABI="$abi" \
     -shared -fPIC "$work/library.cpp" -Wl,-soname,libmixed-abi"$abi".so \
     '-Wl,-rpath,$ORIGIN' -o "$prefix/probe-sdk/lib/libmixed-abi$abi.so"
-  "$prefix/bin/clang++" -std=c++20 -D_GLIBCXX_USE_CXX11_ABI="$abi" \
+  "$prefix/bin/clang++" -std=c++17 -D_GLIBCXX_USE_CXX11_ABI="$abi" \
     "$work/consumer.cpp" -L"$prefix/probe-sdk/lib" -lmixed-abi"$abi" \
     '-Wl,-rpath,$ORIGIN/../lib' -o "$prefix/probe-sdk/bin/mixed-abi$abi"
   env -u LD_LIBRARY_PATH -u LD_PRELOAD "$prefix/probe-sdk/bin/mixed-abi$abi"
