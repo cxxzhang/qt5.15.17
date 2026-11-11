@@ -24,18 +24,23 @@ tar -xf "$out/$archive" -C "$out/extracted"
 "$out/extracted/clang/bin/clang++" --version | tee "$out/version-$arch.txt"
 grep -q '20.1.8' "$out/version-$arch.txt"
 test -x "$out/extracted/clang/bin/ld.lld"
-python3 - "$out" "$url" "$checksum" "$arch" "$archive" <<'PY'
-import json, sys, tarfile
+python3 - "$out" "$url" "$checksum" "$arch" "$archive" "$root" <<'PY'
+import hashlib, json, sys, tarfile
 from pathlib import Path
-out, url, sha, arch, archive = sys.argv[1:]
+out, url, sha, arch, archive, root = sys.argv[1:]
 out = Path(out)
 with tarfile.open(out / archive) as tar:
     licenses = [m.name for m in tar if m.isfile() and
                 any(k in Path(m.name).name.lower() for k in ('license', 'copying'))]
-if not licenses:
-    raise SystemExit('Upstream archive has no license files; refusing publication')
+license_root = Path(root) / 'scripts/linux-baseline/llvm-licenses'
+for entry in json.loads((license_root / 'sources.json').read_text()):
+    if hashlib.sha256((license_root / entry['file']).read_bytes()).hexdigest() != entry['sha256']:
+        raise SystemExit('License text checksum mismatch: ' + entry['file'])
+with tarfile.open(out / ('licenses-' + arch + '.tar.gz'), 'w:gz') as tar:
+    tar.add(license_root, arcname='licenses')
 record = dict(upstream_api_url=url, sha256=sha, archive=archive, arch=arch,
-              version='20.1.8', host_glibc='2.17', licenses=licenses,
+              version='20.1.8', host_glibc='2.17', embedded_licenses=licenses,
+              supplementary_licenses='licenses-' + arch + '.tar.gz',
               validation='clang++ --version and ld.lld executable in manylinux2014')
 (out / ('provenance-' + arch + '.json')).write_text(json.dumps(record, indent=2) + '\n')
 (out / ('sha256-' + arch + '.txt')).write_text(sha + '  ' + archive + '\n')

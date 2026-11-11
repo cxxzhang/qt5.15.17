@@ -30,6 +30,7 @@ jobs:
         compression-level: 0
         path: |
           build-temp/llvm-mirror-${{ matrix.arch }}/*.tar.xz
+          build-temp/llvm-mirror-${{ matrix.arch }}/*.tar.gz
           build-temp/llvm-mirror-${{ matrix.arch }}/*.txt
           build-temp/llvm-mirror-${{ matrix.arch }}/*.json
   publish:
@@ -50,11 +51,11 @@ jobs:
         COMMIT: ${{ github.sha }}
       run: |
         cd mirror
-        cat sha256-*.txt > SHA256SUMS
+        sha256sum *.tar.xz *.tar.gz > SHA256SUMS
         sha256sum -c SHA256SUMS
         cat > notes.md <<'EOF'
-        Original static LLVM/Clang 20.1.8 archives from mayeut/static-clang-images v20.1.8.0, mirrored byte-for-byte. Both native compilers were launched inside pinned glibc 2.17 containers. License files remain inside the original archives; per-architecture provenance records identify them and the upstream API assets.
+        Original static LLVM/Clang 20.1.8 archives from mayeut/static-clang-images v20.1.8.0, mirrored byte-for-byte. Both native compilers were launched inside pinned glibc 2.17 containers. Supplementary license archives include LLVM, the packaging project, and static runtime/dependency notices with source references and checksums. Per-architecture provenance records identify the original upstream API assets.
 
         This is a compiler mirror, not an accepted Qt SDK or a complete target sysroot/GNU toolchain. Target ABI and Qt runtime acceptance are separate requirements.
         EOF
-        gh release create toolchain-llvm-20.1.8-v1 --target "$COMMIT" --latest=false --title 'Linux LLVM 20.1.8 mirror v1' --notes-file notes.md *.tar.xz provenance-*.json version-*.txt SHA256SUMS
+        gh release create toolchain-llvm-20.1.8-v1 --target "$COMMIT" --latest=false --title 'Linux LLVM 20.1.8 mirror v1' --notes-file notes.md *.tar.xz *.tar.gz provenance-*.json version-*.txt SHA256SUMS

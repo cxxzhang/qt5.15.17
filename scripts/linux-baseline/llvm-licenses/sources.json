@@ -1,0 +1,42 @@
+[
+  {
+    "file": "LLVM-LICENSE.txt",
+    "url": "https://github.com/llvm/llvm-project/blob/llvmorg-20.1.8/llvm/LICENSE.TXT",
+    "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee"
+  },
+  {
+    "file": "STATIC-CLANG-LICENSE.txt",
+    "url": "https://github.com/mayeut/static-clang-images/blob/v20.1.8.0/LICENSE",
+    "sha256": "618637dde5772998913652320d70b10dd9a243b308c539479fd09f3320dfe237"
+  },
+  {
+    "file": "GCC-COPYING3.txt",
+    "url": "https://github.com/gcc-mirror/gcc/blob/releases/gcc-14.2.0/COPYING3",
+    "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+  },
+  {
+    "file": "GCC-RUNTIME-EXCEPTION.txt",
+    "url": "https://github.com/gcc-mirror/gcc/blob/releases/gcc-14.2.0/COPYING.RUNTIME",
+    "sha256": "9d6b43ce4d8de0c878bf16b54d8e7a10d9bd42b75178153e3af6a815bdc90f74"
+  },
+  {
+    "file": "ZLIB-LICENSE.txt",
+    "url": "https://github.com/madler/zlib/blob/v1.3.1/LICENSE",
+    "sha256": "845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243"
+  },
+  {
+    "file": "ZSTD-LICENSE.txt",
+    "url": "https://github.com/facebook/zstd/blob/v1.5.7/LICENSE",
+    "sha256": "7055266497633c9025b777c78eb7235af13922117480ed5c674677adc381c9d8"
+  },
+  {
+    "file": "ZSTD-COPYING.txt",
+    "url": "https://github.com/facebook/zstd/blob/v1.5.7/COPYING",
+    "sha256": "f9c375a1be4a41f7b70301dd83c91cb89e41567478859b77eef375a52d782505"
+  },
+  {
+    "file": "MUSL-COPYRIGHT.txt",
+    "url": "https://git.musl-libc.org/cgit/musl/plain/COPYRIGHT?h=v1.2.5",
+    "sha256": "f9bc4423732350eb0b3f7ed7e91d530298476f8fec0c6c427a1c04ade22655af"
+  }
+]
