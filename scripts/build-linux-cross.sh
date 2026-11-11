@@ -47,7 +47,13 @@ source "$source_dir/scripts/linux-build-diagnostics.sh"
 jobs="${QT_BUILD_JOBS:-$(nproc)}"
 export PATH="$prefix/bin:$cross/host/bin:$prefix/host/bin:$PATH"
 host_runtime="${host_runtime:-$(dirname "$(clang++ -print-file-name=libstdc++.so.6)")}"
-export LD_LIBRARY_PATH="$host_runtime"
+if [[ -f "$prefix/gcc/.system-runtime" ]]; then
+  # Bootstrap tools only require the old GNU ABI. Let Ubuntu's compatible
+  # runtime also serve the separately downloaded dynamic cross LLVM.
+  unset LD_LIBRARY_PATH
+else
+  export LD_LIBRARY_PATH="$host_runtime"
+fi
 cross_pkgconfig="${QT_CROSS_PKG_CONFIG:-$cross/bin/pkg-config}"
 export PKG_CONFIG="$cross_pkgconfig"
 export PKG_CONFIG_SYSROOT_DIR="$sysroot"
