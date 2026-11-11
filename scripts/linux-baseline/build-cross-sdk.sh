@@ -62,6 +62,10 @@ done
 exec /usr/bin/pkg-config "\$@"
 EOF
 chmod +x "$context/pkg-config"
+for package in freetype2 fontconfig x11 xcb xcb-renderutil xcb-icccm xkbcommon xkbcommon-x11 wayland-client wayland-server; do
+  printf 'Target dependency %s: ' "$package"
+  "$context/pkg-config" --modversion "$package" || true
+done
 "$context/pkg-config" --print-errors --exists freetype2 fontconfig x11 xcb xcb-renderutil \
   xcb-icccm xkbcommon xkbcommon-x11 wayland-client wayland-server
 export QT_ACCEPTED_CROSS_PREFIX="$cross" QT_ACCEPTED_HOST_PREFIX="$host" QT_ACCEPTED_SYSROOT="$sysroot"

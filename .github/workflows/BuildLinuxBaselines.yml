@@ -6,6 +6,10 @@ on:
         type: choice
         options: [all, native, x64, arm64, cross, loong64-oldworld, loong64-newworld, mips64el]
         default: native
+      variant:
+        type: choice
+        options: [all, release, debug]
+        default: all
 permissions:
   contents: read
 jobs:
@@ -16,7 +20,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: ${{ fromJSON(inputs.target == 'x64' && '["x64"]' || inputs.target == 'arm64' && '["arm64"]' || '["x64","arm64"]') }}
-        variant: [release, debug]
+        variant: ${{ fromJSON(inputs.variant == 'release' && '["release"]' || inputs.variant == 'debug' && '["debug"]' || '["release","debug"]') }}
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-22.04-arm' || 'ubuntu-22.04' }}
     timeout-minutes: 180
     steps:
@@ -80,7 +84,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: ${{ fromJSON((inputs.target == 'all' || inputs.target == 'cross') && '["loong64-oldworld","loong64-newworld","mips64el"]' || format('["{0}"]', inputs.target)) }}
-        variant: [release, debug]
+        variant: ${{ fromJSON(inputs.variant == 'release' && '["release"]' || inputs.variant == 'debug' && '["debug"]' || '["release","debug"]') }}
     runs-on: ubuntu-22.04
     timeout-minutes: 180
     steps:
