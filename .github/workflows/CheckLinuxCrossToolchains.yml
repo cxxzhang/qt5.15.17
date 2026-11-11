@@ -103,6 +103,7 @@ jobs:
         QT_REUSE_INSTALL: ${{ steps.installed-sdk.outputs.cache-hit }}
       run: |
         set -o pipefail
+        docker exec qt-cross-build apt-get -o Acquire::Retries=5 install -y --no-install-recommends gdb-multiarch
         docker exec -e QT_REUSE_INSTALL -e QT_CACHE_INSTALL=true qt-cross-build \
           bash scripts/build-linux-cross.sh "$TARGET" "$VARIANT" \
           2>&1 | tee "build-temp/logs/cross-$TARGET-sdk.log"
