@@ -14,8 +14,22 @@ test -f "$prefix/gcc/.ready"
 rpm -q glibc glibc-devel glibc-headers kernel-headers >"$prefix/share/baseline/sysroot-rpms.txt"
 rpm -ql glibc glibc-devel glibc-headers kernel-headers \
   | sed 's|^/||' | sort -u >"$prefix/share/baseline/sysroot-files.txt"
+python3 - "$prefix/share/baseline/sysroot-files.txt" <<'PY'
+from pathlib import Path
+import sys
+listing = Path(sys.argv[1])
+paths = listing.read_text().splitlines()
+# manylinux strips RPM documentation while retaining the RPM database.
+# Record that omission, and snapshot only paths that actually exist.
+present = [p for p in paths if (Path('/') / p).exists() or (Path('/') / p).is_symlink()]
+listing.with_name('sysroot-omitted-rpm-files.txt').write_text('\n'.join(p for p in paths if p not in present) + '\n')
+listing.write_text('\n'.join(present) + '\n')
+PY
 tar -C / --no-recursion -cf - -T "$prefix/share/baseline/sysroot-files.txt" \
   | tar -C "$prefix/sysroot" -xf -
+test -f "$prefix/sysroot/usr/include/features.h"
+test -e "$prefix/sysroot/lib64/libc.so.6"
+cp -a "$root/scripts/linux-baseline/glibc-licenses" "$prefix/share/baseline/"
 cp "$root/scripts/linux-baseline/targets.json" "$prefix/share/baseline/"
 cp -a "$root/scripts/linux-baseline/llvm-licenses" "$prefix/share/baseline/"
 git -c safe.directory="$root" -C "$root" rev-parse HEAD >"$prefix/share/baseline/source-commit.txt"

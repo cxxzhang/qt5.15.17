@@ -4,7 +4,7 @@ on:
     inputs:
       target:
         type: choice
-        options: [all, native, native-inputs, cross, loongarch, loongarch-oldworld, mips]
+        options: [all, native, native-inputs, cross, loongarch, loongarch-oldworld, loongarch-newworld, mips]
         default: all
 permissions:
   contents: read
@@ -286,3 +286,45 @@ jobs:
         This toolchain is exclusively old-world ELF ABI 0x3 with /lib64/ld.so.1. It is not a new-world target and is not a Qt SDK acceptance result. Source pins, GNU and LLVM notices, and build scripts are included.
         EOF
         gh release create "toolchain-loong64-oldworld-228-$RUN_ID" --target "$COMMIT" --latest=false --title "LoongArch old-world glibc 2.28 toolchain ($RUN_ID)" --notes-file notes.md *.tar.xz SHA256SUMS
+  loongarch-newworld:
+    if: inputs.target == 'all' || inputs.target == 'cross' || inputs.target == 'loongarch-newworld'
+    name: Clang C++20 on LoongArch new-world glibc 2.36
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install host LLVM runtime dependencies
+      run: sudo apt-get -o Acquire::Retries=5 update && sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends patchelf libtinfo5 libxml2
+    - uses: actions/cache/restore@v4
+      id: newworld-runtime
+      with:
+        path: build-temp/baseline-loong64-newworld
+        key: loong-newworld-236-${{ hashFiles('scripts/linux-baseline/prepare-loongarch-oldworld.sh', 'scripts/sysroots/loong64.lock.json') }}
+        restore-keys: loong-newworld-236-
+    - uses: actions/cache/restore@v4
+      id: newworld-inputs
+      with:
+        path: build-temp/loong-newworld-inputs/downloads
+        key: loong-newworld-inputs-${{ hashFiles('scripts/linux-baseline/load-upstream-clang.sh') }}
+    - name: Build and execute the new-world runtime
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        set -o pipefail
+        mkdir -p build-temp/logs
+        bash scripts/linux-baseline/prepare-loongarch-oldworld.sh newworld 2>&1 | tee build-temp/logs/loong-newworld-236.log
+    - uses: actions/cache/save@v4
+      if: always() && steps.newworld-runtime.outputs.cache-hit != 'true' && hashFiles('build-temp/baseline-loong64-newworld/runtime/.ready') != ''
+      with:
+        path: build-temp/baseline-loong64-newworld
+        key: ${{ steps.newworld-runtime.outputs.cache-primary-key }}
+    - uses: actions/cache/save@v4
+      if: always() && steps.newworld-inputs.outputs.cache-hit != 'true'
+      with:
+        path: build-temp/loong-newworld-inputs/downloads
+        key: ${{ steps.newworld-inputs.outputs.cache-primary-key }}
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: diagnostics-baseline-loong-newworld-236
+        path: build-temp/logs/
