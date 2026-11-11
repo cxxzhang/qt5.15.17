@@ -1,0 +1,672 @@
+{
+  "sdk_accepted": false,
+  "evidence_type": "GNU imports passed; extracted C++17 consumer compilation failed in qflags.h",
+  "source_run": "43036480483",
+  "source_commit": "542cab23570d4bf471ca2c484c098a932d60f101",
+  "source_artifact": 13865460806,
+  "target": "arm64",
+  "variant": "debug",
+  "gnu_report": {
+    "accepted": true,
+    "providers": {
+      "libstdcxx": "/usr/lib64/libstdc++.so.6",
+      "libgcc": "/lib64/libgcc_s.so.1"
+    },
+    "maximum_required_versions": {
+      "GLIBCXX": "GLIBCXX_3.4.19",
+      "CXXABI": "CXXABI_1.3.7",
+      "GCC": "GCC_4.2.0"
+    },
+    "files": {
+      "bin/assistant": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "bin/designer": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "bin/lconvert": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "bin/linguist": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "bin/lprodump": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.15"
+      ],
+      "bin/lrelease": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.15"
+      ],
+      "bin/lrelease-pro": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "bin/lupdate": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.15"
+      ],
+      "bin/lupdate-pro": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "bin/moc": [
+        "CXXABI_1.3",
+        "GCC_3.0",
+        "GLIBCXX_3.4"
+      ],
+      "bin/pixeltool": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "bin/qdbus": [
+        "GLIBCXX_3.4"
+      ],
+      "bin/qdbuscpp2xml": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "bin/qdbusviewer": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "bin/qdbusxml2cpp": [
+        "GLIBCXX_3.4"
+      ],
+      "bin/qdistancefieldgenerator": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "bin/qhelpgenerator": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "bin/qlalr": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.15"
+      ],
+      "bin/qmake": [
+        "CXXABI_1.3",
+        "GCC_3.0",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.11",
+        "GLIBCXX_3.4.15"
+      ],
+      "bin/qml": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "bin/qmlcachegen": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.14"
+      ],
+      "bin/qmleasing": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "bin/qmlformat": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "bin/qmlimportscanner": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "bin/qmllint": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.14"
+      ],
+      "bin/qmlmin": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "bin/qmlplugindump": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "bin/qmlpreview": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "bin/qmlprofiler": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.14"
+      ],
+      "bin/qmlscene": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "bin/qmltime": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "bin/qmltyperegistrar": [
+        "GLIBCXX_3.4"
+      ],
+      "bin/qtattributionsscanner": [
+        "GLIBCXX_3.4"
+      ],
+      "bin/qtdiag": [
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.15"
+      ],
+      "bin/qtplugininfo": [
+        "GLIBCXX_3.4"
+      ],
+      "bin/qtwaylandscanner": [
+        "GLIBCXX_3.4"
+      ],
+      "bin/rcc": [
+        "CXXABI_1.3",
+        "GCC_3.0",
+        "GLIBCXX_3.4"
+      ],
+      "bin/tracegen": [
+        "CXXABI_1.3",
+        "GCC_3.0",
+        "GLIBCXX_3.4"
+      ],
+      "bin/uic": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "lib/libQt5Concurrent.so.5.15.17": [
+        "CXXABI_1.3",
+        "GCC_3.0",
+        "GLIBCXX_3.4"
+      ],
+      "lib/libQt5Core.so.5.15.17": [
+        "CXXABI_1.3",
+        "CXXABI_1.3.2",
+        "CXXABI_1.3.3",
+        "CXXABI_1.3.7",
+        "GCC_3.0",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.11",
+        "GLIBCXX_3.4.14",
+        "GLIBCXX_3.4.15"
+      ],
+      "lib/libQt5DBus.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.11"
+      ],
+      "lib/libQt5Designer.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "lib/libQt5DesignerComponents.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "lib/libQt5EglFSDeviceIntegration.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.11"
+      ],
+      "lib/libQt5EglFsKmsSupport.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.14"
+      ],
+      "lib/libQt5Gui.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.11",
+        "GLIBCXX_3.4.14",
+        "GLIBCXX_3.4.15"
+      ],
+      "lib/libQt5Help.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "lib/libQt5Network.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.11",
+        "GLIBCXX_3.4.18"
+      ],
+      "lib/libQt5OpenGL.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "lib/libQt5PrintSupport.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "lib/libQt5Qml.so.5.15.17": [
+        "CXXABI_1.3",
+        "GCC_3.0",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.14"
+      ],
+      "lib/libQt5QmlModels.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.14"
+      ],
+      "lib/libQt5QmlWorkerScript.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "lib/libQt5Quick.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.14"
+      ],
+      "lib/libQt5QuickParticles.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "lib/libQt5QuickShapes.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "lib/libQt5QuickTest.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "lib/libQt5QuickWidgets.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "lib/libQt5Sql.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "lib/libQt5Svg.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "lib/libQt5Test.so.5.15.17": [
+        "CXXABI_1.3",
+        "GCC_3.0",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.11",
+        "GLIBCXX_3.4.19"
+      ],
+      "lib/libQt5WaylandClient.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.14",
+        "GLIBCXX_3.4.15"
+      ],
+      "lib/libQt5WaylandCompositor.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "lib/libQt5WebSockets.so.5.15.18": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "lib/libQt5Widgets.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.14",
+        "GLIBCXX_3.4.15"
+      ],
+      "lib/libQt5XcbQpa.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "lib/libQt5Xml.so.5.15.17": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/bearer/libqconnmanbearer.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.11"
+      ],
+      "plugins/bearer/libqgenericbearer.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/bearer/libqnmbearer.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/designer/libqquickwidget.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/egldeviceintegrations/libqeglfs-emu-integration.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/egldeviceintegrations/libqeglfs-kms-egldevice-integration.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.14"
+      ],
+      "plugins/egldeviceintegrations/libqeglfs-x11-integration.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/generic/libqevdevkeyboardplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/generic/libqevdevmouseplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/generic/libqevdevtabletplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/generic/libqevdevtouchplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.11"
+      ],
+      "plugins/generic/libqtuiotouchplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/iconengines/libqsvgicon.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/imageformats/libqgif.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/imageformats/libqicns.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/imageformats/libqico.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/imageformats/libqjpeg.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/imageformats/libqsvg.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/imageformats/libqtga.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/imageformats/libqtiff.so": [
+        "CXXABI_1.3",
+        "GCC_3.0",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/imageformats/libqwbmp.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/imageformats/libqwebp.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/platforminputcontexts/libcomposeplatforminputcontextplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/platforminputcontexts/libibusplatforminputcontextplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/platforms/libqeglfs.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/platforms/libqlinuxfb.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4",
+        "GLIBCXX_3.4.11",
+        "GLIBCXX_3.4.14"
+      ],
+      "plugins/platforms/libqminimal.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/platforms/libqminimalegl.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/platforms/libqoffscreen.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/platforms/libqvnc.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/platforms/libqwayland-egl.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/platforms/libqwayland-generic.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/platforms/libqxcb.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/platformthemes/libqxdgdesktopportal.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/qmltooling/libqmldbg_debugger.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/qmltooling/libqmldbg_inspector.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/qmltooling/libqmldbg_local.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/qmltooling/libqmldbg_messages.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/qmltooling/libqmldbg_native.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/qmltooling/libqmldbg_nativedebugger.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/qmltooling/libqmldbg_preview.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/qmltooling/libqmldbg_profiler.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/qmltooling/libqmldbg_quickprofiler.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/qmltooling/libqmldbg_server.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/qmltooling/libqmldbg_tcp.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/sqldrivers/libqsqlite.so": [
+        "CXXABI_1.3",
+        "GCC_3.0",
+        "GCC_4.2.0",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/wayland-decoration-client/libbradient.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/wayland-graphics-integration-client/libdmabuf-server.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/wayland-graphics-integration-client/libdrm-egl-server.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/wayland-graphics-integration-client/libqt-plugin-wayland-egl.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/wayland-graphics-integration-client/libshm-emulation-server.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/wayland-graphics-integration-server/libqt-wayland-compositor-dmabuf-server-buffer.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/wayland-graphics-integration-server/libqt-wayland-compositor-drm-egl-server-buffer.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/wayland-graphics-integration-server/libqt-wayland-compositor-linux-dmabuf-unstable-v1.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/wayland-graphics-integration-server/libqt-wayland-compositor-shm-emulation-server.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/wayland-graphics-integration-server/libqt-wayland-compositor-wayland-egl.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/wayland-graphics-integration-server/libqt-wayland-compositor-wayland-eglstream-controller.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/wayland-shell-integration/libfullscreen-shell-v1.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/wayland-shell-integration/libivi-shell.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/wayland-shell-integration/libwl-shell.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/wayland-shell-integration/libxdg-shell-v5.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/wayland-shell-integration/libxdg-shell-v6.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/wayland-shell-integration/libxdg-shell.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/xcbglintegrations/libqxcb-egl-integration.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "plugins/xcbglintegrations/libqxcb-glx-integration.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "qml/Qt/labs/animation/liblabsanimationplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "qml/Qt/labs/folderlistmodel/libqmlfolderlistmodelplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "qml/Qt/labs/qmlmodels/liblabsmodelsplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "qml/Qt/labs/settings/libqmlsettingsplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "qml/Qt/labs/sharedimage/libsharedimageplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "qml/Qt/labs/wavefrontmesh/libqmlwavefrontmeshplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "qml/QtQml/Models.2/libmodelsplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "qml/QtQml/StateMachine/libqtqmlstatemachine.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "qml/QtQml/WorkerScript.2/libworkerscriptplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "qml/QtQml/libqmlplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "qml/QtQuick/Layouts/libqquicklayoutsplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "qml/QtQuick/LocalStorage/libqmllocalstorageplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "qml/QtQuick/Particles.2/libparticlesplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "qml/QtQuick/Shapes/libqmlshapesplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "qml/QtQuick/Window.2/libwindowplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "qml/QtQuick.2/libqtquick2plugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "qml/QtTest/libqmltestplugin.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ],
+      "qml/QtWebSockets/libdeclarative_qmlwebsockets.so": [
+        "CXXABI_1.3",
+        "GLIBCXX_3.4"
+      ]
+    },
+    "missing": {},
+    "source_run": null,
+    "source_commit": null
+  }
+}

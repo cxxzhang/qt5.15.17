@@ -53,6 +53,12 @@ for tool in "$readelf" "$objcopy" "$strip"; do
   "$tool" --version
 done
 
+raw_install="$source_dir/build-temp/installed-sdk/$tag.tar"
+if [[ "${QT_REUSE_INSTALL:-false}" == true && -f "$raw_install" ]]; then
+  mkdir -p "$install"
+  tar -xf "$raw_install" -C "$install"
+  echo "Restored the unverified Qt installation for packaging and runtime acceptance"
+else
 tar -xf "$source_dir/openssl/openssl-1.1.1w.tar.gz" -C "$build"
 ssl="$build/openssl"
 (
@@ -76,8 +82,23 @@ bash "$source_dir/configure" -prefix "$install" -confirm-license -opensource "-$
   -platform linux-clang "QMAKE_CC=$CC" "QMAKE_CXX=$CXX" "QMAKE_LFLAGS=" \
   'QMAKE_CFLAGS+=-Wno-unused-command-line-argument' 'QMAKE_CXXFLAGS+=-Wno-unused-command-line-argument' \
   -I "$OPENSSL_INCDIR" -L "$OPENSSL_LIBDIR"
+printf '#include <QtCore/qnamespace.h>\nint main() { return 0; }\n' >"$build/configured-headers.cpp"
+"$CXX" -std=c++17 -fPIC -fsyntax-only \
+  -I"$build/qt/qtbase/include" -I"$build/qt/qtbase/include/QtCore" \
+  -I"$source_dir/qtbase/include" -I"$source_dir/qtbase/include/QtCore" "$build/configured-headers.cpp"
 make -j"$jobs"
 make install
+if [[ "${QT_CACHE_INSTALL:-false}" == true ]]; then
+  mkdir -p "$(dirname "$raw_install")"
+  tar -C "$install" -cf "$raw_install.tmp" .
+  mv "$raw_install.tmp" "$raw_install"
+fi
+fi
+
+# Check the installed public headers in the consumer language mode before
+# symbol extraction, dependency audits and compression of large SDKs.
+printf '#include <QtCore/QString>\n#include <QtCore/QObject>\nint main() { return 0; }\n' >"$build/headers.cpp"
+"$CXX" -std=c++17 -fPIC -fsyntax-only -I"$install/include" -I"$install/include/QtCore" "$build/headers.cpp"
 
 if [[ "${QT_SYSTEM_GNU_RUNTIME:-0}" != 1 ]]; then
 for runtime in libstdc++.so.6 libgcc_s.so.1; do

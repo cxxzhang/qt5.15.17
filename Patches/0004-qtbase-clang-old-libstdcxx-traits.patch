@@ -13,6 +13,16 @@ diff --git a/src/corelib/global/qtypeinfo.h b/src/corelib/global/qtypeinfo.h
      return std::is_enum<T>::value || std::is_integral<T>::value;
  #endif
  }
+diff --git a/src/corelib/global/qflags.h b/src/corelib/global/qflags.h
+--- a/src/corelib/global/qflags.h
++++ b/src/corelib/global/qflags.h
+@@ -199,5 +199,5 @@
+ # define Q_DECLARE_MIXED_ENUM_OPERATOR(op, Ret, LHS, RHS) \
+     constexpr inline Ret operator op (LHS lhs, RHS rhs) noexcept \
+-    { return static_cast<Ret>(std::underlying_type_t<LHS>(lhs) op std::underlying_type_t<RHS>(rhs)); } \
++    { return static_cast<Ret>(static_cast<typename std::underlying_type<LHS>::type>(lhs) op static_cast<typename std::underlying_type<RHS>::type>(rhs)); } \
+     /* end */
+ #else
 diff --git a/src/corelib/itemmodels/qabstractitemmodel.cpp b/src/corelib/itemmodels/qabstractitemmodel.cpp
 --- a/src/corelib/itemmodels/qabstractitemmodel.cpp
 +++ b/src/corelib/itemmodels/qabstractitemmodel.cpp

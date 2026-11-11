@@ -90,6 +90,18 @@ Windows/macOS chain before the authorized SDK release.
 
 ## Workspace protection
 
+Native ARM64 Debug in run `43036480483` completed Qt build/install,
+stripped/audited 177 ELF/archive files and verified 155 ELF debug links plus
+22 static archive symbol files. Its GNU report checks 151 files with no
+missing imports: maximum GLIBCXX_3.4.19, CXXABI_1.3.7 and GCC_4.2.0.
+It then failed compiling the C++17 extracted consumer because qflags.h used
+the newer underlying_type_t alias with GNU 4.8 headers. The added qflags
+patch uses equivalent C++11 underlying_type::type casts. Native builds now
+check configured C++17 headers before compiling Qt, check installed headers
+before compression, and retain unverified raw installs for packaging retries.
+See `evidence/arm64-low-gnu-20261111.json`; it explicitly records that this
+is GNU-import evidence and not final SDK acceptance. Artifact: 13865460806.
+
 Update: native end-to-end run `43036480483` at `542cab2` is building
 all four x64/ARM64 variants after the QtQuick old-header helper fix.
 MIPS run `43025278752` and new-world run `43025273164` completed Qt

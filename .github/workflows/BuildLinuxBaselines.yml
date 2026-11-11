@@ -49,6 +49,10 @@ jobs:
         assert entry.get('gnu_runtime_policy') == 'baseline-system'
         with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:
             stream.write('sha256=' + entry['sha256'] + '\n')
+        import hashlib, subprocess
+        modules = subprocess.check_output(['git', 'submodule', 'status', '--recursive'])
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:
+            stream.write('modules=' + hashlib.sha256(modules).hexdigest() + '\n')
         PY
     - uses: actions/cache/restore@v4
       id: accepted-toolchain
@@ -64,17 +68,29 @@ jobs:
       with:
         path: build-temp/accepted-${{ matrix.arch }}
         key: ${{ steps.accepted-toolchain.outputs.cache-primary-key }}
+    - uses: actions/cache/restore@v4
+      id: raw-install
+      with:
+        path: build-temp/installed-sdk
+        key: unverified-qt-install-${{ matrix.arch }}-${{ matrix.variant }}-${{ steps.toolchain-pin.outputs.sha256 }}-${{ steps.toolchain-pin.outputs.modules }}-${{ hashFiles('Patches/**', 'scripts/build-linux.sh', 'scripts/linux-baseline/build-native-sdk.sh', 'openssl/openssl-1.1.1w.tar.gz') }}
     - name: Build, relocate and verify the baseline SDK
       env:
         ARCH: ${{ matrix.arch }}
         VARIANT: ${{ matrix.variant }}
+        QT_CACHE_INSTALL: 'true'
+        QT_REUSE_INSTALL: 'true'
       run: |
         set -o pipefail
         mkdir -p build-temp/logs
         image=$(python3 -c 'import json,os; print(json.load(open("scripts/linux-baseline/targets.json"))["targets"][os.environ["ARCH"]]["image"])')
-        docker run --rm -v "$PWD:/workspace" -w /workspace "$image" \
+        docker run --rm -e QT_CACHE_INSTALL -e QT_REUSE_INSTALL -v "$PWD:/workspace" -w /workspace "$image" \
           bash scripts/linux-baseline/build-native-sdk.sh "$ARCH" "$VARIANT" \
           2>&1 | tee "build-temp/logs/$ARCH-$VARIANT-sdk.log"
+    - uses: actions/cache/save@v4
+      if: always() && steps.raw-install.outputs.cache-hit != 'true' && hashFiles('build-temp/installed-sdk/*.tar') != ''
+      with:
+        path: build-temp/installed-sdk
+        key: ${{ steps.raw-install.outputs.cache-primary-key }}
     - uses: actions/upload-artifact@v4
       with:
         name: qt5.15.17_linux_${{ matrix.arch }}_${{ matrix.variant }}
