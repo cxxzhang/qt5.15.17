@@ -30,6 +30,12 @@ else
   [[ -f "$cross/.ready" ]]
   baseline="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["glibc"])' "$source_dir/scripts/sysroots/$arch.lock.json")"
 fi
+elf_audit_args=()
+if [[ "$arch" == loong64-oldworld ]]; then
+  elf_audit_args=(--elf-flags 0x3)
+elif [[ "$arch" == loong64 || "$arch" == loong64-newworld ]]; then
+  elf_audit_args=(--elf-flags 0x43)
+fi
 tag="linux-$arch"
 [[ "$variant" != debug ]] || tag+=-debug
 install="$source_dir/Output/$tag"
@@ -142,6 +148,7 @@ TargetSpec=$spec
 EOF
 symbols="$build/symbols"
 python3 "$source_dir/scripts/package-linux.py" "$install" "$symbols" \
+  "${elf_audit_args[@]}" \
   --machine "$machine" --glibc "$baseline" --host-machine 'Advanced Micro Devices X86-64' \
   --host-glibc "$host_glibc" --interpreter "$loader" --readelf "$tools/llvm-readelf" \
   --objcopy "$tools/llvm-objcopy" --strip "$tools/llvm-strip"
@@ -154,6 +161,7 @@ while IFS= read -r -d '' elf; do
   fi
 done < <(find "$install" -type f -print0)
 python3 "$source_dir/scripts/package-linux.py" "$install" --audit-only --require-stripped \
+  "${elf_audit_args[@]}" \
   --machine "$machine" --glibc "$baseline" --host-machine 'Advanced Micro Devices X86-64' \
   --host-glibc "$host_glibc" --interpreter "$loader" --readelf "$tools/llvm-readelf"
 python3 "$source_dir/scripts/audit-linux-cross-runtime.py" "$install" --sysroot "$sysroot" \

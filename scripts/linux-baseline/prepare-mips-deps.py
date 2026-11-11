@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 import runpy
+import shutil
 import subprocess
 import sys
 from types import SimpleNamespace
@@ -72,6 +73,14 @@ def main():
     runpy.run_path(str(ROOT / "scripts/prepare-linux-sysroot.py"))["relative_symlinks"](sysroot)
     if digest(libc) != before:
         raise ValueError("Graphics supplement changed the source-built libc")
+    private = prefix / "dependencies/lib"
+    private.mkdir(parents=True, exist_ok=True)
+    for directory in (stage / "lib/mips64el-linux-gnuabi64", stage / "usr/lib/mips64el-linux-gnuabi64"):
+        for library in directory.glob("*.so*"):
+            output = private / library.name
+            if output.exists() or output.is_symlink():
+                output.unlink()
+            shutil.copy2(library, output, follow_symlinks=False)
     provenance = prefix / "share/baseline"
     provenance.mkdir(parents=True, exist_ok=True)
     (provenance / lock.name).write_bytes(lock.read_bytes())

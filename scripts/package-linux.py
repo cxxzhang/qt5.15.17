@@ -32,6 +32,11 @@ def audit(path, args):
             or len(encodings) != len(machines)
             or any("little endian" not in value for value in encodings)):
         raise ValueError("{}: expected a 64-bit little-endian ELF".format(path))
+    expected_flags = getattr(args, "elf_flags", None)
+    if not host_tool and expected_flags is not None:
+        flags = re.findall(r"Flags:\s+(0x[0-9a-fA-F]+)", header)
+        if len(flags) != len(machines) or any(int(value, 16) != expected_flags for value in flags):
+            raise ValueError("{}: unexpected ELF ABI flags (expected {:#x})".format(path, expected_flags))
     if not host_tool and args.interpreter:
         program = run(args.readelf, "-l", str(path))
         loader = re.search(r"Requesting program interpreter: ([^\]]+)", program)
@@ -72,6 +77,7 @@ def main():
     parser.add_argument("--host-machine")
     parser.add_argument("--host-glibc", default="2.27")
     parser.add_argument("--interpreter")
+    parser.add_argument("--elf-flags", type=lambda value: int(value, 0))
     parser.add_argument("--readelf", default="readelf")
     parser.add_argument("--objcopy", default="objcopy")
     parser.add_argument("--strip", default="strip")

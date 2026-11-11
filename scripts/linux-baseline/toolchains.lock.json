@@ -27,6 +27,32 @@
       "source_commit": "5968078f2caf117ecd799618eb0562fec464cd52",
       "source_run": "42999963506",
       "source_repository": "cxxzhang/qt5.15.17"
+    },
+    "mips64el": {
+      "schema": 1,
+      "tag": "linux-toolchains-v1",
+      "filename": "toolchain-linux-mips64el-glibc217-9b6f345e44ff.tar.xz",
+      "original_filename": "toolchain-linux-mips64el-glibc217.tar.xz",
+      "sha256": "9b6f345e44ffb7292e0cd0498dd8ba14ca3343b69d910d174a805853b82aa4a1",
+      "size": 1497891076,
+      "asset_id": 735103858,
+      "api_url": "https://api.github.com/repos/cxxzhang/qt5.15.17/releases/assets/735103858",
+      "source_commit": "cf0895478d6bf54f2672baf2a16eb2ace43b3ce8",
+      "source_run": "43002856553",
+      "source_repository": "cxxzhang/qt5.15.17"
+    },
+    "loong64-oldworld": {
+      "schema": 1,
+      "tag": "linux-toolchains-v1",
+      "filename": "toolchain-linux-loong64-oldworld-glibc228-80f0ff9b6365.tar.xz",
+      "original_filename": "toolchain-linux-loong64-oldworld-glibc228.tar.xz",
+      "sha256": "80f0ff9b6365f1856f2b9c0757c7fff7f8329f78f78a064ea5ffb0dcd80b9754",
+      "size": 296363680,
+      "asset_id": 735012578,
+      "api_url": "https://api.github.com/repos/cxxzhang/qt5.15.17/releases/assets/735012578",
+      "source_commit": "7c58b8b8ab3cfbc71fbca1b37b7638918dcd587f",
+      "source_run": "42995401423",
+      "source_repository": "cxxzhang/qt5.15.17"
     }
   }
 }
