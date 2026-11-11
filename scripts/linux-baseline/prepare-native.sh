@@ -92,7 +92,7 @@ for name in clang clang++; do
 prefix="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")/.." && pwd)"
 extra=()
 if [[ "$name" == clang++ ]]; then
-  extra=(-nostdinc++ -isystem "\$prefix/gcc/system-headers" \
+  extra=(-fno-sized-deallocation -fno-aligned-allocation -nostdinc++ -isystem "\$prefix/gcc/system-headers" \
     -isystem "\$prefix/$header_config_rel" -isystem "\$prefix/gcc/system-headers/backward")
 fi
 exec "\$prefix/clang/bin/clang" --driver-mode=$mode --target="$gcc_triple" \

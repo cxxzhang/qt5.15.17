@@ -183,7 +183,7 @@ def main():
                          "--readelf", llvm / "bin/llvm-readelf"]
                 if recipes.get("elf_flags"):
                     audit += ["--elf-flags", recipes["elf_flags"]]
-                run(*audit)
+                run(*audit, env=env)
                 # Shared libraries link through their .so names and pkg-config.
                 # Old libtool versions cannot consume newer .la sysroot escapes.
                 # Do not carry this absolute-path metadata between projects.
@@ -207,7 +207,7 @@ def main():
     run(cross / "bin/pkg-config", "--exists", *modules, env=target_env)
     run("python3", source / "scripts/package-linux.py", private_libs, "--audit-only",
         "--machine", "LoongArch", "--glibc", baseline,
-        "--readelf", llvm / "bin/llvm-readelf")
+        "--readelf", llvm / "bin/llvm-readelf", env=target_env)
     completed.write_text(baseline + "\n")
     print("Old-glibc graphics dependency build and ELF audit passed")
 

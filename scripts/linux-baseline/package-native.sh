@@ -74,7 +74,7 @@ for argument in "\$@"; do
 done
 extra=()
 if [[ "$name" == clang++ ]]; then
-  extra=(-nostdinc++ -isystem "\$prefix/gcc/system-headers" \
+  extra=(-fno-sized-deallocation -fno-aligned-allocation -nostdinc++ -isystem "\$prefix/gcc/system-headers" \
     -isystem "\$prefix/$header_config_rel" -isystem "\$prefix/gcc/system-headers/backward")
 fi
 exec "\$prefix/clang/bin/$name" --target="$gcc_triple" --sysroot="\$prefix/sysroot" \
@@ -101,6 +101,7 @@ bash "$root/scripts/linux-baseline/probe-mixed-cxx.sh" "$rel"
 python3 "$root/scripts/package-linux.py" "$rel/probe-sdk" --audit-only \
   --machine "$machine" --glibc 2.17 --native-dependencies --readelf "$rel/clang/bin/llvm-readelf"
 env -u LD_LIBRARY_PATH -u LD_PRELOAD "$rel/gcc/bin/g++" --sysroot="$rel/sysroot" -std=c++17 -pthread "$rel/probe.cpp" \
+  -fno-sized-deallocation -fno-aligned-new \
   -nostdinc++ -isystem "$rel/gcc/system-headers" -isystem "$rel/$header_config_rel" \
   -isystem "$rel/gcc/system-headers/backward" \
   -B"$rel/sysroot/usr/lib64/" -L"$rel/gcc/lib64" \
