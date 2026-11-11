@@ -55,11 +55,23 @@ def main():
         copied[name] = dict(source=str(source), sha256=hashlib.sha256(target.read_bytes()).hexdigest())
         dynamic = subprocess.check_output(['readelf', '-d', str(source)], text=True)
         pending.extend(re.findall(r'\(NEEDED\).*\[([^\]]+)\]', dynamic))
+    # Minimal runners can have the GL runtime without the development link
+    # name required by QtGui's public link interface. Prefer the host runtime.
+    gl_link = destination / 'libGL.so'
+    gl_runtime = destination / 'libGL.so.1'
+    if not gl_runtime.is_file():
+        candidates = re.findall(r'^\s*libGL\.so\.1\s+\([^\n]+?=>\s+(\S+)', cache, re.M)
+        if not candidates:
+            raise ValueError('No GL runtime provider for the consumer linker')
+        gl_runtime = Path(candidates[0])
+    if gl_link.is_symlink():
+        gl_link.unlink()
+    gl_link.symlink_to(gl_runtime)
     Path('/etc/ld.so.conf.d/qt-modern-graphics.conf').write_text(str(destination) + '\n')
     subprocess.check_call(['ldconfig'])
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(dict(
-        source_snapshot=prefix.name, copied=copied,
+        source_snapshot=prefix.name, copied=copied, linker_aliases={'libGL.so': str(gl_runtime)},
         policy='Reuse installed host providers; supplement only missing graphics libraries; retain host GNU/libc'),
         indent=2) + '\n')
     print('Modern host graphical dependencies ready: ' + ', '.join(sorted(copied)))

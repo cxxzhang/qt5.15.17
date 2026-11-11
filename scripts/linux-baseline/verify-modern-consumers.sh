@@ -7,6 +7,7 @@ artifacts="${3:?original SDK artifact directory required}"
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 artifacts="$(cd "$artifacts" && pwd)"
 prefix="$root/build-temp/accepted-$arch"
+export LIBRARY_PATH="/usr/local/lib/qt-modern-graphics${LIBRARY_PATH:+:$LIBRARY_PATH}"
 name="qt5.15.17_linux_$arch"
 [[ "$variant" != debug ]] || name+=_debug
 work="$(mktemp -d /tmp/qt-modern-consumer.XXXXXXXX)"
