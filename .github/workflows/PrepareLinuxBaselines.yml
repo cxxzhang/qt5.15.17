@@ -20,16 +20,34 @@ jobs:
         test "$(gh api "repos/$GH_REPO/releases/tags/linux-toolchains-v1" --jq .tag_name)" = linux-toolchains-v1
   native-inputs:
     if: inputs.target == 'native-inputs'
-    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, arm64]
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-22.04-arm' || 'ubuntu-22.04' }}
+    env:
+      TARGET: ${{ matrix.arch }}
     steps:
     - uses: actions/checkout@v4
     - name: Inspect the pinned native SDK build environment
       run: |
         set -o pipefail
         mkdir -p build-temp/logs
-        image=$(python3 -c 'import json; print(json.load(open("scripts/linux-baseline/targets.json"))["targets"]["x64"]["image"])')
+        image=$(python3 -c 'import json,os; print(json.load(open("scripts/linux-baseline/targets.json"))["targets"][os.environ["TARGET"]]["image"])')
         docker run --rm "$image" bash -ec '
           getconf GNU_LIBC_VERSION
+          for compiler in /usr/bin/gcc /usr/bin/g++ "$(command -v gcc)" "$(command -v g++)"; do
+            if test -x "$compiler"; then
+              echo "GNU COMPILER: $compiler"
+              "$compiler" --version
+              "$compiler" -dumpmachine
+              "$compiler" -print-file-name=libstdc++.so.6
+              "$compiler" -print-libgcc-file-name
+              "$compiler" -print-search-dirs
+              rpm -qf "$compiler" || true
+            fi
+          done
+          find /usr/include/c++ /opt/rh -name c++config.h -o -name libstdc++.so.6 2>/dev/null || true
           rpm -qa | sort
           command -v patchelf
           pkg-config --list-all | sort
@@ -41,13 +59,13 @@ jobs:
     - name: Prepare missing Qt dependencies on the baseline
       run: |
         set -o pipefail
-        image=$(python3 -c 'import json; print(json.load(open("scripts/linux-baseline/targets.json"))["targets"]["x64"]["image"])')
-        docker run --rm -v "$PWD:/workspace" -w /workspace "$image" bash scripts/linux-baseline/prepare-native-deps.sh x64 \
+        image=$(python3 -c 'import json,os; print(json.load(open("scripts/linux-baseline/targets.json"))["targets"][os.environ["TARGET"]]["image"])')
+        docker run --rm -v "$PWD:/workspace" -w /workspace "$image" bash scripts/linux-baseline/prepare-native-deps.sh "$TARGET" \
           2>&1 | tee build-temp/logs/native-qt-dependencies.log
     - uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: diagnostics-native-environment
+        name: diagnostics-native-environment-${{ matrix.arch }}
         path: build-temp/logs/
   native:
     needs: check-cache-release

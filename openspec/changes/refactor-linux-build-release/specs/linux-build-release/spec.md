@@ -11,12 +11,16 @@
 - **WHEN** 构建 LoongArch64 旧世界或新世界
 - **THEN** 系统分别使用固定且经校验的工具链与目标 sysroot，检查对应 ELF ABI、加载器及旧世界 glibc 2.28、新世界 glibc 2.36 上限，并执行实际目标运行探针。
 
-### Requirement: C++20 SDK 消费能力
-系统 SHALL 使用统一的 libstdc++ 工具链验证 C++20 应用消费 Qt SDK，并记录已验证的功能及运行库要求。
+### Requirement: 低版本 GNU 运行库与编译器互操作
+系统 SHALL 优先复用各目标基准系统的旧版 libstdc++/libgcc 和 GNU 头文件，不得为了额外的 C++20 功能抬高运行库要求。C++20 消费能力不再是验收条件（用户 2026-11-11 明确取消）。Qt 仍由 Clang 编译。
 
-#### Scenario: 编译和运行 C++20 样例
-- **WHEN** 验证一个目标 SDK
-- **THEN** 包含 concepts、协程、span 和 ranges 的 Qt 消费样例完成编译链接与目标运行验证，随包运行库满足其符号需求。
+#### Scenario: 旧系统运行库满足 SDK
+- **WHEN** 一个目标 SDK 准备发布
+- **THEN** 记录并检查实际需要的 GLIBCXX、CXXABI、GCC 和 GLIBC 符号，验证基准系统提供的运行库能解析全部依赖，不能仅通过随包携带新版 libstdc++ 宣称兼容旧系统。
+
+#### Scenario: 较新编译器消费已有 Qt 库
+- **WHEN** 使用 Clang 或 GCC 编译消费程序
+- **THEN** 使用匹配目标 ABI 的 GNU 支持文件链接同一份 Qt SDK，并运行 GUI/QML/字体/TLS 消费样例，记录实际测试的编译器版本。不能保证未知未来编译器，或使用新标准库 API 的业务程序仍能在旧系统运行。
 
 ### Requirement: 发布前剥离与审计
 系统 SHALL 在上传 Linux 产物前使用对应目标工具提取调试符号、执行 strip 并检查 ELF 运行依赖，保留 SDK 链接所需符号。
