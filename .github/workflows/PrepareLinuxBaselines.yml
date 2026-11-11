@@ -184,20 +184,6 @@ jobs:
       with:
         path: build-temp/loong-newworld-inputs/downloads
         key: ${{ steps.mips-vendor.outputs.cache-primary-key }}
-    - name: Relocate and package the accepted MIPS toolchain
-      if: inputs.target != 'mips-deps'
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      run: |
-        set -o pipefail
-        bash scripts/linux-baseline/package-cross.sh mips64el 2>&1 | tee build-temp/logs/mips217-packaging.log
-    - uses: actions/upload-artifact@v4
-      if: inputs.target != 'mips-deps'
-      with:
-        name: cross-toolchain-mips64el
-        compression-level: 0
-        path: Output/toolchains/
-        if-no-files-found: error
     - uses: actions/cache/restore@v4
       if: inputs.target == 'mips-deps'
       id: mips-graphics
@@ -214,6 +200,18 @@ jobs:
       with:
         path: build-temp/baseline-mips64el/graphics-inputs
         key: ${{ steps.mips-graphics.outputs.cache-primary-key }}
+    - name: Relocate and package the accepted MIPS toolchain
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        set -o pipefail
+        bash scripts/linux-baseline/package-cross.sh mips64el 2>&1 | tee build-temp/logs/mips217-packaging.log
+    - uses: actions/upload-artifact@v4
+      with:
+        name: cross-toolchain-mips64el
+        compression-level: 0
+        path: Output/toolchains/
+        if-no-files-found: error
     - uses: actions/upload-artifact@v4
       if: always()
       with:
@@ -307,7 +305,7 @@ jobs:
     needs: [loongarch-oldworld, loongarch-newworld, mips]
     if: >-
       ${{ !cancelled() &&
-      (inputs.target == 'all' || inputs.target == 'cross' || inputs.target == 'mips' || inputs.target == 'loongarch-oldworld' || inputs.target == 'loongarch-newworld') &&
+      (inputs.target == 'all' || inputs.target == 'cross' || inputs.target == 'mips' || inputs.target == 'mips-deps' || inputs.target == 'loongarch-oldworld' || inputs.target == 'loongarch-newworld') &&
       (needs.mips.result == 'success' || needs['loongarch-oldworld'].result == 'success' || needs['loongarch-newworld'].result == 'success') &&
       needs.mips.result != 'failure' && needs['loongarch-oldworld'].result != 'failure' && needs['loongarch-newworld'].result != 'failure' }}
     runs-on: ubuntu-22.04

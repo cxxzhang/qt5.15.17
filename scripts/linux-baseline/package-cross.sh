@@ -143,6 +143,7 @@ mv "$rel" "$prefix"
 rmdir "$relocated"
 trap - EXIT
 name="toolchain-linux-$arch-glibc${baseline//./}.tar.xz"
-XZ_OPT='-T2 -3' tar -C "$prefix" -cJf "$root/Output/toolchains/$name" .
+XZ_OPT='-T2 -3' tar -C "$prefix" --exclude=./graphics-inputs --exclude=./downloads \
+  --exclude=./qemu -cJf "$root/Output/toolchains/$name" .
 (cd "$root/Output/toolchains" && sha256sum "$name" >"$name.sha256")
 echo "$arch: compiler, GNU support and sysroot relocated, compiled, audited and executed; bundle ready"
