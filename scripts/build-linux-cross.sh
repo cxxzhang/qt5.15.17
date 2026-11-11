@@ -28,6 +28,12 @@ export LD_LIBRARY_PATH="$(dirname "$(clang++ -print-file-name=libstdc++.so.6)")"
 export PKG_CONFIG="$cross/bin/pkg-config"
 export PKG_CONFIG_SYSROOT_DIR="$sysroot"
 export PKG_CONFIG_LIBDIR="$sysroot/usr/lib/$triple/pkgconfig:$sysroot/usr/share/pkgconfig"
+raw_install="$source_dir/build-temp/installed-sdk/$tag.tar"
+if [[ "${QT_REUSE_INSTALL:-false}" == true && -f "$raw_install" ]]; then
+  mkdir -p "$install"
+  tar -xf "$raw_install" -C "$install"
+  echo "Restored the configured Qt installation for packaging and runtime acceptance"
+else
 if [[ "$arch" == loong64 ]]; then
   patch="$source_dir/Patches/0002-qtbase-loongarch64.patch"
   if ! git -C "$source_dir/qtbase" apply --reverse --check "$patch" >/dev/null 2>&1; then
@@ -80,6 +86,12 @@ bash "$source_dir/configure" -prefix /opt/qt5.15.17 -extprefix "$install" \
   -I "$OPENSSL_INCDIR" -L "$OPENSSL_LIBDIR"
 make -j"$jobs"
 make install
+if [[ "${QT_CACHE_INSTALL:-false}" == true ]]; then
+  mkdir -p "$(dirname "$raw_install")"
+  tar -C "$install" -cf "$raw_install.tmp" .
+  mv "$raw_install.tmp" "$raw_install"
+fi
+fi
 
 mkdir -p "$install/host/lib" "$install/host/bin"
 cp -L "$cross/runtime/lib/libstdc++.so.6" "$install/lib/"

@@ -52,7 +52,7 @@ def main():
                       STRIP=str(prefix / "llvm/bin/llvm-strip"),
                       CFLAGS="-O2 -g -fPIC", CXXFLAGS="-O2 -g -fsized-deallocation",
                       PKG_CONFIG=str(cross / "bin/pkg-config"),
-                      PKG_CONFIG_PATH=str(host / "share/pkgconfig"), PYTHON="python3")
+                      PKG_CONFIG_PATH=str(host / "lib/pkgconfig") + ":" + str(host / "share/pkgconfig"), PYTHON="python3")
     target_env.pop("LD_LIBRARY_PATH", None)
     options = {
         "libxcb": ["--enable-xkb", "--enable-xinput"],

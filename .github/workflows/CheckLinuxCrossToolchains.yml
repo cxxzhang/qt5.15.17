@@ -83,15 +83,35 @@ jobs:
       with:
         path: build-temp/toolchain/cross-${{ matrix.arch }}
         key: ${{ steps.cross-cache.outputs.cache-primary-key }}
+    - name: Identify Qt build inputs
+      if: inputs.build_sdk
+      id: qt-source
+      run: |
+        qt_modules_hash=$(git ls-tree -r HEAD | awk '$1 == "160000" && $4 ~ /^qt/ {print $3, $4}' | sha256sum | cut -d' ' -f1)
+        echo "modules=$qt_modules_hash" >> "$GITHUB_OUTPUT"
+    - uses: actions/cache/restore@v4
+      if: inputs.build_sdk
+      id: installed-sdk
+      with:
+        path: build-temp/installed-sdk/
+        key: installed-qt-${{ matrix.arch }}-${{ inputs.variant }}-${{ steps.qt-source.outputs.modules }}-${{ hashFiles('scripts/build-linux-cross.sh', 'scripts/setup-cross-linux-toolchain.sh', 'scripts/build-linux-cross-dependencies.py', format('scripts/sysroots/{0}.lock.json', matrix.arch), 'Patches/*.patch', 'configure', 'qt.pro', 'openssl/*.tar.gz') }}
     - name: Build and verify target Qt SDK
       if: inputs.build_sdk
       env:
         TARGET: ${{ matrix.arch }}
         VARIANT: ${{ inputs.variant }}
+        QT_REUSE_INSTALL: ${{ steps.installed-sdk.outputs.cache-hit }}
       run: |
         set -o pipefail
-        docker exec qt-cross-build bash scripts/build-linux-cross.sh "$TARGET" "$VARIANT" \
+        docker exec -e QT_REUSE_INSTALL -e QT_CACHE_INSTALL=true qt-cross-build \
+          bash scripts/build-linux-cross.sh "$TARGET" "$VARIANT" \
           2>&1 | tee "build-temp/logs/cross-$TARGET-sdk.log"
+    - uses: actions/cache/save@v4
+      if: always() && inputs.build_sdk && steps.installed-sdk.outputs.cache-hit != 'true' && hashFiles('build-temp/installed-sdk/*.tar') != ''
+      continue-on-error: true
+      with:
+        path: build-temp/installed-sdk/
+        key: ${{ steps.installed-sdk.outputs.cache-primary-key }}
     - name: Upload cross toolchain diagnostics
       if: always()
       continue-on-error: true

@@ -66,7 +66,7 @@ cat >"$cross/bin/pkg-config" <<EOF
 export PKG_CONFIG_SYSROOT_DIR="$sysroot"
 export PKG_CONFIG_LIBDIR="$sysroot/usr/lib/$triple/pkgconfig:$sysroot/usr/lib/pkgconfig:$sysroot/usr/share/pkgconfig"
 # Only the architecture-independent XML/Python generator is a host package.
-export PKG_CONFIG_PATH="$cross/host/share/pkgconfig"
+export PKG_CONFIG_PATH="$cross/host/lib/pkgconfig:$cross/host/share/pkgconfig"
 exec /usr/bin/pkg-config "\$@"
 EOF
 chmod +x "$cross/bin/pkg-config"
