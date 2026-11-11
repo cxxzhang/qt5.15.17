@@ -5,12 +5,19 @@ GCC 13.3.0's libstdc++. The intended runtime baseline for x64 and ARM64 is
 glibc 2.27. The pipeline rejects newer glibc requirements in SDK ELF files.
 It does not bundle glibc or replace the target system's C library.
 
+`scripts/linux-toolchain.lock.json` pins the container manifest digest and
+the SHA-256 of each compiler/source archive. GitHub release assets are
+downloaded through the GitHub API. The manual **Record fixed Linux toolchain
+source digests** workflow records these values and checks GCC's upstream
+SHA-512 manifest before a maintainer updates the lock file.
+
 ## Local builds
 
 From the repository root on a Linux Docker host, run:
 
 ```bash
-docker run --rm -v "$PWD:/workspace" -w /workspace ubuntu:18.04 \
+qt_container=$(python3 -c 'import json; print(json.load(open("scripts/linux-toolchain.lock.json"))["container"]["image"])')
+docker run --rm -v "$PWD:/workspace" -w /workspace "$qt_container" \
   bash -ec 'bash scripts/setup-linux-toolchain.sh x64
     PATH=/workspace/build-temp/toolchain/bin:$PATH bash scripts/build-linux.sh x64 release'
 ```
@@ -57,6 +64,11 @@ and execute a Qt GUI/network consumer with TLS support. The consumer uses
 C++20 concepts, coroutines, span and ranges. This verifies those features;
 it does not claim complete C++20 library coverage.
 
+The consumer performs a TLS 1.2 handshake and exchanges encrypted data over
+the loopback interface. `scripts/smoke-tls/` contains its public self-signed
+test certificate and key. Peer verification is disabled for this fixture;
+the check verifies TLS operation without external network or CA services.
+
 Applications that use the newer libstdc++ must deploy compatible C++
 runtime libraries too. Place them in the application's private library
 directory with an appropriate runtime search path; do not overwrite
@@ -84,6 +96,13 @@ The workflow caches the prepared toolchain before compiling Qt, preserving
 it even when Qt fails later. Build and toolchain logs, `config.log` and
 `config.summary` are uploaded as `diagnostics-*` artifacts, including on
 failure. Diagnostics are excluded from release packages.
+
+The manual **Verify an extracted Linux SDK** workflow takes the producing
+workflow's run ID, architecture and variant. It downloads the SDK and
+symbols, extracts into a fresh baseline container without the original Qt
+build or install directory, audits the extracted ELF files and dependencies,
+then builds and runs the qmake consumer. Compiler and target sysroot caches
+are reused; the extracted SDK comes exclusively from the selected artifact.
 
 ## Cross targets and acceptance status
 
