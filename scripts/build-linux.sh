@@ -21,6 +21,11 @@ build="$(mktemp -d "$work/build.XXXXXXXX")"
 jobs="${QT_BUILD_JOBS:-$(nproc)}"
 export CC="${CC:-clang}" CXX="${CXX:-clang++}"
 export CFLAGS=-fPIC
+# configure builds and immediately runs a bootstrap qmake. It needs the
+# selected GCC runtime before the SDK's private runtime has been installed.
+runtime_dir="$(dirname "$("$CXX" -print-file-name=libstdc++.so.6)")"
+[[ -f "$runtime_dir/libstdc++.so.6" ]]
+export LD_LIBRARY_PATH="$runtime_dir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 "$CC" --version
 getconf GNU_LIBC_VERSION
 
@@ -63,9 +68,14 @@ done < <(find "$install" -type f -print0)
 
 symbols="$build/symbols"
 python3 "$source_dir/scripts/package-linux.py" "$install" "$symbols" \
-  --machine "$machine" --glibc "$baseline"
-env -u LD_LIBRARY_PATH "$install/bin/qmake" -query QT_VERSION
-bash "$source_dir/scripts/smoke-linux.sh" "$install" "$build/smoke"
+  --machine "$machine" --glibc "$baseline" --native-dependencies
 name="qt5.15.17_${tag//-/_}"
 tar -C "$install" -czf "$source_dir/Output/$name.tar.gz" .
 tar -C "$symbols" -czf "$source_dir/Output/$name-symbols.tar.gz" .
+
+# Verify the packaged SDK after moving it out of the configured prefix.
+relocated="$build/relocated-sdk"
+mkdir "$relocated"
+tar -xzf "$source_dir/Output/$name.tar.gz" -C "$relocated"
+[[ "$(env -u LD_LIBRARY_PATH "$relocated/bin/qmake" -query QT_VERSION)" == 5.15.17 ]]
+bash "$source_dir/scripts/smoke-linux.sh" "$relocated" "$build/smoke"

@@ -7,8 +7,10 @@ cat >"$work/main.cpp" <<'EOF'
 #include <QtCore/QString>
 #include <QtGui/QGuiApplication>
 #include <QtNetwork/QSslSocket>
+#include <algorithm>
 #include <concepts>
 #include <coroutine>
+#include <exception>
 #include <ranges>
 #include <span>
 
@@ -33,7 +35,21 @@ int main(int argc, char **argv) {
     return !(QString::number(result) == QStringLiteral("42") && QSslSocket::supportsSsl());
 }
 EOF
-"${CXX:-clang++}" -std=c++20 -fPIC "$work/main.cpp" \
-  -I"$sdk/include" -L"$sdk/lib" -Wl,-rpath,"$sdk/lib" \
-  -lQt5Gui -lQt5Network -lQt5Core -o "$work/smoke"
+cat >"$work/smoke.pro" <<'EOF'
+QT += core gui network
+TEMPLATE = app
+TARGET = smoke
+CONFIG += console c++2a
+CONFIG -= app_bundle
+SOURCES += main.cpp
+EOF
+(
+  cd "$work"
+  # Exercise the installed qmake/mkspecs and SDK relocation, not only
+  # compilation with manually supplied include/library search paths.
+  env -u LD_LIBRARY_PATH "$sdk/bin/qmake" smoke.pro \
+    "QMAKE_CC=${CC:-clang}" "QMAKE_CXX=${CXX:-clang++}" \
+    "QMAKE_LINK=${CXX:-clang++}" "QMAKE_LFLAGS+=-Wl,-rpath,$sdk/lib"
+  make -j2
+)
 env -u LD_LIBRARY_PATH QT_QPA_PLATFORM=offscreen "$work/smoke"

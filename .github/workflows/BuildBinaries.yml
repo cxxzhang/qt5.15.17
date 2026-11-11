@@ -213,16 +213,51 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: recursive
-    - uses: actions/cache@v4
+    - name: Test ELF publishing gate
+      run: bash scripts/test-package-linux.sh
+    - uses: actions/cache/restore@v4
+      id: toolchain-cache
       with:
         path: build-temp/toolchain
         key: bionic-qt-${{ matrix.arch }}-${{ hashFiles('scripts/setup-linux-toolchain.sh') }}
+    - name: Prepare Ubuntu 18.04 toolchain
+      env:
+        TARGET: ${{ matrix.arch }}
+      run: |
+        set -o pipefail
+        mkdir -p build-temp/logs
+        docker run -d --name qt-linux-build -v "$PWD:/workspace" -w /workspace \
+          ubuntu:18.04 sleep infinity
+        docker exec qt-linux-build bash scripts/setup-linux-toolchain.sh "$TARGET" \
+          2>&1 | tee "build-temp/logs/$TARGET-toolchain.log"
+    - uses: actions/cache/save@v4
+      if: steps.toolchain-cache.outputs.cache-hit != 'true'
+      with:
+        path: build-temp/toolchain
+        key: ${{ steps.toolchain-cache.outputs.cache-primary-key }}
     - name: Build and verify Ubuntu 18.04 SDK
       env:
         TARGET: ${{ matrix.arch }}
         VARIANT: ${{ matrix.variant }}
       run: |
-        docker run --rm -v "$PWD:/workspace" -w /workspace ubuntu:18.04           bash -ec 'bash scripts/setup-linux-toolchain.sh "$1"; PATH=/workspace/build-temp/toolchain/bin:$PATH bash scripts/build-linux.sh "$1" "$2"'           bash "$TARGET" "$VARIANT"
+        set -o pipefail
+        mkdir -p build-temp/logs
+        docker exec qt-linux-build \
+          bash -ec 'PATH=/workspace/build-temp/toolchain/bin:$PATH bash scripts/build-linux.sh "$1" "$2"' \
+          bash "$TARGET" "$VARIANT" 2>&1 | tee "build-temp/logs/$TARGET-$VARIANT.log"
+    - name: Upload build diagnostics
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: diagnostics-${{ matrix.asset }}
+        if-no-files-found: ignore
+        path: |
+          build-temp/logs/
+          build-temp/linux-*/build.*/qt/config.log
+          build-temp/linux-*/build.*/qt/config.summary
+    - name: Remove build container
+      if: always()
+      run: docker rm -f qt-linux-build || true
     - uses: actions/upload-artifact@v4
       with:
         name: qt5.15.17_${{ matrix.asset }}
@@ -338,6 +373,7 @@ jobs:
         for artifact in release_work/*; do
           name="${artifact##*/}"
           case "$name" in
+            diagnostics-*) continue ;;
             qt5.15.17_linux_*) cp "$artifact"/*.tar.gz release_zips/ ;;
             qt5.15.17_windows_*.zip) (cd "$artifact" && zip -qr "../../release_zips/$name" .) ;;
             qt5.15.17_macos_*) tar -C "$artifact" -czf "release_zips/$name.tar.gz" . ;;
