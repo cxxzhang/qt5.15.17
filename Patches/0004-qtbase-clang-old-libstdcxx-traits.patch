@@ -1,0 +1,15 @@
+diff --git a/src/corelib/global/qtypeinfo.h b/src/corelib/global/qtypeinfo.h
+--- a/src/corelib/global/qtypeinfo.h
++++ b/src/corelib/global/qtypeinfo.h
+@@ -53,8 +53,10 @@
+ static constexpr bool qIsRelocatable()
+ {
+-#if defined(Q_CC_CLANG) || !defined(Q_CC_GNU) || Q_CC_GNU >= 501
++#if defined(Q_CC_CLANG)
++    return __is_trivially_copyable(T) && __is_trivially_destructible(T);
++#elif !defined(Q_CC_GNU) || Q_CC_GNU >= 501
+     return std::is_trivially_copyable<T>::value && std::is_trivially_destructible<T>::value;
+ #else
+     return std::is_enum<T>::value || std::is_integral<T>::value;
+ #endif
+ }

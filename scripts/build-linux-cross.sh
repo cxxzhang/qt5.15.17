@@ -59,6 +59,11 @@ if [[ "${QT_REUSE_INSTALL:-false}" == true && -f "$raw_install" ]]; then
   tar -xf "$raw_install" -C "$install"
   echo "Restored the configured Qt installation for packaging and runtime acceptance"
 else
+patch="$source_dir/Patches/0004-qtbase-clang-old-libstdcxx-traits.patch"
+if ! git -C "$source_dir/qtbase" apply --reverse --check "$patch" >/dev/null 2>&1; then
+  git -C "$source_dir/qtbase" apply --check "$patch"
+  git -C "$source_dir/qtbase" apply "$patch"
+fi
 if [[ "$arch" == loong64* ]]; then
   patch="$source_dir/Patches/0002-qtbase-loongarch64.patch"
   if ! git -C "$source_dir/qtbase" apply --reverse --check "$patch" >/dev/null 2>&1; then
