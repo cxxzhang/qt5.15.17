@@ -2,6 +2,8 @@
 """Audit macOS SDK architectures and merge complete universal SDKs."""
 
 import argparse
+import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -66,6 +68,14 @@ def merge(x64, arm64, output):
             header.write_text('#if defined(__x86_64__)\n#include "' + header.name + '.x86_64"\n'
                               '#elif defined(__aarch64__) || defined(__arm64__)\n#include "' + header.name + '.arm64"\n'
                               '#else\n#error Unsupported SDK architecture\n#endif\n')
+    sources = {}
+    for name, sdk in (('x86_64', x64), ('arm64', arm64)):
+        record = sdk / 'share/ci-native-source.json'
+        sources[name] = json.loads(record.read_text()) if record.is_file() else dict(
+            source_run=os.environ.get('GITHUB_RUN_ID'), source_commit=os.environ.get('GITHUB_SHA'))
+    provenance = output / 'share/ci-universal-sources.json'
+    provenance.parent.mkdir(parents=True, exist_ok=True)
+    provenance.write_text(json.dumps(sources, indent=2) + '\n')
     audit(output, ['x86_64', 'arm64'])
 
 

@@ -6,11 +6,37 @@ from pathlib import Path
 import struct
 import tempfile
 import unittest
+from unittest import mock
 import zipfile
 
 spec = importlib.util.spec_from_file_location('release_gate', Path(__file__).with_name('collect-release.py'))
 gate = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(gate)
+restore_spec = importlib.util.spec_from_file_location('native_restore', Path(__file__).with_name('restore-native-sdk.py'))
+restore = importlib.util.module_from_spec(restore_spec)
+restore_spec.loader.exec_module(restore)
+
+
+class NativeInputs(unittest.TestCase):
+    def identity(self, **changes):
+        files = {'qtbase': 'qt', 'configure': 'config', 'onekey-build-windows-x64.bat': 'win',
+                 'onekey-build-macos-x64.sh': 'mac', '.github/workflows/BuildBinaries.yml': 'workflow'}
+        files.update(changes)
+        tree = [dict(path=name, sha=value, type='commit' if name == 'qtbase' else 'blob') for name, value in files.items()]
+        with mock.patch.object(restore, 'api', return_value=dict(tree=tree)):
+            return restore.inputs('commit', 'windows')
+
+    def test_submodule_change_invalidates_reuse(self):
+        self.assertNotEqual(self.identity(), self.identity(qtbase='changed'))
+
+    def test_configure_change_invalidates_reuse(self):
+        self.assertNotEqual(self.identity(), self.identity(configure='changed'))
+
+    def test_native_script_change_invalidates_reuse(self):
+        self.assertNotEqual(self.identity(), self.identity(**{'onekey-build-windows-x64.bat': 'changed'}))
+
+    def test_packaging_workflow_change_retains_compile_identity(self):
+        self.assertEqual(self.identity(), self.identity(**{'.github/workflows/BuildBinaries.yml': 'changed'}))
 
 
 class ReleaseGate(unittest.TestCase):
