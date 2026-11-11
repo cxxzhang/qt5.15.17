@@ -127,7 +127,7 @@ jobs:
             bash scripts/linux-baseline/build-native-sdk.sh "$ARCH" "$VARIANT" artifacts \
             2>&1 | tee build-temp/logs/extracted-sdk.log
         else
-          sudo bash scripts/linux-baseline/install-host-deps.sh build-essential pkg-config patchelf libtinfo5 libxml2 libedit2
+          sudo bash scripts/linux-baseline/prepare-cross-host.sh "$ARCH"
           sudo -E bash scripts/linux-baseline/build-cross-sdk.sh "$ARCH" "$VARIANT" artifacts \
             2>&1 | tee build-temp/logs/extracted-sdk.log
         fi

@@ -84,6 +84,7 @@ bash "$source_dir/configure" -prefix "$install" -confirm-license -opensource "-$
   -I "$OPENSSL_INCDIR" -L "$OPENSSL_LIBDIR"
 printf '#include <QtCore/qnamespace.h>\nint main() { return 0; }\n' >"$build/configured-headers.cpp"
 "$CXX" -std=c++17 -fPIC -fsyntax-only -DQT_BOOTSTRAPPED \
+  -I"$build/qt/qtbase/include" -I"$build/qt/qtbase/include/QtCore" \
   -I"$source_dir/qtbase/include" -I"$source_dir/qtbase/include/QtCore" "$build/configured-headers.cpp"
 make -j"$jobs"
 make install

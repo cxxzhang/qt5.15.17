@@ -119,7 +119,6 @@ jobs:
     - name: Check ELF publishing gates and host runtime dependencies
       run: |
         bash scripts/test-package-linux.sh
-        sudo bash scripts/linux-baseline/install-host-deps.sh build-essential pkg-config patchelf libtinfo5 libxml2 libedit2
     - name: Read accepted source archive identities
       id: toolchain-pin
       env:
@@ -164,6 +163,8 @@ jobs:
       with:
         path: build-temp/accepted-${{ matrix.arch }}
         key: ${{ steps.accepted-cross.outputs.cache-primary-key }}
+    - name: Reuse runner tools and accepted LLVM host libraries
+      run: sudo bash scripts/linux-baseline/prepare-cross-host.sh "${{ matrix.arch }}"
     - name: Test target ELF packaging with the real baseline loader
       run: sudo -E bash scripts/linux-baseline/test-cross-packaging.sh "${{ matrix.arch }}"
     - uses: actions/cache/restore@v4
