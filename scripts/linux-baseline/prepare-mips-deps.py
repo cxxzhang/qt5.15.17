@@ -62,6 +62,12 @@ def main():
     if len(compilers) != 1:
         raise ValueError("Expected the single source-built MIPS GCC")
     sysroot = Path(subprocess.check_output([str(compilers[0]), "-print-sysroot"], text=True).strip())
+    stdlib = subprocess.check_output([str(compilers[0]).removesuffix('gcc') + 'g++',
+                                      '-print-file-name=libstdc++.so.6'], text=True).strip()
+    libgcc = subprocess.check_output([str(compilers[0]), '-print-file-name=libgcc_s.so.1'], text=True).strip()
+    subprocess.check_call([sys.executable, str(ROOT / 'scripts/audit-linux-gnu-runtime.py'), str(stage),
+                           '--libstdcxx', stdlib, '--libgcc', libgcc, '--readelf', str(llvm),
+                           '--output', str(ROOT / 'build-temp/logs/mips217-graphics-gnu-audit.json')])
     libc = sysroot / "lib64/libc.so.6"
     if not libc.is_file():
         candidates = list(sysroot.rglob("libc-2.17.so"))
