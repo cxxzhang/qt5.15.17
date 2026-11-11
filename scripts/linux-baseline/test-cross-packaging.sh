@@ -4,8 +4,9 @@ set -euo pipefail
 arch="${1:?cross target required}"
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 prefix="$root/build-temp/accepted-$arch"
-work="$(mktemp -d "$root/build-temp/packaging-probe.XXXXXXXX")"
-trap 'rm -rf "$work"' EXIT
+mkdir -p "$root/build-temp/logs"
+work="$(mktemp -d "$root/build-temp/logs/packaging-probe-$arch.XXXXXXXX")"
+echo "Packaging probe evidence: $work"
 mkdir -p "$work/bin" "$work/lib"
 readarray -t settings < <(python3 - "$prefix/toolchain.json" "$arch" <<'PY'
 import json, sys
@@ -15,13 +16,16 @@ PY
 )
 "$prefix/bin/clang++" -std=c++17 -pthread "$root/scripts/linux-baseline/probe.cpp" \
   '-Wl,-rpath,$ORIGIN/../lib' -o "$work/bin/probe"
-for name in libstdc++.so.6 libgcc_s.so.1; do
-  cp -L "$prefix/probe-sdk/lib/$name" "$work/lib/$name"
-done
+bash "$root/scripts/linux-baseline/copy-cross-runtime.sh" "$prefix" "$work/lib"
 for elf in "$work/bin/probe" "$work/lib/"*; do
+  "$prefix/llvm/bin/llvm-readelf" -lW "$elf" >"$work/$(basename "$elf").original.txt"
   "$prefix/llvm/bin/llvm-strip" --strip-unneeded "$elf"
+  "$prefix/llvm/bin/llvm-readelf" -lW "$elf" >"$work/$(basename "$elf").stripped.txt"
   rel="$(realpath --relative-to="$(dirname "$elf")" "$work/lib")"
-  python3 "$root/scripts/elf-load-alignment.py" "$elf" "\$ORIGIN/$rel"
+  result=0
+  python3 "$root/scripts/elf-load-alignment.py" "$elf" "\$ORIGIN/$rel" || result=$?
+  "$prefix/llvm/bin/llvm-readelf" -lW "$elf" >"$work/$(basename "$elf").rpath.txt"
+  [[ "$result" == 0 ]] || exit "$result"
 done
 PYTHONPATH="$root/scripts" python3 - "$prefix/${settings[0]}" "$prefix/bin/qemu" "$work" "${settings[1]}" <<'PY'
 from pathlib import Path

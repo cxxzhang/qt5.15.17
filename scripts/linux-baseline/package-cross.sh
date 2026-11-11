@@ -68,6 +68,9 @@ cp "$root/scripts/linux-baseline/targets.json" "$root/scripts/linux-baseline/pac
 cp "$root/scripts/linux-baseline/wrap-vendor-host-tools.py" "$prefix/share/baseline/"
 if [[ "$arch" == loong64-newworld ]]; then
   cp "$root/scripts/sysroots/loong64.lock.json" "$prefix/share/baseline/"
+elif [[ "$arch" == loong64-oldworld ]]; then
+  cp "$root/scripts/linux-baseline/oldworld-graphics.lock.json" \
+    "$root/scripts/build-linux-cross-dependencies.py" "$prefix/share/baseline/"
 fi
 cp -a "$root/scripts/linux-baseline/llvm-licenses" "$prefix/share/baseline/"
 python3 - "$prefix/host" <<'PY'

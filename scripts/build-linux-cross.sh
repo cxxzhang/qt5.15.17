@@ -141,7 +141,7 @@ fi
 
 mkdir -p "$install/host/lib" "$install/host/bin"
 if [[ -n "${QT_ACCEPTED_CROSS_PREFIX:-}" ]]; then
-  cp -L "$cross/probe-sdk/lib/libstdc++.so.6" "$cross/probe-sdk/lib/libgcc_s.so.1" "$install/lib/"
+  bash "$source_dir/scripts/linux-baseline/copy-cross-runtime.sh" "$cross" "$install/lib"
 else
   cp -L "$cross/runtime/lib/libstdc++.so.6" "$install/lib/"
   cp -L "$("$cross/bin/clang" -print-file-name=libgcc_s.so.1)" "$install/lib/"

@@ -31,7 +31,8 @@ def audit(path):
     for offset, address, alignment in segments:
         if alignment > 1 and (alignment & (alignment - 1) or
                               (address - offset) % alignment):
-            raise ValueError('{}: invalid PT_LOAD alignment'.format(path))
+            raise ValueError('{}: invalid PT_LOAD offset={:#x} vaddr={:#x} align={:#x}'.format(
+                path, offset, address, alignment))
 
 
 def set_rpath(path, rpath):

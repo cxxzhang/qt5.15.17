@@ -22,6 +22,9 @@ def main():
     parser.add_argument("--llvm", type=Path)
     parser.add_argument("--recipes", type=Path,
                         help="Pinned supplemental recipes with an explicit glibc baseline")
+    parser.add_argument("--only-source", choices=("xcb-util-keysyms",),
+                        help="Add one missing source library to a verified released base")
+    parser.add_argument("--base-toolchain", type=Path)
     args = parser.parse_args()
     source = Path(__file__).resolve().parent.parent
     prefix = args.prefix.resolve()
@@ -36,9 +39,34 @@ def main():
         raise ValueError("Graphics recipes do not match the pinned sysroot")
     recipes = json.loads(recipe_bytes.decode("utf-8"))
     baseline = recipes["glibc"] if args.recipes else lock["glibc"]
+    base_sha = ''
+    if args.only_source:
+        if not args.base_toolchain or not args.recipes:
+            parser.error('--only-source requires --base-toolchain and --recipes')
+        base = args.base_toolchain.resolve()
+        if sysroot != cross / 'sysroot':
+            raise ValueError('Old-world supplement requires its matching sysroot directory')
+        entry = json.loads((source / 'scripts/linux-baseline/toolchains.lock.json').read_text())['targets']['loong64-oldworld']
+        if not (base / ('.accepted-' + entry['sha256'])).is_file():
+            raise ValueError('Supplement requires the checksum-verified released old-world base')
+        manifest = json.loads((base / 'toolchain.json').read_text())
+        if manifest['target'] != 'loong64-oldworld' or manifest['glibc'] != baseline:
+            raise ValueError('Supplement base target/baseline mismatch')
+        for directory in ('sysroot', 'dependencies', 'host'):
+            destination = cross / directory
+            destination.mkdir(parents=True, exist_ok=True)
+            run('cp', '-a', str(base / directory) + '/.', str(destination) + '/')
+        provenance = cross / 'share/baseline/supplement-base.json'
+        provenance.parent.mkdir(parents=True, exist_ok=True)
+        provenance.write_text(json.dumps(dict(base=entry, added_source=args.only_source), indent=2) + '\n')
+        recipes['sources'] = [r for r in recipes['sources'] if r['name'] == args.only_source]
+        if len(recipes['sources']) != 1:
+            raise ValueError('Expected one pinned supplemental source recipe')
+        base_sha = entry['sha256']
     identity = hashlib.sha256(recipe_bytes + Path(__file__).read_bytes()
                               + (cross / 'bin/clang').read_bytes()
-                              + (cross / 'bin/clang++').read_bytes()).hexdigest()
+                              + (cross / 'bin/clang++').read_bytes()
+                              + base_sha.encode()).hexdigest()
     completed = cross / (".graphics-ready-" + identity)
     all_installed = all(((cross / "host" if r["host"] else sysroot)
                          / (".source-" + r["name"] + "-" + identity)).is_file()
@@ -46,10 +74,15 @@ def main():
     if completed.is_file() and all_installed:
         print("Using verified old-glibc graphics dependencies")
         return
-    run("bash", source / "scripts/linux-baseline/install-host-deps.sh",
-        "autoconf", "automake", "libtool", "xutils-dev", "bison", "flex", "gperf", "libexpat1-dev",
-        "meson", "ninja-build")
-    run("python3", source / "scripts/prepare-linux-sysroot.py", recipe_path, prefix, "--sources-only")
+    packages = (['autoconf', 'automake', 'libtool'] if args.only_source else
+                ['autoconf', 'automake', 'libtool', 'xutils-dev', 'bison', 'flex',
+                 'gperf', 'libexpat1-dev', 'meson', 'ninja-build'])
+    run("bash", source / "scripts/linux-baseline/install-host-deps.sh", *packages)
+    work = source / "build-temp/loong64-dependencies" / identity
+    work.mkdir(parents=True, exist_ok=True)
+    selected_recipes = work / 'selected-recipes.json'
+    selected_recipes.write_text(json.dumps(recipes, indent=2) + '\n')
+    run("python3", source / "scripts/prepare-linux-sysroot.py", selected_recipes, prefix, "--sources-only")
     host = cross / "host"
     host.mkdir(parents=True, exist_ok=True)
     # Vendor sysroots can distribute development metadata over lib and lib64.
@@ -65,8 +98,6 @@ def main():
     pkg_wrapper.chmod(0o755)
     private_libs = cross / "dependencies/lib"
     private_libs.mkdir(parents=True, exist_ok=True)
-    work = source / "build-temp/loong64-dependencies" / identity
-    work.mkdir(parents=True, exist_ok=True)
     target_env = dict(os.environ, CC=str(cross / "bin/clang"), CXX=str(cross / "bin/clang++"),
                       AR=str(llvm / "bin/llvm-ar"), RANLIB=str(llvm / "bin/llvm-ranlib"),
                       NM=str(llvm / "bin/llvm-nm"), LD=str(llvm / "bin/ld.lld"),

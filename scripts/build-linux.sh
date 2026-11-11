@@ -82,10 +82,8 @@ bash "$source_dir/configure" -prefix "$install" -confirm-license -opensource "-$
   -platform linux-clang "QMAKE_CC=$CC" "QMAKE_CXX=$CXX" "QMAKE_LFLAGS=" \
   'QMAKE_CFLAGS+=-Wno-unused-command-line-argument' 'QMAKE_CXXFLAGS+=-Wno-unused-command-line-argument' \
   -I "$OPENSSL_INCDIR" -L "$OPENSSL_LIBDIR"
-printf '#include <QtCore/qnamespace.h>\nint main() { return 0; }\n' >"$build/configured-headers.cpp"
-"$CXX" -std=c++17 -fPIC -fsyntax-only -DQT_BOOTSTRAPPED \
-  -I"$build/qt/qtbase/include" -I"$build/qt/qtbase/include/QtCore" \
-  -I"$source_dir/qtbase/include" -I"$source_dir/qtbase/include/QtCore" "$build/configured-headers.cpp"
+# Public headers are checked below after make install generates qconfig.h and
+# the version headers. Bootstrap headers require qmake's private build flags.
 make -j"$jobs"
 make install
 if [[ "${QT_CACHE_INSTALL:-false}" == true ]]; then

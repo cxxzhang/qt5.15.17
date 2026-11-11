@@ -11,7 +11,7 @@ cross="$root/build-temp/accepted-$arch"
 host="$root/build-temp/accepted-x64"
 compgen -G "$cross/.accepted-*" >/dev/null
 compgen -G "$host/.accepted-*" >/dev/null
-if ! ldconfig -p | grep -q 'libtinfo.so.5 '; then
+if ! ldconfig -p | grep 'libtinfo.so.5 ' >/dev/null; then
   library="$(find "$host/sysroot/usr/lib64" -type f -name 'libtinfo.so.5*' -print -quit)"
   test -n "$library" || { echo 'Accepted native snapshot lacks LLVM host libtinfo.so.5' >&2; exit 1; }
   readelf -h "$library" | grep -q 'Machine:.*Advanced Micro Devices X86-64'
