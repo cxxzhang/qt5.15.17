@@ -57,6 +57,21 @@
       "source_commit": "7c58b8b8ab3cfbc71fbca1b37b7638918dcd587f",
       "source_run": "42995401423",
       "source_repository": "cxxzhang/qt5.15.17"
+    },
+    "loong64-newworld": {
+      "schema": 1,
+      "tag": "linux-toolchains-v1",
+      "filename": "toolchain-linux-loong64-newworld-glibc236-8c09d4629b3f.tar.xz",
+      "original_filename": "toolchain-linux-loong64-newworld-glibc236.tar.xz",
+      "sha256": "8c09d4629b3fdd214bb64d097ee8a6ac7abd68204f75903cab07eb50a26ace7f",
+      "size": 1427952192,
+      "asset_id": 735423736,
+      "api_url": "https://api.github.com/repos/cxxzhang/qt5.15.17/releases/assets/735423736",
+      "source_commit": "83d9463487f441b38b828d0f1de04dd1ffeb5972",
+      "source_run": "43017704941",
+      "source_repository": "cxxzhang/qt5.15.17",
+      "gnu_runtime_policy": "baseline-system",
+      "gnu_runtime_version": "12"
     }
   }
 }

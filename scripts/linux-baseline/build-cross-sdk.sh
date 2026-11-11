@@ -18,8 +18,11 @@ test -x "$host/bin/clang++"
 if [[ -f "$cross/toolchain.json" ]]; then
   sysroot_rel="$(python3 - "$cross/toolchain.json" <<'PY'
 import json, sys
+from pathlib import Path
 entry = json.load(open(sys.argv[1]))
-assert entry.get('gnu_runtime_policy') == 'baseline-system', 'Replace the historical high-GNU-runtime bundle before SDK acceptance'
+# The first validated original-GNU LoongArch bundles predate the JSON field.
+system_marker = Path(sys.argv[1]).parent / 'runtime/.system-runtime'
+assert entry.get('gnu_runtime_policy') == 'baseline-system' or system_marker.is_file(), 'Replace the historical high-GNU-runtime bundle before SDK acceptance'
 print(entry['sysroot'])
 PY
 )"

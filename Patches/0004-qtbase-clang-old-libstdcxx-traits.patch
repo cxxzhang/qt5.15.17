@@ -20,3 +20,17 @@ diff --git a/src/corelib/itemmodels/qabstractitemmodel.cpp b/src/corelib/itemmod
 -    return std::less<>{}(d, other.d);
 +    return std::less<decltype(d)>{}(d, other.d);
  }
+diff --git a/src/3rdparty/harfbuzz-ng/src/hb-meta.hh b/src/3rdparty/harfbuzz-ng/src/hb-meta.hh
+--- a/src/3rdparty/harfbuzz-ng/src/hb-meta.hh
++++ b/src/3rdparty/harfbuzz-ng/src/hb-meta.hh
+@@ -202,3 +202,9 @@
+-#if defined(__GNUC__) && __GNUC__ < 5 && !defined(__clang__)
++#if defined(__clang__)
++#define hb_is_trivially_copyable(T) __is_trivially_copyable(T)
++#define hb_is_trivially_copy_assignable(T) __is_trivially_assignable(typename std::add_lvalue_reference<T>::type, typename std::add_lvalue_reference<typename std::add_const<T>::type>::type)
++#define hb_is_trivially_constructible(T) __is_trivially_constructible(T)
++#define hb_is_trivially_copy_constructible(T) __is_trivially_constructible(T, typename std::add_lvalue_reference<typename std::add_const<T>::type>::type)
++#define hb_is_trivially_destructible(T) __is_trivially_destructible(T)
++#elif defined(__GNUC__) && __GNUC__ < 5
+ #define hb_is_trivially_copyable(T) __has_trivial_copy(T)
+ #define hb_is_trivially_copy_assignable(T) __has_trivial_assign(T)
