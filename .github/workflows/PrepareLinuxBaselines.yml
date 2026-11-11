@@ -272,7 +272,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Install host packaging tool
-      run: sudo apt-get -o Acquire::Retries=5 update && sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends patchelf autotools-dev
+      run: sudo bash scripts/linux-baseline/install-host-deps.sh patchelf autotools-dev
     - uses: actions/cache/restore@v4
       id: oldworld-runtime
       with:
@@ -388,7 +388,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Install host LLVM runtime dependencies
-      run: sudo apt-get -o Acquire::Retries=5 update && sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends patchelf autotools-dev libtinfo5 libxml2
+      run: sudo bash scripts/linux-baseline/install-host-deps.sh patchelf autotools-dev libtinfo5 libxml2
     - uses: actions/cache/restore@v4
       id: newworld-runtime
       with:
@@ -435,7 +435,7 @@ jobs:
       if: inputs.target == 'loongarch-newworld-deps'
       run: |
         set -o pipefail
-        sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends build-essential pkg-config libexpat1-dev libwayland-dev
+        sudo bash scripts/linux-baseline/install-host-deps.sh build-essential pkg-config libexpat1-dev libwayland-dev
         sudo -E python3 scripts/build-linux-cross-dependencies.py build-temp/baseline-loong64-newworld \
           --cross build-temp/baseline-loong64-newworld --sysroot build-temp/baseline-loong64-newworld/sysroot-loong64 \
           --llvm build-temp/loong-newworld-inputs/compiler \
