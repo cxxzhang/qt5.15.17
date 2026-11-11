@@ -4,7 +4,7 @@ set -euo pipefail
 arch="${1:?target required}"
 destination="${2:?extraction directory required}"
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-read -r url checksum filename < <(python3 - "$root/scripts/linux-baseline/toolchains.lock.json" "$arch" <<'PY'
+read -r url checksum filename < <(python3 - "${QT_TOOLCHAIN_LOCK:-$root/scripts/linux-baseline/toolchains.lock.json}" "$arch" <<'PY'
 import json, sys
 config = json.load(open(sys.argv[1]))
 entry = config['targets'].get(sys.argv[2])

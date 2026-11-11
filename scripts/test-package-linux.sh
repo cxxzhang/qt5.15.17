@@ -22,6 +22,8 @@ expect_rejection --machine invalid --glibc 99.0
 grep -q 'unexpected ELF architecture' "$work/error.log"
 expect_rejection --machine "$machine" --glibc 1.0
 grep -q 'exceeds glibc baseline' "$work/error.log"
+expect_rejection --machine "$machine" --glibc 99.0 --audit-only --elf-flags 0xffffffff
+grep -q 'unexpected ELF ABI flags' "$work/error.log"
 expect_rejection --machine "$machine" --glibc 99.0 --audit-only --require-stripped
 grep -q 'debug information survived strip' "$work/error.log"
 test ! -e "$work/symbols"

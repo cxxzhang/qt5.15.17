@@ -1,69 +1,114 @@
-name: Verify an extracted Linux SDK
-
+name: Verify an extracted Linux baseline SDK
 on:
   workflow_dispatch:
     inputs:
       source_run:
-        description: Completed Build Binaries run containing the SDK artifact
+        description: Build accepted Linux baseline SDKs run containing the artifact
         type: string
         required: true
       arch:
         type: choice
-        options: [x64, arm64, loong64, mips64el]
-        default: x64
+        options: [x64, arm64, loong64-oldworld, loong64-newworld, mips64el]
+        required: true
       variant:
         type: choice
         options: [release, debug]
         default: release
-
 permissions:
   contents: read
   actions: read
-
 jobs:
   verify:
     runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-22.04-arm' || 'ubuntu-22.04' }}
+    timeout-minutes: 45
     steps:
     - uses: actions/checkout@v4
-    - name: Check packaging and symbol rejection gates
+    - name: Bind verification to the SDK's successful job and original toolchain pins
+      id: source
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
+        SOURCE_RUN: ${{ inputs.source_run }}
+        ARCH: ${{ inputs.arch }}
+        VARIANT: ${{ inputs.variant }}
+      run: |
+        python3 - <<'PY'
+        import base64, json, os, subprocess
+        from pathlib import Path
+        repo, run_id, arch, variant = (os.environ[n] for n in ('GH_REPO', 'SOURCE_RUN', 'ARCH', 'VARIANT'))
+        assert run_id.isdigit()
+        def api(path):
+            return json.loads(subprocess.check_output(['gh', 'api', 'repos/' + repo + path], text=True))
+        run = api('/actions/runs/' + run_id)
+        assert run['name'] == 'Build accepted Linux baseline SDKs'
+        name = ('Qt glibc 2.17' if arch in ('x64', 'arm64') else 'Qt cross baseline') + ' (' + arch + ', ' + variant + ')'
+        jobs = api('/actions/runs/' + run_id + '/jobs?filter=all&per_page=100')['jobs']
+        assert any(j['name'] == name and j['conclusion'] == 'success' for j in jobs), name
+        content = api('/contents/scripts/linux-baseline/toolchains.lock.json?ref=' + run['head_sha'])
+        raw = base64.b64decode(content['content'])
+        entries = json.loads(raw)['targets']
+        Path('build-temp').mkdir(exist_ok=True)
+        Path('build-temp/source-toolchains.lock.json').write_bytes(raw)
+        host = 'arm64' if arch == 'arm64' else 'x64'
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
+            out.write('commit=' + run['head_sha'] + '\n')
+            out.write('host=' + host + '\nhost_sha=' + entries[host]['sha256'] + '\n')
+            if arch not in ('x64', 'arm64'):
+                out.write('cross_sha=' + entries[arch]['sha256'] + '\n')
+        PY
+    - name: Check ELF rejection gates
       run: bash scripts/test-package-linux.sh
     - uses: actions/download-artifact@v4
       with:
         github-token: ${{ github.token }}
         run-id: ${{ inputs.source_run }}
-        name: ${{ (inputs.arch == 'loong64' || inputs.arch == 'mips64el') && format('qt5.15.17_linux_{0}_{1}', inputs.arch, inputs.variant) || format('qt5.15.17_linux_{0}{1}', inputs.arch, inputs.variant == 'debug' && '_debug' || '') }}
+        name: qt5.15.17_linux_${{ inputs.arch }}_${{ inputs.variant }}
         path: artifacts
     - uses: actions/cache/restore@v4
+      id: host-toolchain
       with:
-        path: build-temp/toolchain
-        key: bionic-qt-${{ inputs.arch == 'arm64' && 'arm64' || 'x64' }}-${{ hashFiles('scripts/setup-linux-toolchain.sh', 'scripts/linux-toolchain.lock.json') }}
-        restore-keys: bionic-qt-${{ inputs.arch == 'arm64' && 'arm64' || 'x64' }}-
+        path: build-temp/accepted-${{ steps.source.outputs.host }}
+        key: accepted-native-${{ steps.source.outputs.host }}-${{ steps.source.outputs.host_sha }}
     - uses: actions/cache/restore@v4
-      if: inputs.arch == 'loong64' || inputs.arch == 'mips64el'
+      if: inputs.arch != 'x64' && inputs.arch != 'arm64'
+      id: cross-toolchain
       with:
-        path: |
-          build-temp/toolchain/sysroot-${{ inputs.arch }}
-          build-temp/toolchain/downloads
-        key: cross-deps-${{ inputs.arch }}-${{ hashFiles('scripts/prepare-linux-sysroot.py', 'scripts/build-linux-cross-dependencies.py', format('scripts/sysroots/{0}.lock.json', inputs.arch)) }}
-    - uses: actions/cache/restore@v4
-      if: inputs.arch == 'loong64' || inputs.arch == 'mips64el'
-      with:
-        path: build-temp/toolchain/cross-${{ inputs.arch }}
-        key: cross-bionic-${{ inputs.arch }}-${{ hashFiles('scripts/setup-cross-linux-toolchain.sh', 'scripts/build-linux-cross-dependencies.py', format('scripts/sysroots/{0}.lock.json', inputs.arch)) }}
-    - name: Audit and consume the package in a new Ubuntu 18.04 container
+        path: build-temp/accepted-${{ inputs.arch }}
+        key: accepted-cross-${{ inputs.arch }}-${{ steps.source.outputs.cross_sha }}
+    - name: Restore the original accepted toolchains without rebuilding
       env:
-        TARGET: ${{ inputs.arch }}
-        VARIANT: ${{ inputs.variant }}
         GITHUB_TOKEN: ${{ github.token }}
+        QT_TOOLCHAIN_LOCK: ${{ github.workspace }}/build-temp/source-toolchains.lock.json
+        ARCH: ${{ inputs.arch }}
+        HOST: ${{ steps.source.outputs.host }}
+      run: |
+        bash scripts/linux-baseline/download-toolchain.sh "$HOST" "build-temp/accepted-$HOST"
+        if [[ "$ARCH" != x64 && "$ARCH" != arm64 ]]; then
+          bash scripts/linux-baseline/download-toolchain.sh "$ARCH" "build-temp/accepted-$ARCH"
+        fi
+    - name: Consume the archives in a fresh baseline environment
+      env:
+        ARCH: ${{ inputs.arch }}
+        VARIANT: ${{ inputs.variant }}
+        QT_VERIFY_SOURCE_RUN: ${{ inputs.source_run }}
+        QT_VERIFY_SOURCE_COMMIT: ${{ steps.source.outputs.commit }}
       run: |
         set -o pipefail
         mkdir -p build-temp/logs
-        qt_container=$(python3 -c 'import json; print(json.load(open("scripts/linux-toolchain.lock.json"))["container"]["image"])')
-        docker run --rm -e GITHUB_TOKEN -v "$PWD:/workspace" -w /workspace "$qt_container" \
-          bash scripts/verify-linux-artifact.sh "$TARGET" "$VARIANT" artifacts \
-          2>&1 | tee build-temp/logs/extracted-sdk.log
+        if [[ "$ARCH" == x64 || "$ARCH" == arm64 ]]; then
+          image=$(python3 -c 'import json,os; print(json.load(open("scripts/linux-baseline/targets.json"))["targets"][os.environ["ARCH"]]["image"])')
+          docker run --rm -e QT_VERIFY_SOURCE_RUN -e QT_VERIFY_SOURCE_COMMIT -e GITHUB_SHA \
+            -v "$PWD:/workspace" -w /workspace "$image" \
+            bash scripts/linux-baseline/build-native-sdk.sh "$ARCH" "$VARIANT" artifacts \
+            2>&1 | tee build-temp/logs/extracted-sdk.log
+        else
+          sudo apt-get -o Acquire::Retries=5 update
+          sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends build-essential pkg-config patchelf libtinfo5 libxml2 libedit2
+          sudo -E bash scripts/linux-baseline/build-cross-sdk.sh "$ARCH" "$VARIANT" artifacts \
+            2>&1 | tee build-temp/logs/extracted-sdk.log
+        fi
     - uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: diagnostics-extracted-${{ inputs.arch }}-${{ inputs.variant }}
+        name: verification-${{ inputs.arch }}-${{ inputs.variant }}
         path: build-temp/logs/

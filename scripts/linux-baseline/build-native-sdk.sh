@@ -34,4 +34,8 @@ export PKG_CONFIG_SYSROOT_DIR="$prefix/sysroot"
 export PKG_CONFIG_LIBDIR="$prefix/sysroot/usr/lib64/pkgconfig:$prefix/sysroot/usr/share/pkgconfig"
 unset PKG_CONFIG_PATH
 export QT_BUILD_JOBS="${QT_BUILD_JOBS:-4}"
-bash "$root/scripts/build-linux.sh" "$arch" "$variant"
+if [[ -n "${3:-}" ]]; then
+  bash "$root/scripts/linux-baseline/verify-sdk.sh" "$arch" "$variant" "$3"
+else
+  bash "$root/scripts/build-linux.sh" "$arch" "$variant"
+fi

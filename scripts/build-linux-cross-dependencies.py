@@ -81,6 +81,15 @@ def main():
         project.mkdir(parents=True, exist_ok=True)
         archive = prefix / "downloads/sources" / (recipe["sha256"] + "-" + Path(recipe["path"]).name)
         run("tar", "-xf", archive, "--strip-components=1", "-C", project)
+        if name == "xcb-proto":
+            replacements = 0
+            for path in project.rglob('*.py'):
+                text = path.read_text()
+                if 'from fractions import gcd' in text:
+                    replacements += text.count('from fractions import gcd')
+                    path.write_text(text.replace('from fractions import gcd', 'from math import gcd'))
+            if not replacements:
+                raise ValueError("Pinned xcb-proto Python compatibility patch no longer applies")
         if name == "libglu":
             # Modern GL headers do not provide NULL through incidental includes.
             error_source = project / "src/libutil/error.c"
