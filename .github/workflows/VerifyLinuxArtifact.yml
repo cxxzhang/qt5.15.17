@@ -1,5 +1,19 @@
 name: Verify an extracted Linux baseline SDK
 on:
+  workflow_call:
+    inputs:
+      source_run:
+        type: string
+        required: true
+      arch:
+        type: string
+        required: true
+      variant:
+        type: string
+        required: true
+      inspect_gnu_only:
+        type: boolean
+        default: false
   workflow_dispatch:
     inputs:
       source_run:
@@ -23,6 +37,8 @@ permissions:
   actions: read
 jobs:
   verify:
+    outputs:
+      source_commit: ${{ steps.source.outputs.commit }}
     runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-22.04-arm' || 'ubuntu-22.04' }}
     timeout-minutes: 45
     steps:
@@ -44,10 +60,14 @@ jobs:
         def api(path):
             return json.loads(subprocess.check_output(['gh', 'api', 'repos/' + repo + path], text=True))
         run = api('/actions/runs/' + run_id)
-        assert run['name'] == 'Build accepted Linux baseline SDKs'
+        assert run['path'].split('@')[0] in (
+            '.github/workflows/BuildLinuxBaselines.yml',
+            '.github/workflows/LinuxPipeline.yml',
+            '.github/workflows/BuildBinaries.yml'), run['path']
         name = ('Qt glibc 2.17' if arch in ('x64', 'arm64') else 'Qt cross baseline') + ' (' + arch + ', ' + variant + ')'
         jobs = api('/actions/runs/' + run_id + '/jobs?filter=all&per_page=100')['jobs']
-        assert any(j['name'] == name and j['conclusion'] == 'success' for j in jobs), name
+        assert any((j['name'] == name or j['name'].endswith(' / ' + name))
+                   and j['conclusion'] == 'success' for j in jobs), name
         content = api('/contents/scripts/linux-baseline/toolchains.lock.json?ref=' + run['head_sha'])
         raw = base64.b64decode(content['content'])
         entries = json.loads(raw)['targets']
@@ -160,6 +180,7 @@ jobs:
     - name: Consume the same SDK with modern GCC and Clang
       env:
         QT_VERIFY_SOURCE_RUN: ${{ inputs.source_run }}
+        QT_VERIFY_SOURCE_COMMIT: ${{ needs.verify.outputs.source_commit }}
       run: |
         set -o pipefail
         mkdir -p build-temp/logs

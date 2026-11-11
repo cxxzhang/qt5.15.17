@@ -43,6 +43,7 @@ def digest(path):
     return result.hexdigest()
 record = dict(target=arch, variant=variant, accepted=True,
               source_run=os.environ['QT_VERIFY_SOURCE_RUN'],
+              source_commit=os.environ['QT_VERIFY_SOURCE_COMMIT'],
               verifier_commit=os.environ['GITHUB_SHA'],
               host='Ubuntu 22.04; baseline deployment is checked by the separate verifier',
               compilers={kind: Path(logs, 'modern-' + kind + '-' + arch + '-' + variant + '.txt').read_text()

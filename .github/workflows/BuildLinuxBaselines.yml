@@ -1,5 +1,13 @@
 name: Build accepted Linux baseline SDKs
 on:
+  workflow_call:
+    inputs:
+      target:
+        type: string
+        default: all
+      variant:
+        type: string
+        default: all
   workflow_dispatch:
     inputs:
       target:

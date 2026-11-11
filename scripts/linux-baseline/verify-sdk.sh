@@ -73,17 +73,18 @@ fi
 test "$(env -u LD_LIBRARY_PATH "$qmake" -query QT_VERSION)" = 5.15.17
 bash "$root/scripts/smoke-linux.sh" "$sdk" "$work"
 mkdir -p "$root/build-temp/logs"
-python3 - "$artifacts" "$name" "$arch" "$variant" "$baseline" "$root/build-temp/logs" <<'PY'
+python3 - "$artifacts" "$name" "$arch" "$variant" "$baseline" "$root/build-temp/logs" "$cross" <<'PY'
 import hashlib, json, os, sys
 from pathlib import Path
-artifacts, name, arch, variant, baseline, logs = sys.argv[1:]
+artifacts, name, arch, variant, baseline, logs, cross = sys.argv[1:]
 def digest(path):
     result = hashlib.sha256()
     with path.open('rb') as stream:
         for block in iter(lambda: stream.read(1024 * 1024), b''): result.update(block)
     return result.hexdigest()
 record = dict(target=arch, variant=variant, glibc=baseline, accepted=True,
-              gnu_runtime_policy='baseline-system' if os.environ.get('QT_SYSTEM_GNU_RUNTIME') == '1' else 'bundled',
+              gnu_runtime_policy='baseline-system' if cross == 'true' or os.environ.get('QT_SYSTEM_GNU_RUNTIME') == '1' else 'legacy-bundled',
+              gnu_runtime_delivery='system' if os.environ.get('QT_SYSTEM_GNU_RUNTIME') == '1' else 'bundled-baseline',
               source_run=os.environ.get('QT_VERIFY_SOURCE_RUN'),
               source_commit=os.environ.get('QT_VERIFY_SOURCE_COMMIT'),
               verifier_commit=os.environ.get('GITHUB_SHA'),

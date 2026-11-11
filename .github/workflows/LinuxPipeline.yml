@@ -1,0 +1,77 @@
+name: Validate the Linux release pipeline
+on:
+  workflow_call:
+    inputs:
+      target:
+        type: string
+        default: all
+      variant:
+        type: string
+        default: all
+  workflow_dispatch:
+    inputs:
+      target:
+        type: choice
+        options: [all, native, x64, arm64, cross, mips64el, loong64-oldworld, loong64-newworld]
+        default: all
+      variant:
+        type: choice
+        options: [all, release, debug]
+        default: all
+permissions:
+  contents: read
+  actions: read
+jobs:
+  gate-tests:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+    - name: Check matrix, provenance and archive rejection gates
+      run: python3 -B scripts/linux-baseline/test-collect-acceptance.py
+  build:
+    needs: gate-tests
+    uses: ./.github/workflows/BuildLinuxBaselines.yml
+    with:
+      target: ${{ inputs.target }}
+      variant: ${{ inputs.variant }}
+  verify:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: ${{ fromJSON(inputs.target == 'all' && '["x64","arm64","mips64el","loong64-oldworld","loong64-newworld"]' || inputs.target == 'native' && '["x64","arm64"]' || inputs.target == 'cross' && '["mips64el","loong64-oldworld","loong64-newworld"]' || format('["{0}"]', inputs.target)) }}
+        variant: ${{ fromJSON(inputs.variant == 'all' && '["release","debug"]' || format('["{0}"]', inputs.variant)) }}
+    uses: ./.github/workflows/VerifyLinuxArtifact.yml
+    with:
+      source_run: ${{ format('{0}', github.run_id) }}
+      arch: ${{ matrix.arch }}
+      variant: ${{ matrix.variant }}
+  accepted:
+    needs: [build, verify]
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: qt5.15.17_linux_*
+        path: sdk
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: verification-*
+        path: verification
+    - uses: actions/download-artifact@v4
+      if: inputs.target == 'all' || inputs.target == 'native' || inputs.target == 'x64' || inputs.target == 'arm64'
+      with:
+        pattern: modern-consumers-*
+        path: modern
+    - name: Require the entire selected matrix and matching archive hashes
+      run: |
+        python3 scripts/linux-baseline/collect-acceptance.py --sdk sdk --verification verification --modern modern \
+          --targets-spec scripts/linux-baseline/targets.json --toolchains scripts/linux-baseline/toolchains.lock.json \
+          --target "${{ inputs.target }}" --variant "${{ inputs.variant }}" \
+          --source-run "${{ github.run_id }}" --source-commit "${{ github.sha }}" \
+          --output linux-acceptance-manifest.json
+    - uses: actions/upload-artifact@v4
+      with:
+        name: linux-acceptance-manifest
+        path: linux-acceptance-manifest.json
