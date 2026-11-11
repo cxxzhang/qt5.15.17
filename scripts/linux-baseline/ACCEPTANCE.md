@@ -41,6 +41,15 @@ their released base provenance; earlier assets remain available. SDK retries
 reuse the prepared compilers and matching raw Qt installs, then repeat all
 packaging and acceptance gates. ELF alignment work is internal packaging.
 
+Published assets were rechecked on 2026-11-12 against GitHub's server-side
+SHA256 digests. All five current toolchain bundles and both original Clang
+mirrors match their pins, names and declared sizes. All sixteen repository
+assets pinned across the lock files' sixteen historical commits remain
+available with unchanged digests across the two toolchain releases. The
+publication metadata audit is recorded in
+`evidence/toolchain-publication-20261112.json`; toolchain execution is covered
+by the SDK acceptance run above.
+
 For native consumers, use qmake's normal compiler specification selection:
 
 ```sh

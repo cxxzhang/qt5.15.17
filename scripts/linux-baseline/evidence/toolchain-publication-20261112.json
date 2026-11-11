@@ -1,0 +1,178 @@
+{
+  "accepted": true,
+  "checked_at": "2026-11-11T20:48:27.405437+00:00",
+  "release_id": 441502279,
+  "tag": "linux-toolchains-v1",
+  "lock_sha256": "8b5483d9bfd64ee91cedc0fd4a347258296fbc9319951ab551cf0b837c2345c3",
+  "api_snapshot_sha256": "93f078d077d4368bdb2ddf0a8592e45231a2e4d3a03225333395fcf4938fad06",
+  "assets": [
+    {
+      "kind": "GNU/sysroot/Clang bundle",
+      "target": "arm64",
+      "asset_id": 735356552,
+      "filename": "toolchain-linux-arm64-glibc217-6e501bb9d592.tar.xz",
+      "sha256": "6e501bb9d592c2771bd29243fe7f49b42eef4fa46d6203feff2ac55322302292",
+      "size": 159318652
+    },
+    {
+      "kind": "GNU/sysroot/Clang bundle",
+      "target": "x64",
+      "asset_id": 735357044,
+      "filename": "toolchain-linux-x64-glibc217-4bc4e39e583a.tar.xz",
+      "sha256": "4bc4e39e583a80feaa0ba791ce1b1a5512bbee7d18f90d9d2d3ec754d49f0e98",
+      "size": 181496720
+    },
+    {
+      "kind": "GNU/sysroot/Clang bundle",
+      "target": "mips64el",
+      "asset_id": 736114481,
+      "filename": "toolchain-linux-mips64el-glibc217-0d584de4cad9.tar.xz",
+      "sha256": "0d584de4cad9971f156b1b8c780dfb81c689490c343a7e272c7e9d2924ced40b",
+      "size": 1454445076
+    },
+    {
+      "kind": "GNU/sysroot/Clang bundle",
+      "target": "loong64-oldworld",
+      "asset_id": 735976415,
+      "filename": "toolchain-linux-loong64-oldworld-glibc228-61698744d55f.tar.xz",
+      "sha256": "61698744d55f79f771e357cacf65ffed067d59ea86de5b609c11d8f4243ab90a",
+      "size": 337715900
+    },
+    {
+      "kind": "GNU/sysroot/Clang bundle",
+      "target": "loong64-newworld",
+      "asset_id": 735423736,
+      "filename": "toolchain-linux-loong64-newworld-glibc236-8c09d4629b3f.tar.xz",
+      "sha256": "8c09d4629b3fdd214bb64d097ee8a6ac7abd68204f75903cab07eb50a26ace7f",
+      "size": 1427952192
+    },
+    {
+      "kind": "byte-for-byte upstream Clang mirror",
+      "target": "x64",
+      "asset_id": 735013026,
+      "filename": "static-clang-linux-x64-3a25cb4eae72.tar.xz",
+      "sha256": "3a25cb4eae724cad96d7e504ce7669a824f61d57d27716fd47d0a9f1fe2d8fdf",
+      "size": 66070500
+    },
+    {
+      "kind": "byte-for-byte upstream Clang mirror",
+      "target": "arm64",
+      "asset_id": 735012796,
+      "filename": "static-clang-linux-arm64-da56c2b13a0c.tar.xz",
+      "sha256": "da56c2b13a0c3e676e010d61a87753a975de18ae9eaa65247ca6a6d22bb95ab4",
+      "size": 54817128
+    }
+  ],
+  "retained_historical_asset_ids": [
+    735013387,
+    735014459,
+    735012578,
+    735027410,
+    735027689,
+    735482193,
+    735610883
+  ],
+  "retained_historical_pins": [
+    {
+      "asset_id": 734794935,
+      "sha256": "3a25cb4eae724cad96d7e504ce7669a824f61d57d27716fd47d0a9f1fe2d8fdf",
+      "filename": "static-clang-linux-x64.tar.xz",
+      "tag": "toolchain-llvm-20.1.8-v1"
+    },
+    {
+      "asset_id": 734794943,
+      "sha256": "da56c2b13a0c3e676e010d61a87753a975de18ae9eaa65247ca6a6d22bb95ab4",
+      "filename": "static-clang-linux-arm64.tar.xz",
+      "tag": "toolchain-llvm-20.1.8-v1"
+    },
+    {
+      "asset_id": 735012578,
+      "sha256": "80f0ff9b6365f1856f2b9c0757c7fff7f8329f78f78a064ea5ffb0dcd80b9754",
+      "filename": "toolchain-linux-loong64-oldworld-glibc228-80f0ff9b6365.tar.xz",
+      "tag": "linux-toolchains-v1"
+    },
+    {
+      "asset_id": 735012796,
+      "sha256": "da56c2b13a0c3e676e010d61a87753a975de18ae9eaa65247ca6a6d22bb95ab4",
+      "filename": "static-clang-linux-arm64-da56c2b13a0c.tar.xz",
+      "tag": "linux-toolchains-v1"
+    },
+    {
+      "asset_id": 735013026,
+      "sha256": "3a25cb4eae724cad96d7e504ce7669a824f61d57d27716fd47d0a9f1fe2d8fdf",
+      "filename": "static-clang-linux-x64-3a25cb4eae72.tar.xz",
+      "tag": "linux-toolchains-v1"
+    },
+    {
+      "asset_id": 735029150,
+      "sha256": "155156e6646998b8c4486bf67be619faaa4eaaedb9a62c7cdf56de996bea57d3",
+      "filename": "toolchain-linux-arm64-glibc217-155156e66469.tar.xz",
+      "tag": "linux-toolchains-v1"
+    },
+    {
+      "asset_id": 735030471,
+      "sha256": "ccb32371de5ddf0b604a48ea6f5d1ce6248b8ec52a686fa1e76f8cd06c27ef11",
+      "filename": "toolchain-linux-x64-glibc217-ccb32371de5d.tar.xz",
+      "tag": "linux-toolchains-v1"
+    },
+    {
+      "asset_id": 735103858,
+      "sha256": "9b6f345e44ffb7292e0cd0498dd8ba14ca3343b69d910d174a805853b82aa4a1",
+      "filename": "toolchain-linux-mips64el-glibc217-9b6f345e44ff.tar.xz",
+      "tag": "linux-toolchains-v1"
+    },
+    {
+      "asset_id": 735271486,
+      "sha256": "ecd3d59eb5462eb31dad4c3514c472e44e903cd3afc95f8e9aee2d995ad769dd",
+      "filename": "toolchain-linux-mips64el-glibc217-ecd3d59eb546.tar.xz",
+      "tag": "linux-toolchains-v1"
+    },
+    {
+      "asset_id": 735356552,
+      "sha256": "6e501bb9d592c2771bd29243fe7f49b42eef4fa46d6203feff2ac55322302292",
+      "filename": "toolchain-linux-arm64-glibc217-6e501bb9d592.tar.xz",
+      "tag": "linux-toolchains-v1"
+    },
+    {
+      "asset_id": 735357044,
+      "sha256": "4bc4e39e583a80feaa0ba791ce1b1a5512bbee7d18f90d9d2d3ec754d49f0e98",
+      "filename": "toolchain-linux-x64-glibc217-4bc4e39e583a.tar.xz",
+      "tag": "linux-toolchains-v1"
+    },
+    {
+      "asset_id": 735423736,
+      "sha256": "8c09d4629b3fdd214bb64d097ee8a6ac7abd68204f75903cab07eb50a26ace7f",
+      "filename": "toolchain-linux-loong64-newworld-glibc236-8c09d4629b3f.tar.xz",
+      "tag": "linux-toolchains-v1"
+    },
+    {
+      "asset_id": 735482193,
+      "sha256": "37be0d64c0f10af4915daa20ce26fa7fcbb141403baf7f62f21ae4871d89b57d",
+      "filename": "toolchain-linux-mips64el-glibc217-37be0d64c0f1.tar.xz",
+      "tag": "linux-toolchains-v1"
+    },
+    {
+      "asset_id": 735610883,
+      "sha256": "a7fb1e0ab4c6c015dad9dd7d5c4d31a857f7782fe80aafc7b44777b47da36531",
+      "filename": "toolchain-linux-loong64-oldworld-glibc228-a7fb1e0ab4c6.tar.xz",
+      "tag": "linux-toolchains-v1"
+    },
+    {
+      "asset_id": 735976415,
+      "sha256": "61698744d55f79f771e357cacf65ffed067d59ea86de5b609c11d8f4243ab90a",
+      "filename": "toolchain-linux-loong64-oldworld-glibc228-61698744d55f.tar.xz",
+      "tag": "linux-toolchains-v1"
+    },
+    {
+      "asset_id": 736114481,
+      "sha256": "0d584de4cad9971f156b1b8c780dfb81c689490c343a7e272c7e9d2924ced40b",
+      "filename": "toolchain-linux-mips64el-glibc217-0d584de4cad9.tar.xz",
+      "tag": "linux-toolchains-v1"
+    }
+  ],
+  "history_commits_checked": 16,
+  "api_snapshots_sha256": {
+    "toolchain-release-api.json": "93f078d077d4368bdb2ddf0a8592e45231a2e4d3a03225333395fcf4938fad06",
+    "historical-clang-release-api.json": "b82aef7707fa67fda4ab5eea086d11f73c0e904e0c6455e22c67bbc31e0d932a"
+  }
+}
