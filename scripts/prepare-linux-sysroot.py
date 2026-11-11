@@ -60,6 +60,20 @@ def relative_symlinks(root):
                 path.symlink_to(relative)
 
 
+def loader_search_links(root, architecture):
+    # Extracting .debs does not run ldconfig. The early LoongArch loader and
+    # MIPS n64 loader search lib64, while Debian stores libraries in multiarch
+    # directories. Expose those libraries through their standard loader paths.
+    triple = {"loong64": "loongarch64-linux-gnu", "mips64el": "mips64el-linux-gnuabi64"}[architecture]
+    for parent in ("lib", "usr/lib"):
+        destination = root / ("lib64" if parent == "lib" else "usr/lib64")
+        destination.mkdir(parents=True, exist_ok=True)
+        for path in sorted((root / parent / triple).glob("*.so*")):
+            link = destination / path.name
+            if not link.exists() and not link.is_symlink():
+                link.symlink_to(os.path.relpath(str(path), str(destination)))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("lock", type=Path)
@@ -80,6 +94,7 @@ def main():
     pending_name = ".unpacking-" + hashlib.sha256(raw).hexdigest()
     root = args.prefix / ("sysroot-" + lock["architecture"])
     if (root / marker_name).is_file() and not args.download_only:
+        loader_search_links(root, lock["architecture"])
         print("Using verified sysroot:", root)
         return
     if (root.exists() and any(root.iterdir()) and not (root / pending_name).is_file()
@@ -98,6 +113,7 @@ def main():
     for path in paths:
         subprocess.check_call(["dpkg-deb", "-x", str(path), str(root)])
     relative_symlinks(root)
+    loader_search_links(root, lock["architecture"])
     (root / marker_name).write_text(lock["architecture"] + " glibc " + lock["glibc"] + "\n")
     (root / pending_name).unlink()
     print("Prepared", root)

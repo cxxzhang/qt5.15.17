@@ -111,6 +111,8 @@ def main():
             if (project / "config.log").is_file():
                 shutil.copy2(str(project / "config.log"), str(log))
         marker.write_text(json.dumps({"version": recipe["version"], "libraries": libraries}) + "\n")
+    run("python3", source / "scripts/prepare-linux-sysroot.py",
+        source / "scripts/sysroots/loong64.lock.json", prefix)
     modules = "xcb xcb-glx xcb-render xcb-renderutil xcb-image xcb-icccm xcb-keysyms xcb-randr xcb-sync xcb-xinerama xcb-xkb xcb-shm xcb-present xcb-dri3 xkbcommon xkbcommon-x11 wayland-client wayland-server wayland-egl gl egl glesv2 glu".split()
     run(cross / "bin/pkg-config", "--exists", *modules, env=target_env)
     run("python3", source / "scripts/package-linux.py", private_libs, "--audit-only",

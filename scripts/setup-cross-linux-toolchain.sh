@@ -18,6 +18,28 @@ sysroot="$prefix/sysroot-$arch"
 gcc_install="$sysroot/usr/lib/gcc/$triple/$gcc_version"
 [[ -f "$gcc_install/crtbegin.o" ]]
 mkdir -p "$cross/bin" "$prefix/downloads"
+linker="$prefix/llvm/bin/ld.lld"
+if [[ "$arch" == mips64el ]]; then
+  # GNU ld handles the MIPS n64 EH-frame relocations emitted by Clang 18.
+  # These fixed Buster host tools require at most glibc 2.27, not target glibc.
+  binutils="$prefix/downloads/binutils-mips64el_2.31.1-16.deb"
+  binutils_sha=522c942418fc6510d717e153539e3ba72755b228c8686e83dd28a19bca5e3078
+  if [[ ! -f "$binutils" ]] || ! echo "$binutils_sha  $binutils" | sha256sum -c -; then
+    curl --fail --location --retry 5 --connect-timeout 30 \
+      https://archive.debian.org/debian/pool/main/b/binutils/binutils-mips64el-linux-gnuabi64_2.31.1-16_amd64.deb \
+      -o "$binutils"
+    echo "$binutils_sha  $binutils" | sha256sum -c -
+  fi
+  mkdir -p "$cross/binutils"
+  dpkg-deb -x "$binutils" "$cross/binutils"
+  linker="$cross/bin/ld"
+  cat >"$linker" <<EOF
+#!/usr/bin/env bash
+export LD_LIBRARY_PATH="$cross/binutils/usr/lib/x86_64-linux-gnu\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}"
+exec "$cross/binutils/usr/bin/mips64el-linux-gnuabi64-ld.bfd" "\$@"
+EOF
+  chmod +x "$linker"
+fi
 
 write_driver() {
   local language="$1" runtime_flags=""
@@ -31,7 +53,7 @@ if [[ "\$#" == 1 && "\$1" == -print-multi-os-directory ]]; then
   exit 0
 fi
 exec "$prefix/llvm/bin/$language" --target="$triple" --sysroot="$sysroot" \
-  --gcc-install-dir="$gcc_install" -fuse-ld="$prefix/llvm/bin/ld.lld" \
+  --gcc-install-dir="$gcc_install" -fuse-ld="$linker" \
   -Wl,-rpath-link,"$sysroot/lib/$triple" -Wl,-rpath-link,"$sysroot/usr/lib/$triple" \
   $runtime_flags "\$@"
 EOF
@@ -86,7 +108,7 @@ PY
     CFLAGS='-O2 -g -fPIC' CXXFLAGS='-O2 -g -fsized-deallocation' \
     LDFLAGS='-Wl,--undefined-version' \
     AR="$prefix/llvm/bin/llvm-ar" RANLIB="$prefix/llvm/bin/llvm-ranlib" \
-    NM="$prefix/llvm/bin/llvm-nm" LD="$prefix/llvm/bin/ld.lld" \
+    NM="$prefix/llvm/bin/llvm-nm" LD="$linker" \
     STRIP="$prefix/llvm/bin/llvm-strip" \
     "$work/gcc-13.3.0/libstdc++-v3/configure" \
       --build=x86_64-linux-gnu --host="$triple" --target="$triple" \
