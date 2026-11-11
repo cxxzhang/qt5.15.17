@@ -171,6 +171,14 @@ python3 "$source_dir/scripts/package-linux.py" "$install" --audit-only --require
   --host-glibc "$host_glibc" --interpreter "$loader" --readelf "$tools/llvm-readelf"
 python3 "$source_dir/scripts/audit-linux-cross-runtime.py" "$install" --sysroot "$sysroot" \
   --qemu "$cross/bin/qemu" --loader "$loader" --readelf "$tools/llvm-readelf"
+if [[ -n "${QT_ACCEPTED_CROSS_PREFIX:-}" ]]; then
+  python3 "$source_dir/scripts/audit-linux-gnu-runtime.py" "$install" --skip-host \
+    --libstdcxx "$cross/probe-sdk/lib/libstdc++.so.6" --libgcc "$cross/probe-sdk/lib/libgcc_s.so.1" \
+    --readelf "$tools/llvm-readelf" --output "$source_dir/build-temp/logs/gnu-requirements-$arch-$variant.json"
+  python3 "$source_dir/scripts/audit-linux-gnu-runtime.py" "$install/host" \
+    --libstdcxx "$host_runtime/libstdc++.so.6" --libgcc "$host_runtime/libgcc_s.so.1" \
+    --readelf "$tools/llvm-readelf" --output "$source_dir/build-temp/logs/gnu-requirements-$arch-$variant-host.json"
+fi
 name="qt5.15.17_${tag//-/_}"
 tar -C "$install" -czf "$source_dir/Output/$name.tar.gz" .
 tar -C "$symbols" -czf "$source_dir/Output/$name-symbols.tar.gz" .

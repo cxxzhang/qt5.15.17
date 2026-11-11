@@ -7,7 +7,7 @@
 - Linux 使用 Ubuntu 18.04 构建环境、固定版本 Clang 与 libstdc++，x64、ARM64 的 glibc 上限为 2.27；不升级宿主或目标 glibc 来适配构建工具。
 - 新增 LoongArch64、MIPS64EL 交叉构建，参考只读仓库 `E:\YooDeskGroup\desk` 的下载校验、工具链隔离及 QEMU 验证方法，不直接复用其高版本 LoongArch sysroot。
 - 分别确定各目标架构的最低可用 sysroot、ABI 和 glibc 上限；在通过验证之前不宣称支持某个发行版。
-- 将 C++20 能力验证与 Qt 自身的编译标准分开；选择兼容旧 glibc 的现代 Clang/libstdc++，提供消费 Qt SDK 的 C++20 样例验证。
+- 取消 C++20 硬性条件；Clang 编译 Qt，优先使用旧系统 GNU 头文件和运行库，审计 GLIBCXX/CXXABI/GCC/GLIBC 实际需求，验证 Clang/GCC 消费同一份 Qt SDK。
 - 汇总 Linux 构建逻辑，隔离架构、编译器与 debug/release 输出；发布前使用匹配目标架构的 strip，调试符号单独归档。
 - 增加 ELF 架构、符号版本、运行依赖检查及运行测试；实际随包发布的 C++ 运行库一并检查。
 - 支持仅构建 Linux；全平台模式中 Windows/macOS 在全部必要 Linux 检查成功后启动，失败时不发布不完整版本。

@@ -16,10 +16,16 @@ test -x "$cross/bin/clang++"
 test -x "$cross/bin/qemu"
 test -x "$host/bin/clang++"
 if [[ -f "$cross/toolchain.json" ]]; then
-  sysroot_rel="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["sysroot"])' "$cross/toolchain.json")"
+  sysroot_rel="$(python3 - "$cross/toolchain.json" <<'PY'
+import json, sys
+entry = json.load(open(sys.argv[1]))
+assert entry.get('gnu_runtime_policy') == 'baseline-system', 'Replace the historical high-GNU-runtime bundle before SDK acceptance'
+print(entry['sysroot'])
+PY
+)"
 else
-  [[ "$arch" == loong64-oldworld ]]
-  sysroot_rel=sysroot
+  echo 'The published cross toolchain needs a validated baseline GNU runtime manifest' >&2
+  exit 1
 fi
 sysroot="$cross/$sysroot_rel"
 compgen -G "$sysroot/.sysroot-*" >/dev/null

@@ -85,6 +85,7 @@ import json, sys
 from pathlib import Path
 prefix, arch, glibc, sysroot, gcc, triple, loader = sys.argv[1:]
 record = dict(target=arch, glibc=glibc, sysroot=sysroot, gcc_install=gcc,
+              gnu_runtime_policy='baseline-system',
               triple=triple, interpreter=loader, host='Ubuntu 22.04 x86_64 (tested)',
               acceptance='Relocated Clang C++17/thread probe using the baseline GNU runtime in target chroot')
 Path(prefix, 'toolchain.json').write_text(json.dumps(record, indent=2) + '\n')

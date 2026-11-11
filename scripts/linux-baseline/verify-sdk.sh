@@ -46,6 +46,13 @@ if "$cross"; then
     --machine "$machine" --glibc "$baseline" --readelf "$tools/llvm-readelf" "${audit[@]}"
   python3 "$root/scripts/audit-linux-cross-runtime.py" "$sdk" --sysroot "${QT_ACCEPTED_SYSROOT:?}" \
     --qemu "$prefix/bin/qemu" --loader "$loader" --readelf "$tools/llvm-readelf"
+  python3 "$root/scripts/audit-linux-gnu-runtime.py" "$sdk" --skip-host \
+    --libstdcxx "$prefix/probe-sdk/lib/libstdc++.so.6" --libgcc "$prefix/probe-sdk/lib/libgcc_s.so.1" \
+    --readelf "$tools/llvm-readelf" --output "$root/build-temp/logs/gnu-requirements-$arch-$variant.json"
+  python3 "$root/scripts/audit-linux-gnu-runtime.py" "$sdk/host" \
+    --libstdcxx "$root/build-temp/accepted-x64/gcc/lib64/libstdc++.so.6" \
+    --libgcc "$root/build-temp/accepted-x64/gcc/lib64/libgcc_s.so.1" \
+    --readelf "$tools/llvm-readelf" --output "$root/build-temp/logs/gnu-requirements-$arch-$variant-host.json"
   qmake="$sdk/host/bin/qmake"
   export CC="$prefix/bin/clang" CXX="$prefix/bin/clang++"
   export QT_CROSS_QEMU="$prefix/bin/qemu" QT_CROSS_SYSROOT="$QT_ACCEPTED_SYSROOT"
