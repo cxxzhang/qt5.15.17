@@ -17,8 +17,8 @@ fetch() {
 }
 fetch llvm20.tar.gz https://ftp.loongnix.cn/toolchain/llvm/llvm20/llvm-toolchain_20.1.8-1_amd64-linux-gnu_debian-10.tar.gz b552f93326948c7292cceaf11db7eb442327448d9f45b4b25eafdbfa9b60c25e
 fetch sysroot.tar.bz2 https://ftp.loongnix.cn/browser/build/sysroot/debian_bullseye_loong64-sysroot.tar.bz2 34efb077fed691feac2605ec9656c8ecb40e63076fdb76ae06df90f279099a64
-# The new-world candidate is inspection-only until its observed hash and
-# actual libc/ABI are reviewed and pinned. Never publish it based on its name.
+# The new-world candidate is inspection-only until its actual libc/ABI are
+# reviewed. Never publish it based on its name.
 fetch sysroot-newworld.tar.bz2 https://ftp.loongnix.cn/browser/build/sysroot/debian_bullseye_loongarch64-sysroot.tar.bz2 f5f7eb75744935f228afe7298c66e9faf3c52e3134787906290d5d479d8bb252
 fetch libffi6.deb https://archive.debian.org/debian/pool/main/libf/libffi/libffi6_3.2.1-9_amd64.deb d4d748d897e8e53aa239ead23a18724a1a30085cc6ca41a8c31b3b1e1b3452f4
 # This vendor compiler targets Debian 10 hosts. Keep its legacy libffi

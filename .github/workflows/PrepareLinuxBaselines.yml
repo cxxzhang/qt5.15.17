@@ -126,6 +126,23 @@ jobs:
       with:
         path: build-temp/baseline-mips64el
         key: ${{ steps.mips-cache.outputs.cache-primary-key }}
+    - uses: actions/cache/restore@v4
+      id: mips-vendor
+      with:
+        path: build-temp/loong28-inspection/downloads
+        key: mips-vendor-clang-${{ hashFiles('scripts/linux-baseline/load-vendor-clang.sh') }}
+        restore-keys: loong28-vendor-inputs-
+    - name: Execute Clang C++20 on MIPS glibc 2.17
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        set -o pipefail
+        bash scripts/linux-baseline/probe-mips.sh 2>&1 | tee build-temp/logs/mips217-probe.log
+    - uses: actions/cache/save@v4
+      if: always() && steps.mips-vendor.outputs.cache-hit != 'true'
+      with:
+        path: build-temp/loong28-inspection/downloads
+        key: ${{ steps.mips-vendor.outputs.cache-primary-key }}
     - uses: actions/upload-artifact@v4
       if: always()
       with:

@@ -47,6 +47,7 @@ values = {
     'CT_VERIFY_DOWNLOAD_DIGEST': 'y', 'CT_SAVE_TARBALLS': 'y',
     'CT_LOCAL_TARBALLS_DIR': '"' + root + '/build-temp/baseline-downloads"',
     'CT_PREFIX_DIR': '"' + prefix + '/gcc"',
+    'CT_PREFIX_DIR_RO': 'n',
     'CT_PARALLEL_JOBS': '4', 'CT_LOG_EXTRA': 'y',
     'CT_LOG_TO_FILE': 'y', 'CT_LOG_FILE_COMPRESS': 'n',
 }
@@ -70,7 +71,9 @@ trap 'cp build.log "$root/build-temp/logs/mips217-build.log" 2>/dev/null || true
 "$work/ct-ng/bin/ct-ng" build
 sysroot="$(find "$prefix/gcc" -type d -name sysroot -print -quit)"
 test -n "$sysroot"
+chmod u+w "$sysroot"
 touch "$sysroot/.sysroot-mips64el-2.17"
-printf '%s\n' "$sysroot" >"$prefix/sysroot-path.txt"
+printf '%s\n' "${sysroot#"$prefix/"}" >"$prefix/sysroot-path.txt"
+cp .config "$prefix/crosstool.config"
 find "$prefix/gcc/bin" -maxdepth 1 -name '*gcc' -exec '{}' --version \;
 echo 'Built MIPS64EL n64 GNU support toolchain and glibc 2.17 sysroot'
