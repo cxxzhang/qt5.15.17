@@ -46,12 +46,12 @@ if [[ "$name" == clang++ ]]; then
   extra=(-fno-sized-deallocation -fno-aligned-allocation)
 fi
 if "\$link"; then
-  extra+=(-Wl,-rpath-link,"$sysroot/lib/loongarch64-linux-gnu" \
+  extra+=(--ld-path="$compiler_bin/ld.lld" -Wl,-rpath-link,"$sysroot/lib/loongarch64-linux-gnu" \
     -Wl,-rpath-link,"$sysroot/usr/lib/loongarch64-linux-gnu")
 fi
 exec "$vendor_compiler" --driver-mode="$([[ "$name" == clang++ ]] && echo g++ || echo gcc)" \
   --target=loongarch64-linux-gnu -mabi="$abi" --sysroot="$sysroot" \
-  --gcc-install-dir="$gcc_install" --ld-path="$compiler_bin/ld.lld" -Wno-unused-command-line-argument \
+  --gcc-install-dir="$gcc_install" -Wno-unused-command-line-argument \
   "\${extra[@]}" "\$@"
 EOF
   chmod +x "$prefix/bin/$name"

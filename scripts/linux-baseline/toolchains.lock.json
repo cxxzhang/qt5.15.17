@@ -35,15 +35,17 @@
     "mips64el": {
       "schema": 1,
       "tag": "linux-toolchains-v1",
-      "filename": "toolchain-linux-mips64el-glibc217-ecd3d59eb546.tar.xz",
+      "filename": "toolchain-linux-mips64el-glibc217-37be0d64c0f1.tar.xz",
       "original_filename": "toolchain-linux-mips64el-glibc217.tar.xz",
-      "sha256": "ecd3d59eb5462eb31dad4c3514c472e44e903cd3afc95f8e9aee2d995ad769dd",
-      "size": 1510301136,
-      "asset_id": 735271486,
-      "api_url": "https://api.github.com/repos/cxxzhang/qt5.15.17/releases/assets/735271486",
-      "source_commit": "d663d45d7cf70a7aec6d35b3cba48c4a99092509",
-      "source_run": "43009985057",
-      "source_repository": "cxxzhang/qt5.15.17"
+      "sha256": "37be0d64c0f10af4915daa20ce26fa7fcbb141403baf7f62f21ae4871d89b57d",
+      "size": 1454265524,
+      "asset_id": 735482193,
+      "api_url": "https://api.github.com/repos/cxxzhang/qt5.15.17/releases/assets/735482193",
+      "source_commit": "892007fbb4378d9021f7d99d9022b53ca1180c68",
+      "source_run": "43020389433",
+      "source_repository": "cxxzhang/qt5.15.17",
+      "gnu_runtime_policy": "baseline-system",
+      "gnu_runtime_version": "4.9.4"
     },
     "loong64-oldworld": {
       "schema": 1,

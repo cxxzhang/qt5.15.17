@@ -115,12 +115,12 @@ if [[ "$arch" == mips64el ]] && "\$link"; then
     -Wl,-rpath-link,"\$prefix/$sysroot_rel/lib/mips64el-linux-gnuabi64")
 fi
 if "\$link"; then
-  extra+=(-Wl,-rpath-link,"\$prefix/$sysroot_rel/lib/$triple" \
+  extra+=(--ld-path="\$prefix/$linker_rel" -Wl,-rpath-link,"\$prefix/$sysroot_rel/lib/$triple" \
     -Wl,-rpath-link,"\$prefix/$sysroot_rel/usr/lib/$triple")
 fi
 exec "\$prefix/llvm/bin/clang" --driver-mode="$mode" --target="$triple" $target_flags \
   --sysroot="\$prefix/$sysroot_rel" --gcc-install-dir="\$prefix/$gcc_rel" \
-  --ld-path="\$prefix/$linker_rel" -Wno-unused-command-line-argument \
+  -Wno-unused-command-line-argument \
   "\${extra[@]}" "\$@"
 EOF
   chmod +x "$prefix/bin/$name"

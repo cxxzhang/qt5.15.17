@@ -23,11 +23,13 @@ diff --git a/src/corelib/itemmodels/qabstractitemmodel.cpp b/src/corelib/itemmod
 diff --git a/src/3rdparty/harfbuzz-ng/src/hb-meta.hh b/src/3rdparty/harfbuzz-ng/src/hb-meta.hh
 --- a/src/3rdparty/harfbuzz-ng/src/hb-meta.hh
 +++ b/src/3rdparty/harfbuzz-ng/src/hb-meta.hh
-@@ -202,3 +202,9 @@
+@@ -202,3 +202,11 @@
 -#if defined(__GNUC__) && __GNUC__ < 5 && !defined(__clang__)
 +#if defined(__clang__)
++template <typename T, bool = std::is_copy_assignable<T>::value> struct hb_clang_trivial_copy_assign : hb_false_type {};
++template <typename T> struct hb_clang_trivial_copy_assign<T, true> : hb_bool_constant<__is_trivially_assignable(T&, const T&)> {};
 +#define hb_is_trivially_copyable(T) __is_trivially_copyable(T)
-+#define hb_is_trivially_copy_assignable(T) __is_trivially_assignable(typename std::add_lvalue_reference<T>::type, typename std::add_lvalue_reference<typename std::add_const<T>::type>::type)
++#define hb_is_trivially_copy_assignable(T) hb_clang_trivial_copy_assign<T>::value
 +#define hb_is_trivially_constructible(T) __is_trivially_constructible(T)
 +#define hb_is_trivially_copy_constructible(T) __is_trivially_constructible(T, typename std::add_lvalue_reference<typename std::add_const<T>::type>::type)
 +#define hb_is_trivially_destructible(T) __is_trivially_destructible(T)

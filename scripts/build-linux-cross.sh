@@ -45,7 +45,7 @@ mkdir -p "$work" "$source_dir/Output"
 build="$(mktemp -d "$work/build.XXXXXXXX")"
 source "$source_dir/scripts/linux-build-diagnostics.sh"
 jobs="${QT_BUILD_JOBS:-$(nproc)}"
-export PATH="$prefix/bin:$cross/host/bin:$prefix/host/bin:$PATH"
+export PATH="${QT_NATIVE_COMPILER_BIN:+$QT_NATIVE_COMPILER_BIN:}$prefix/bin:$cross/host/bin:$prefix/host/bin:$PATH"
 host_runtime="${host_runtime:-$(dirname "$(clang++ -print-file-name=libstdc++.so.6)")}"
 if [[ -f "$prefix/gcc/.system-runtime" ]]; then
   # Bootstrap tools only require the old GNU ABI. Let Ubuntu's compatible

@@ -29,6 +29,11 @@ if ! git -c safe.directory="$source_dir/qtbase" -C "$source_dir/qtbase" apply --
   git -c safe.directory="$source_dir/qtbase" -C "$source_dir/qtbase" apply --check "$patch"
   git -c safe.directory="$source_dir/qtbase" -C "$source_dir/qtbase" apply "$patch"
 fi
+# Compile the failing vendored translation unit before the expensive Qt
+# build, so old-header template incompatibilities fail immediately.
+"$CXX" -std=c++11 -fPIC -fno-exceptions -fno-rtti -DHB_NO_UNICODE_FUNCS \
+  -DHB_NDEBUG -DHB_EXTERN= -DHAVE_ATEXIT -DHAVE_PTHREAD -DHAVE_SCHED_H -DHAVE_SCHED_YIELD \
+  -c "$source_dir/qtbase/src/3rdparty/harfbuzz-ng/hb-dummy.cc" -o "$build/harfbuzz-compat.o"
 # configure builds and immediately runs a bootstrap qmake. It needs the
 # selected GCC runtime before the SDK's private runtime has been installed.
 runtime_dir="${QT_CXX_RUNTIME_DIR:-$(dirname "$("$CXX" -print-file-name=libstdc++.so.6)")}"
