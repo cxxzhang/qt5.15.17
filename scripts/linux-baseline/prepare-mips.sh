@@ -39,7 +39,7 @@ values = {
     'CT_OBSOLETE': 'y', 'CT_ARCH_LE': 'y', 'CT_ARCH_BE': 'n',
     'CT_ARCH_ARCH': '"mips64r2"', 'CT_ARCH_FLOAT_HW': 'y',
     'CT_ARCH_mips_n64': 'y', 'CT_ARCH_64': 'y',
-    'CT_GLIBC_V_2_17': 'y', 'CT_GCC_V_13': 'y', 'CT_LINUX_V_3_10': 'y',
+    'CT_GLIBC_V_2_17': 'y', 'CT_GCC_V_4_9': 'y', 'CT_LINUX_V_3_10': 'y',
     'CT_GLIBC_KERNEL_VERSION_CHOSEN': 'y',
     'CT_GLIBC_MIN_KERNEL_VERSION': '"3.10.0"',
     'CT_GLIBC_ENABLE_WERROR': 'n', 'CT_GCC_LIBSANITIZER': 'n',
@@ -63,7 +63,7 @@ path.write_text('\n'.join(lines) + '\n')
 PY
 "$work/ct-ng/bin/ct-ng" olddefconfig
 grep -q '^CT_GLIBC_VERSION="2.17"$' .config
-grep -q '^CT_GCC_VERSION="13.2.0"$' .config
+grep -q '^CT_GCC_VERSION="4.9.4"$' .config
 grep -q '^CT_ARCH_LE=y$' .config
 grep -q '^CT_ARCH_mips_n64=y$' .config
 cp .config "$root/build-temp/logs/mips217-crosstool.config"

@@ -19,6 +19,7 @@ for name in clang clang++; do
 #!/usr/bin/env bash
 exec "$vendor_compiler" --driver-mode="$([[ "$name" == clang++ ]] && echo g++ || echo gcc)" \
   --target="$triple" -march=mips64r2 -mabi=64 -EL --sysroot="$sysroot" \
+  -fno-sized-deallocation -fno-aligned-allocation \
   --gcc-install-dir="$gcc_install" --ld-path="$prefix/gcc/bin/$triple-ld" "\$@"
 EOF
   chmod +x "$prefix/bin/$name"
@@ -29,41 +30,14 @@ cp -L "$stdlib" "$prefix/probe-sdk/lib/libstdc++.so.6"
 cp -L "$libgcc" "$prefix/probe-sdk/lib/libgcc_s.so.1"
 patchelf --set-rpath '$ORIGIN' "$prefix/probe-sdk/lib/libstdc++.so.6"
 patchelf --set-rpath '$ORIGIN' "$prefix/probe-sdk/lib/libgcc_s.so.1"
-cat >"$prefix/probe.cpp" <<'CPP'
-#include <algorithm>
-#include <concepts>
-#include <coroutine>
-#include <exception>
-#include <format>
-#include <mutex>
-#include <ranges>
-#include <span>
-#include <thread>
-static_assert(_GLIBCXX_RELEASE == 13);
-struct Done { struct promise_type {
-  Done get_return_object() { return {}; }
-  std::suspend_never initial_suspend() noexcept { return {}; }
-  std::suspend_never final_suspend() noexcept { return {}; }
-  void return_void() {}
-  void unhandled_exception() { std::terminate(); }
-}; };
-Done calculate(std::integral auto value, int &answer) {
-  int values[]{value, value + 1};
-  answer = *std::ranges::find(std::span{values}, value + 1);
-  co_return;
-}
-int main() {
-  int answer = 0;
-  std::mutex mutex;
-  std::thread worker([&] { std::lock_guard lock(mutex); calculate(41, answer); });
-  worker.join();
-  return answer != 42 || std::format("{} {:.1f}", answer, 1.5) != "42 1.5";
-}
-CPP
-"$prefix/bin/clang++" -std=c++20 -pthread "$prefix/probe.cpp" \
+cp "$root/scripts/linux-baseline/probe.cpp" "$prefix/probe.cpp"
+"$prefix/bin/clang++" -std=c++17 -pthread "$prefix/probe.cpp" \
   '-Wl,-rpath,$ORIGIN/lib' -o "$prefix/probe-sdk/bin/probe"
 python3 "$root/scripts/package-linux.py" "$prefix/probe-sdk" --audit-only \
   --machine 'MIPS R3000' --glibc 2.17 --interpreter /lib64/ld.so.1
+python3 "$root/scripts/audit-linux-gnu-runtime.py" "$prefix/probe-sdk" \
+  --libstdcxx "$stdlib" --libgcc "$libgcc" --readelf "$(dirname "$vendor_compiler")/llvm-readelf" \
+  --output "$root/build-temp/logs/mips-system-gnu-probe.json"
 qemu_deb="$root/build-temp/baseline-downloads/mips-qemu.deb"
 if [[ ! -f "$qemu_deb" ]]; then
   curl -fsSL --retry 5 -H 'Accept: application/octet-stream' \

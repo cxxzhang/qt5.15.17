@@ -73,7 +73,7 @@ fi
 gcc_triple="$("$gcc_root/bin/gcc" -dumpmachine)"
 gcc_install="$(dirname "$("$gcc_root/bin/gcc" -print-libgcc-file-name)")"
 gcc_install_rel="${gcc_install#"$prefix/"}"
-header_config="$(find "$gcc_root/system-headers" -name c++config.h -print -quit)"
+header_config="$(find "$gcc_root/system-headers" -name c++config.h ! -path '*/32/*' ! -path '*/x32/*' -print -quit)"
 test -n "$header_config"
 header_config_rel="$(dirname "$(dirname "${header_config#"$prefix/"}")")"
 python3 - "$prefix" "$gcc_install_rel" "$header_config_rel" <<'PY'

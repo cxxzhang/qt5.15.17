@@ -7,7 +7,7 @@ prefix="$root/build-temp/baseline-$arch"
 case "$arch" in
   loong64-oldworld)
     source "$root/scripts/linux-baseline/load-vendor-clang.sh"
-    test -f "$prefix/runtime/.lld-symvers-verified"
+    test -f "$prefix/runtime/.system-runtime"
     sysroot_rel=sysroot
     gcc_rel=sysroot/usr/lib/gcc/loongarch64-linux-gnu/8
     triple=loongarch64-linux-gnu
@@ -17,7 +17,7 @@ case "$arch" in
     ;;
   loong64-newworld)
     source "$root/scripts/linux-baseline/load-upstream-clang.sh"
-    test -f "$prefix/runtime/.lld-symvers-verified"
+    test -f "$prefix/runtime/.system-runtime"
     sysroot_rel=sysroot-loong64
     gcc_rel=sysroot-loong64/usr/lib/gcc/loongarch64-linux-gnu/12
     triple=loongarch64-linux-gnu
@@ -86,7 +86,7 @@ from pathlib import Path
 prefix, arch, glibc, sysroot, gcc, triple, loader = sys.argv[1:]
 record = dict(target=arch, glibc=glibc, sysroot=sysroot, gcc_install=gcc,
               triple=triple, interpreter=loader, host='Ubuntu 22.04 x86_64 (tested)',
-              acceptance='Relocated Clang C++20/thread/format probe and private runtime audit in target chroot')
+              acceptance='Relocated Clang C++17/thread probe using the baseline GNU runtime in target chroot')
 Path(prefix, 'toolchain.json').write_text(json.dumps(record, indent=2) + '\n')
 PY
 for name in clang clang++; do
@@ -102,10 +102,6 @@ for argument in "\$@"; do
   [[ "\$argument" != -print-multi-os-directory ]] || { echo .; exit 0; }
 done
 extra=()
-if [[ "$name" == clang++ && "$arch" != mips64el ]]; then
-  extra=(-nostdinc++ -isystem "\$prefix/runtime/include/c++/13.3.0" \
-    -isystem "\$prefix/runtime/include/c++/13.3.0/loongarch64-linux-gnu" -L"\$prefix/runtime/lib")
-fi
 if [[ "$arch" == mips64el ]]; then
   extra+=(-L"\$prefix/$sysroot_rel/usr/lib/mips64el-linux-gnuabi64" \
     -L"\$prefix/$sysroot_rel/lib/mips64el-linux-gnuabi64" \
@@ -113,6 +109,7 @@ if [[ "$arch" == mips64el ]]; then
     -Wl,-rpath-link,"\$prefix/$sysroot_rel/lib/mips64el-linux-gnuabi64")
 fi
 exec "\$prefix/llvm/bin/clang" --driver-mode="$mode" --target="$triple" $target_flags \
+  -fno-sized-deallocation -fno-aligned-allocation \
   --sysroot="\$prefix/$sysroot_rel" --gcc-install-dir="\$prefix/$gcc_rel" \
   --ld-path="\$prefix/$linker_rel" -Wno-unused-command-line-argument \
   -Wl,-rpath-link,"\$prefix/$sysroot_rel/lib/$triple" \
@@ -139,11 +136,11 @@ relocated="$(mktemp -d "$root/build-temp/relocated-$arch.XXXXXXXX")"
 trap 'if [[ -d "$relocated/toolchain" && ! -e "$prefix" ]]; then mv "$relocated/toolchain" "$prefix"; fi; rmdir "$relocated"' EXIT
 mv "$prefix" "$relocated/toolchain"
 rel="$relocated/toolchain"
-env -u LD_LIBRARY_PATH "$rel/bin/clang++" -std=c++20 -pthread "$rel/probe.cpp" \
+env -u LD_LIBRARY_PATH "$rel/bin/clang++" -std=c++17 -pthread "$rel/probe.cpp" \
   '-Wl,-rpath,$ORIGIN/../lib' -o "$rel/probe-sdk/bin/probe"
 if [[ "$arch" == mips64el ]]; then
   env -u LD_LIBRARY_PATH "$rel/gcc/bin/$triple-g++" --sysroot="$rel/$sysroot_rel" \
-    -std=c++20 -pthread "$rel/probe.cpp" '-Wl,-rpath,$ORIGIN/../lib' \
+    -std=c++11 -pthread "$rel/probe.cpp" '-Wl,-rpath,$ORIGIN/../lib' \
     -o "$rel/probe-sdk/bin/gcc-probe"
 fi
 python3 "$root/scripts/package-linux.py" "$rel/probe-sdk" --audit-only \

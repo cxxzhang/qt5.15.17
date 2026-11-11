@@ -5,25 +5,33 @@
       "glibc": "2.17",
       "machine": "Advanced Micro Devices X86-64",
       "triple": "x86_64-linux-gnu",
-      "image": "quay.io/pypa/manylinux2014_x86_64@sha256:62eeff30ef134a85ec0f97109e008a319b0315ca5e8a6d754ee771556c02622a"
+      "image": "quay.io/pypa/manylinux2014_x86_64@sha256:62eeff30ef134a85ec0f97109e008a319b0315ca5e8a6d754ee771556c02622a",
+      "gnu_runtime_policy": "baseline-system",
+      "gnu_runtime_candidate": "CentOS 7 libstdc++ 4.8.5"
     },
     "arm64": {
       "glibc": "2.17",
       "machine": "AArch64",
       "triple": "aarch64-linux-gnu",
-      "image": "quay.io/pypa/manylinux2014_aarch64@sha256:101d2292840109c9d329fcfcd7b89b46f59e19ca23cbfdcf059fb389994665fc"
+      "image": "quay.io/pypa/manylinux2014_aarch64@sha256:101d2292840109c9d329fcfcd7b89b46f59e19ca23cbfdcf059fb389994665fc",
+      "gnu_runtime_policy": "baseline-system",
+      "gnu_runtime_candidate": "CentOS 7 libstdc++ 4.8.5"
     },
     "mips64el": {
       "glibc": "2.17",
       "machine": "MIPS R3000",
-      "triple": "mips64el-linux-gnuabi64"
+      "triple": "mips64el-linux-gnuabi64",
+      "gnu_runtime_policy": "baseline-system",
+      "gnu_runtime_candidate": "source-built GNU 4.9.4 on glibc 2.17"
     },
     "loong64-oldworld": {
       "glibc": "2.28",
       "machine": "LoongArch",
       "triple": "loongarch64-linux-gnu",
       "elf_flags": 3,
-      "interpreter": "/lib64/ld.so.1"
+      "interpreter": "/lib64/ld.so.1",
+      "gnu_runtime_policy": "baseline-system",
+      "gnu_runtime_candidate": "original vendor GNU 8 runtime"
     },
     "loong64-newworld": {
       "glibc": "2.36",
@@ -31,7 +39,9 @@
       "triple": "loongarch64-linux-gnu",
       "elf_flags": 67,
       "interpreter": "/lib64/ld-linux-loongarch-lp64d.so.1",
-      "baseline_reason": "User authorized upstream new-world 2.36 fallback on 2026-11-11; glibc 2.28 has no upstream new-world port"
+      "baseline_reason": "User authorized upstream new-world 2.36 fallback on 2026-11-11; glibc 2.28 has no upstream new-world port",
+      "gnu_runtime_policy": "baseline-system",
+      "gnu_runtime_candidate": "original pinned GNU 12 runtime"
     }
   },
   "clang": {
@@ -48,10 +58,5 @@
       "upstream_api_url": "https://api.github.com/repos/mayeut/static-clang-images/releases/assets/285677753",
       "release": "linux-toolchains-v1"
     }
-  },
-  "libstdcxx": {
-    "version": "13.3.0",
-    "url": "https://gcc.gnu.org/pub/gcc/releases/gcc-13.3.0/gcc-13.3.0.tar.xz",
-    "sha256": "0845e9621c9543a13f484e94584a49ffc0129970e9914624235fc1d061a0c083"
   }
 }

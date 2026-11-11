@@ -8,6 +8,18 @@ out="$root/Output/toolchains"
 mkdir -p "$prefix/sysroot" "$prefix/share/baseline" "$out"
 test "$(getconf GNU_LIBC_VERSION)" = 'glibc 2.17'
 test -f "$prefix/gcc/.ready"
+# SCL also installs x86 multilib files. This bundle supports ELF64 only.
+python3 - "$prefix/gcc" <<'PY'
+from pathlib import Path
+import shutil, sys
+root = Path(sys.argv[1]).resolve()
+for directory in list(root.rglob('*')):
+    if directory.name not in ('32', 'x32') or not directory.is_dir() or directory.is_symlink():
+        continue
+    if root not in directory.resolve().parents:
+        raise ValueError('Multilib directory escapes generated toolchain: ' + str(directory))
+    shutil.rmtree(directory)
+PY
 # Snapshot real baseline headers, startup objects, linker scripts and glibc.
 # rpm enumerates the package files so /usr/lib64 from unrelated packages
 # cannot accidentally become part of this target sysroot.
@@ -100,7 +112,7 @@ env -u LD_LIBRARY_PATH -u LD_PRELOAD "$rel/probe-sdk/bin/probe"
 bash "$root/scripts/linux-baseline/probe-mixed-cxx.sh" "$rel"
 python3 "$root/scripts/package-linux.py" "$rel/probe-sdk" --audit-only \
   --machine "$machine" --glibc 2.17 --native-dependencies --readelf "$rel/clang/bin/llvm-readelf"
-env -u LD_LIBRARY_PATH -u LD_PRELOAD "$rel/gcc/bin/g++" --sysroot="$rel/sysroot" -std=c++17 -pthread "$rel/probe.cpp" \
+env -u LD_LIBRARY_PATH -u LD_PRELOAD "$rel/gcc/bin/g++" --sysroot="$rel/sysroot" -std=c++11 -pthread "$rel/probe.cpp" \
   -fno-sized-deallocation -fno-aligned-new \
   -nostdinc++ -isystem "$rel/gcc/system-headers" -isystem "$rel/$header_config_rel" \
   -isystem "$rel/gcc/system-headers/backward" \

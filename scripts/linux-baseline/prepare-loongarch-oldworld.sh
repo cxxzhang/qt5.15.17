@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build C++20 against a real, separately selected LoongArch world/sysroot.
+# Reuse the original GNU headers/runtime of each real LoongArch sysroot.
 set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 world="${1:-oldworld}"
@@ -40,12 +40,9 @@ for argument in "\$@"; do
   [[ "\$argument" != -print-multi-os-directory ]] || { echo .; exit 0; }
 done
 extra=()
-if [[ "$name" == clang++ && -f "$prefix/runtime/.lld-symvers-verified" ]]; then
-  extra=(-nostdinc++ -isystem "$prefix/runtime/include/c++/13.3.0" \
-    -isystem "$prefix/runtime/include/c++/13.3.0/loongarch64-linux-gnu" -L"$prefix/runtime/lib")
-fi
 exec "$vendor_compiler" --driver-mode="$([[ "$name" == clang++ ]] && echo g++ || echo gcc)" \
   --target=loongarch64-linux-gnu -mabi="$abi" --sysroot="$sysroot" \
+  -fno-sized-deallocation -fno-aligned-allocation \
   --gcc-install-dir="$gcc_install" --ld-path="$compiler_bin/ld.lld" -Wno-unused-command-line-argument \
   -Wl,-rpath-link,"$sysroot/lib/loongarch64-linux-gnu" \
   -Wl,-rpath-link,"$sysroot/usr/lib/loongarch64-linux-gnu" \${extra[@]+"\${extra[@]}"} "\$@"
@@ -62,122 +59,32 @@ export PKG_CONFIG_PATH="$prefix/host/lib/pkgconfig:$prefix/host/share/pkgconfig"
 exec /usr/bin/pkg-config "\$@"
 EOF
 chmod +x "$prefix/bin/pkg-config"
-archive="$vendor_work/downloads/gcc-13.3.0.tar.xz"
-vendor_fetch gcc-13.3.0.tar.xz https://gcc.gnu.org/pub/gcc/releases/gcc-13.3.0/gcc-13.3.0.tar.xz 0845e9621c9543a13f484e94584a49ffc0129970e9914624235fc1d061a0c083
-mkdir -p "$prefix/share"
-tar -xf "$archive" -C "$prefix/share" --strip-components=1 \
-  gcc-13.3.0/config.sub gcc-13.3.0/config.guess
-if [[ ! -f "$prefix/runtime/.lld-symvers-verified" ]]; then
-  work="$(mktemp -d)"
-  trap 'cp "$work/build/config.log" "$root/build-temp/logs/loong-$world-libstdcxx-config.log" 2>/dev/null || true; rm -rf "$work"' EXIT
-  tar -xf "$archive" -C "$work"
-  # GCC 13 mistakes LLD's version string for an obsolete GNU ld version,
-  # disabling GNU symbol versions even when explicitly requested. Test the
-  # real linker capability and teach configure to recognize that linker.
-  printf 'int baseline_symbol(void) { return 42; }\n' >"$work/symver.c"
-  printf 'BASELINE_1 { global: baseline_symbol; local: *; };\n' >"$work/symver.map"
-  "$prefix/bin/clang" -shared -fPIC "$work/symver.c" \
-    -Wl,--version-script="$work/symver.map" -o "$work/symver.so"
-  "$compiler_bin/llvm-readelf" -V "$work/symver.so" >"$work/symver.txt"
-  grep -q BASELINE_1 "$work/symver.txt"
-  python3 - "$work/gcc-13.3.0/libstdc++-v3" <<'PY'
-from pathlib import Path
-import sys
-root = Path(sys.argv[1])
-needle = '  elif test $glibcxx_gnu_ld_version -lt $glibcxx_min_gnu_ld_version ; then'
-replacement = '''  elif "$LD" --version 2>/dev/null | grep -q 'LLD'; then
-    : LLD GNU symbol versioning was verified by the baseline builder.
-''' + needle
-for name in ('configure', 'acinclude.m4'):
-    path = root / name
-    text = path.read_text()
-    assert text.count(needle) == 1, name
-    path.write_text(text.replace(needle, replacement))
-PY
-  ln -s gthr-posix.h "$work/gcc-13.3.0/libgcc/gthr-default.h"
-  python3 - "$work/gcc-13.3.0/libstdc++-v3/src/c++11/Makefile.in" <<'PY'
-from pathlib import Path
-import sys
-path = Path(sys.argv[1])
-text = path.read_text()
-assert text.count('-gno-as-loc-support') == 2
-path.write_text(text.replace('-gno-as-loc-support', '-g0'))
-PY
-  mkdir "$work/build"
-  (
-    cd "$work/build"
-    CC="$prefix/bin/clang" CXX="$prefix/bin/clang++" \
-    CFLAGS='-O2 -g -fPIC' CXXFLAGS='-O2 -g -fsized-deallocation' \
-    LDFLAGS='-Wl,--undefined-version' \
-    AR="$compiler_bin/llvm-ar" RANLIB="$compiler_bin/llvm-ranlib" \
-    NM="$compiler_bin/llvm-nm" LD="$compiler_bin/ld.lld" STRIP="$compiler_bin/llvm-strip" \
-      "$work/gcc-13.3.0/libstdc++-v3/configure" \
-      --build=x86_64-linux-gnu --host=loongarch64-linux-gnu --target=loongarch64-linux-gnu \
-      --with-cross-host=x86_64-linux-gnu --prefix="$prefix/runtime" \
-      --with-gxx-include-dir="$prefix/runtime/include/c++/13.3.0" \
-      --disable-multilib --disable-libstdcxx-pch --disable-static --enable-shared \
-      --enable-libstdcxx-threads --enable-symvers=gnu
-    grep -q '^#define _GLIBCXX_HAS_GTHREADS 1' config.h
-    make -j4
-    make install
-    cp "$work/gcc-13.3.0/COPYING3" "$work/gcc-13.3.0/COPYING.RUNTIME" "$prefix/runtime/"
-  )
-  test -e "$prefix/runtime/lib" || ln -s loongarch64-linux-gnu/lib "$prefix/runtime/lib"
-  touch "$prefix/runtime/.ready"
-  touch "$prefix/runtime/.symvers-gnu"
-fi
-"$compiler_bin/llvm-readelf" -V "$prefix/runtime/lib/libstdc++.so.6" >"$root/build-temp/logs/loong-$world-libstdcxx-versions.txt"
-grep -q 'GLIBCXX_3.4.32' "$root/build-temp/logs/loong-$world-libstdcxx-versions.txt"
-touch "$prefix/runtime/.lld-symvers-verified"
-mkdir -p "$prefix/probe-sdk/bin" "$prefix/probe-sdk/lib"
-cp -L "$prefix/runtime/lib/libstdc++.so.6" "$prefix/probe-sdk/lib/"
-cp -L "$("$prefix/bin/clang" -print-file-name=libgcc_s.so.1)" "$prefix/probe-sdk/lib/"
+mkdir -p "$prefix/share" "$prefix/runtime/lib" "$prefix/probe-sdk/bin" "$prefix/probe-sdk/lib"
+cp /usr/share/misc/config.sub /usr/share/misc/config.guess "$prefix/share/"
+bash "$prefix/share/config.sub" loongarch64-linux-gnu
+# Only select regular target runtime files. Absolute vendor symlinks must
+# never resolve to the x86_64 host's libraries.
+stdlib="$(find "$sysroot" -type f -name 'libstdc++.so.6*' -print -quit)"
+libgcc="$(find "$sysroot" -type f -name libgcc_s.so.1 -print -quit)"
+test -n "$stdlib"
+test -n "$libgcc"
+cp "$stdlib" "$prefix/runtime/lib/libstdc++.so.6"
+cp "$libgcc" "$prefix/runtime/lib/libgcc_s.so.1"
+touch "$prefix/runtime/.system-runtime"
+"$compiler_bin/llvm-readelf" -V "$stdlib" >"$root/build-temp/logs/loong-$world-libstdcxx-versions.txt"
+cp "$stdlib" "$prefix/probe-sdk/lib/libstdc++.so.6"
+cp "$libgcc" "$prefix/probe-sdk/lib/libgcc_s.so.1"
 patchelf --set-rpath '$ORIGIN' "$prefix/probe-sdk/lib/libstdc++.so.6"
 patchelf --set-rpath '$ORIGIN' "$prefix/probe-sdk/lib/libgcc_s.so.1"
-cat >"$prefix/probe.cpp" <<'CPP'
-#include <algorithm>
-#include <concepts>
-#include <coroutine>
-#include <exception>
-#include <format>
-#include <mutex>
-#include <ranges>
-#include <span>
-#include <thread>
-static_assert(_GLIBCXX_RELEASE == 13);
-struct Done { struct promise_type {
-  Done get_return_object() { return {}; }
-  std::suspend_never initial_suspend() noexcept { return {}; }
-  std::suspend_never final_suspend() noexcept { return {}; }
-  void return_void() {}
-  void unhandled_exception() { std::terminate(); }
-}; };
-Done calculate(std::integral auto value, int &answer) {
-  int values[]{value, value + 1};
-  answer = *std::ranges::find(std::span{values}, value + 1);
-  co_return;
-}
-int main() {
-  int answer = 0;
-  std::mutex mutex;
-  std::thread worker([&] { std::lock_guard lock(mutex); calculate(41, answer); });
-  worker.join();
-  return answer != 42 || std::format("{} {:.1f}", answer, 1.5) != "42 1.5";
-}
-CPP
-"$prefix/bin/clang++" -std=c++20 -pthread "$prefix/probe.cpp" \
-  '-Wl,-rpath,$ORIGIN/lib' -o "$prefix/probe-sdk/bin/probe"
+cp "$root/scripts/linux-baseline/probe.cpp" "$prefix/probe.cpp"
+"$prefix/bin/clang++" -std=c++17 -pthread "$prefix/probe.cpp" \
+  '-Wl,-rpath,$ORIGIN/../lib' -o "$prefix/probe-sdk/bin/probe"
 python3 "$root/scripts/package-linux.py" "$prefix/probe-sdk" --audit-only \
-  --machine LoongArch --glibc "$baseline" --interpreter "$loader" --readelf "$compiler_bin/llvm-readelf"
-python3 - "$prefix/probe-sdk" "$elf_flags" <<'PY'
-from pathlib import Path
-import struct, sys
-for path in Path(sys.argv[1]).rglob('*'):
-    if not path.is_file() or path.is_symlink(): continue
-    data = path.read_bytes()[:64]
-    if data[:4] == b'\x7fELF' and struct.unpack_from('<I', data, 48)[0] != int(sys.argv[2]):
-        raise SystemExit('Incorrect LoongArch world ABI: ' + str(path))
-PY
+  --machine LoongArch --glibc "$baseline" --interpreter "$loader" --readelf "$compiler_bin/llvm-readelf" \
+  --elf-flags "$elf_flags"
+python3 "$root/scripts/audit-linux-gnu-runtime.py" "$prefix/probe-sdk" \
+  --libstdcxx "$stdlib" --libgcc "$libgcc" --readelf "$compiler_bin/llvm-readelf" \
+  --output "$root/build-temp/logs/loong-$world-system-gnu-probe.json"
 qemu="$vendor_work/downloads/qemu-loongarch64"
 if [[ ! -f "$qemu" ]]; then
   curl -fsSL --retry 5 -H 'Accept: application/octet-stream' \
