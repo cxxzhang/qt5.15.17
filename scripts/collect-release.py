@@ -76,8 +76,11 @@ def collect(packages, proofs, scope, run, commit):
                 require(proof.get('target') == target and proof.get('consumer_arch') == consumer
                         and set(proof.get('architectures', [])) == architectures, 'macOS proof architecture: ' + name)
                 require({'extracted executable permissions', 'all Mach-O and static archive architectures',
+                         'advertised qmake architectures', 'default native qmake consumer',
                          'qmake C++17 consumer', 'offscreen GUI/QML/fonts/TLS execution'}
                         <= set(proof.get('checks', [])), 'Incomplete macOS checks: ' + name)
+                if target == 'universal':
+                    require('explicit dual-architecture consumer' in proof['checks'], 'Missing universal app check: ' + name)
                 require(proof.get('archive') == filename and proof.get('sha256') == digest(packages / filename),
                         'macOS archive hash mismatch: ' + name)
     actual = {p.name for p in packages.iterdir() if p.is_file()}

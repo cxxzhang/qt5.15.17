@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Reuse a successful native build only when every compilation input matches."""
+"""Reuse a native build only when recorded source and build configuration match."""
 
 import argparse
+import base64
+import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import tempfile
@@ -13,14 +16,41 @@ import zipfile
 
 
 def api(path):
+    path += ('&' if '?' in path else '?') + '_qt_native_ci=' + str(time.time_ns())
     request = urllib.request.Request('https://api.github.com/repos/' + os.environ['GITHUB_REPOSITORY'] + path,
                                      headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
-                                              'Accept': 'application/vnd.github+json', 'User-Agent': 'qt-native-reuse'})
+                                              'Accept': 'application/vnd.github+json', 'User-Agent': 'qt-native-reuse',
+                                              'Cache-Control': 'no-cache'})
     with urllib.request.urlopen(request, timeout=45) as response:
         return json.load(response)
 
 
-def inputs(commit, kind):
+def native_configuration(content, job):
+    lines = content.splitlines()
+    start = lines.index('  ' + job + ':')
+    end = next((i for i in range(start + 1, len(lines)) if re.match(r'^  \S', lines[i])), len(lines))
+    block = lines[start:end]
+    steps = block.index('    steps:')
+    selected = block[:steps]
+    sections = []
+    for line in block[steps + 1:]:
+        if line.startswith('    - '):
+            sections.append([])
+        if sections:
+            sections[-1].append(line)
+    for section in sections:
+        if any(marker in section[0] for marker in (
+                'name: Clone repository', 'name: Set up VC-LTL', 'name: Build qt5', 'uses: actions/checkout@')):
+            selected.extend(line for line in section if "if: steps.native-cache.outputs.restored" not in line)
+    for key in ('env:', 'defaults:'):
+        if key in lines:
+            first = lines.index(key)
+            last = next((i for i in range(first + 1, len(lines)) if lines[i] and not lines[i][0].isspace()), len(lines))
+            selected.extend(lines[first:last])
+    return '\n'.join(line.rstrip() for line in selected if line.strip())
+
+
+def inputs(commit, kind, job=None):
     tree = api('/git/trees/' + commit + '?recursive=1')
     if tree.get('truncated'):
         raise ValueError('Cannot verify a truncated source tree')
@@ -39,6 +69,12 @@ def inputs(commit, kind):
             result[name] = entry['sha']
     if not any(name == 'qtbase' for name in result):
         raise ValueError('Missing Qt source identities')
+    if job:
+        workflow = next(entry for entry in tree['tree'] if entry['path'] == '.github/workflows/BuildBinaries.yml')
+        blob = api('/git/blobs/' + workflow['sha'])
+        content = base64.b64decode(blob['content']).decode('utf-8')
+        config = native_configuration(content, job)
+        result['@native-job-configuration'] = hashlib.sha256(config.encode('utf-8')).hexdigest()
     return result
 
 
@@ -60,8 +96,8 @@ def main():
     source = api('/actions/runs/' + args.run)
     if source['path'].split('@')[0] != '.github/workflows/BuildBinaries.yml':
         raise ValueError('Native reuse requires the repository build workflow')
-    original = inputs(source['head_sha'], args.kind)
-    if original != inputs(os.environ['GITHUB_SHA'], args.kind):
+    original = inputs(source['head_sha'], args.kind, args.job)
+    if original != inputs(os.environ['GITHUB_SHA'], args.kind, args.job):
         print('Native compilation inputs changed; rebuild instead of reusing this run')
         output(False)
         return
@@ -111,6 +147,8 @@ def main():
                       source_artifact=matches[0]['id'], packaging_commit=os.environ['GITHUB_SHA'],
                       compilation_inputs=original, policy='Unverified install; all current packaging and acceptance gates repeat')
         provenance = destination / 'share/ci-native-source.json'
+        if provenance.is_file():
+            record['previous'] = json.loads(provenance.read_text(encoding='utf-8'))
         provenance.parent.mkdir(parents=True, exist_ok=True)
         provenance.write_text(json.dumps(record, indent=2) + '\n', encoding='utf-8')
     output(True)

@@ -15,9 +15,38 @@ spec.loader.exec_module(gate)
 restore_spec = importlib.util.spec_from_file_location('native_restore', Path(__file__).with_name('restore-native-sdk.py'))
 restore = importlib.util.module_from_spec(restore_spec)
 restore_spec.loader.exec_module(restore)
+mac_spec = importlib.util.spec_from_file_location('mac_sdk', Path(__file__).with_name('macos-sdk.py'))
+mac = importlib.util.module_from_spec(mac_spec)
+mac_spec.loader.exec_module(mac)
+
+
+class UniversalMetadata(unittest.TestCase):
+    def test_both_architectures_advertised(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'mkspecs').mkdir()
+            config = root / 'mkspecs/qconfig.pri'
+            config.write_text('QT_ARCH = arm64\nQT_ARCHS = arm64\nQT_VERSION = 5.15.17\n')
+            mac.advertise_universal(root)
+            self.assertIn('QT_ARCHS = x86_64 arm64', config.read_text())
+            self.assertIn('QT_ARCH = arm64', config.read_text())
+
+    def test_missing_metadata_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'mkspecs').mkdir()
+            (root / 'mkspecs/qconfig.pri').write_text('QT_ARCH = arm64\n')
+            with self.assertRaisesRegex(ValueError, 'QT_ARCHS'):
+                mac.advertise_universal(root)
 
 
 class NativeInputs(unittest.TestCase):
+    def test_native_configuration_changes_invalidate_reuse(self):
+        config = 'jobs:\n  windows-x64:\n    runs-on: windows-latest\n    steps:\n    - name: Build qt5\n      run: call build.bat\n    - name: Package SDK\n      run: package\n'
+        original = restore.native_configuration(config, 'windows-x64')
+        self.assertNotEqual(original, restore.native_configuration(config.replace('call build.bat', 'call changed.bat'), 'windows-x64'))
+        self.assertNotEqual(original, restore.native_configuration(config.replace('windows-latest', 'windows-2022'), 'windows-x64'))
+        self.assertEqual(original, restore.native_configuration(config.replace('run: package', 'run: changed-package'), 'windows-x64'))
     def identity(self, **changes):
         files = {'qtbase': 'qt', 'configure': 'config', 'onekey-build-windows-x64.bat': 'win',
                  'onekey-build-macos-x64.sh': 'mac', '.github/workflows/BuildBinaries.yml': 'workflow'}
@@ -80,6 +109,8 @@ class ReleaseGate(unittest.TestCase):
                            dict(accepted=True, source_run='123', source_commit='abc', target=target,
                                 consumer_arch=consumer, architectures=arches, archive=path.name, sha256=gate.digest(path),
                                 checks=['extracted executable permissions', 'all Mach-O and static archive architectures',
+                                        'advertised qmake architectures', 'default native qmake consumer',
+                                        'explicit dual-architecture consumer',
                                         'qmake C++17 consumer', 'offscreen GUI/QML/fonts/TLS execution']))
 
     def write(self, path, value):

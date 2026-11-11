@@ -4,6 +4,7 @@
 import argparse
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -40,6 +41,15 @@ def audit(root, architectures):
     print('Verified architectures and executable permissions for {} macOS binaries/archives'.format(len(files)))
 
 
+def advertise_universal(root):
+    config = root / 'mkspecs/qconfig.pri'
+    content, count = re.subn(r'^QT_ARCHS\s*=.*$', 'QT_ARCHS = x86_64 arm64',
+                             config.read_text(), flags=re.M)
+    if count != 1:
+        raise ValueError('Expected exactly one generated macOS QT_ARCHS setting')
+    config.write_text(content)
+
+
 def merge(x64, arm64, output):
     audit(x64, ['x86_64'])
     audit(arm64, ['arm64'])
@@ -49,6 +59,7 @@ def merge(x64, arm64, output):
     if output.exists():
         raise ValueError('Universal output already exists: ' + str(output))
     shutil.copytree(arm64, output, symlinks=True)
+    advertise_universal(output)
     for relative in afiles:
         destination = output / relative
         subprocess.check_call(['lipo', '-create', str(xfiles[relative]), str(afiles[relative]),
