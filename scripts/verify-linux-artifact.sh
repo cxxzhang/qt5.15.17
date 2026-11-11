@@ -29,8 +29,7 @@ test ! -e "$root/Output/linux-$arch-debug"
 sdk=/opt/extracted-sdk
 mkdir "$sdk"
 tar -xzf "$artifacts/$tag.tar.gz" -C "$sdk"
-tar -tzf "$artifacts/$tag-symbols.tar.gz" >/tmp/debug-files
-grep -q '\.debug$' /tmp/debug-files
+python3 "$root/scripts/verify-linux-symbols.py" "$sdk" "$artifacts/$tag-symbols.tar.gz"
 audit=(python3 "$root/scripts/package-linux.py" "$sdk" --audit-only --require-stripped
        --machine "$machine" --glibc "$baseline")
 if "$cross"; then

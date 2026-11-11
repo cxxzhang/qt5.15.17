@@ -29,6 +29,16 @@ python3 "$root/scripts/package-linux.py" "$work/sdk" "$work/symbols" \
   --machine "$machine" --glibc 99.0 --native-dependencies
 test -s "$work/symbols/probe.debug"
 test -s "$work/symbols/libprobe.a.debug"
+tar -C "$work/symbols" -czf "$work/symbols.tar.gz" .
+python3 "$root/scripts/verify-linux-symbols.py" "$work/sdk" "$work/symbols.tar.gz"
+printf 'corrupt' >>"$work/symbols/probe.debug"
+tar -C "$work/symbols" -czf "$work/corrupt-symbols.tar.gz" .
+if python3 "$root/scripts/verify-linux-symbols.py" "$work/sdk" "$work/corrupt-symbols.tar.gz" \
+    >"$work/error.log" 2>&1; then
+  echo "The symbol verifier accepted a corrupt debug file" >&2
+  exit 1
+fi
+grep -q 'CRC mismatch' "$work/error.log"
 readelf -SW "$work/sdk/probe" >"$work/sections"
 ! grep -q '\.debug_info ' "$work/sections"
 grep -q '\.gnu_debuglink ' "$work/sections"

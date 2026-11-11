@@ -7,7 +7,7 @@ Run numbers identify GitHub Actions runs in `cxxzhang/qt5.15.17`.
 | --- | --- | --- | --- |
 | x64 | Release | Passed, run `42955634377` | Passed, run `42966673803` |
 | x64 | Debug | Passed, run `42960048140` | Passed, run `42966678486` |
-| MIPS64EL | Release | Passed MIPS job in run `42969467526` | In progress |
+| MIPS64EL | Release | Passed MIPS job in run `42969467526` | Passed, run `42972856514` |
 | MIPS64EL | Debug | Pending | Pending |
 | LoongArch64 | Release | Graphics dependencies passed; Qt architecture patch pending verification | Pending |
 | LoongArch64 | Debug | First Qt build in progress | Pending |
@@ -32,7 +32,9 @@ and compile-time pointer alignment assertions. The MIPS Release job in run
 `42969467526` then passed its complete SDK build, audits, relocated consumer
 and TLS exchange. The parent workflow failed its separate, older LoongArch
 job; this does not represent a successful full Linux matrix. Independent
-MIPS artifact verification and the Debug build are still in progress.
+MIPS artifact verification passed in run `42972856514`, auditing 167 ELF
+files/archives and resolving 145 dynamic ELF files before the C++20/GUI/QML/
+fonts/TLS consumer passed. The Debug build is still in progress.
 
 The LoongArch glibc 2.36 sysroot needs source-built graphics dependencies.
 Run `42966136435` compiled and installed libxcb, then stopped because the

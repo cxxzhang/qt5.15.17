@@ -103,6 +103,9 @@ symbols, extracts into a fresh baseline container without the original Qt
 build or install directory, audits the extracted ELF files and dependencies,
 then builds and runs the qmake consumer. Compiler and target sysroot caches
 are reused; the extracted SDK comes exclusively from the selected artifact.
+The symbol check reads the delivered archive and verifies each ELF debug
+file's GNU debuglink filename and CRC, checks static-archive counterparts,
+and rejects missing files referenced by generated debug links.
 
 ## Cross targets and acceptance status
 
