@@ -62,7 +62,7 @@ from pathlib import Path
 import sys
 path = Path(sys.argv[1])
 source = path.read_text()
-assert source.count("-gno-as-loc-support") == 1
+assert source.count("-gno-as-loc-support") == 2
 path.write_text(source.replace("-gno-as-loc-support", "-g0"))
 PY
   mkdir "$work/build"
