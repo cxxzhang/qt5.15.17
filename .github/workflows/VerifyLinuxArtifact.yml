@@ -138,6 +138,21 @@ jobs:
           libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 \
           libxcb-xkb1 libxkbcommon-x11-0 libfontconfig1 libfreetype6 libgl1 libegl1 \
           libdbus-1-3 libdrm2 fonts-dejavu-core
+    - name: Read the published native compiler cache identity
+      id: modern-toolchain
+      env:
+        ARCH: ${{ inputs.arch }}
+      run: |
+        python3 - <<'PY'
+        import json, os
+        entry = json.load(open('scripts/linux-baseline/toolchains.lock.json'))['targets'][os.environ['ARCH']]
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:
+            stream.write('sha256=' + entry['sha256'] + '\n')
+        PY
+    - uses: actions/cache/restore@v4
+      with:
+        path: build-temp/accepted-${{ inputs.arch }}
+        key: accepted-native-${{ inputs.arch }}-${{ steps.modern-toolchain.outputs.sha256 }}
     - name: Restore published native Clang without rebuilding it
       env:
         GITHUB_TOKEN: ${{ github.token }}
