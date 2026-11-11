@@ -105,6 +105,7 @@ cat >"$prefix/probe.cpp" <<'CPP'
 #include <concepts>
 #include <coroutine>
 #include <exception>
+#include <format>
 #include <mutex>
 #include <ranges>
 #include <span>
@@ -127,7 +128,7 @@ int main() {
     std::mutex mutex;
     std::thread worker([&] { std::lock_guard lock(mutex); calculate(41, answer); });
     worker.join();
-    return answer != 42;
+    return answer != 42 || std::format("{} {:.1f}", answer, 1.5) != "42 1.5";
 }
 CPP
 "$prefix/bin/clang++" -std=c++20 -pthread "$prefix/probe.cpp" \

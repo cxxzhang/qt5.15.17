@@ -116,7 +116,7 @@ jobs:
         cat *.sha256 > SHA256SUMS
         sha256sum -c SHA256SUMS
         cat > notes.md <<'EOF'
-        x64 and ARM64 native Clang 20.1.8 + full GCC/libstdc++ 13.3.0 + glibc 2.17 sysroots. Both archives passed relocation, Clang and GCC C++20/thread execution, matching ABI=0/1 older-GNU-library interoperability, ELF glibc requirements and private runtime dependency checks in pinned manylinux2014 containers. Source pins, build scripts, GNU license files and sysroot package provenance are included.
+        x64 and ARM64 native Clang 20.1.8 + full GCC/libstdc++ 13.3.0 + glibc 2.17 sysroots. Both archives passed relocation, Clang and GCC C++20/thread execution, available matching older-GNU-library ABI interoperability, ELF glibc requirements and private runtime dependency checks in pinned manylinux2014 containers. Legacy distro headers may only support ABI=0; their unavailable ABI=1 is explicitly recorded instead of claimed as tested. Source pins, build scripts, GNU license files and sysroot package provenance are included.
 
         These are reusable toolchains. Qt SDK acceptance is separate and has not been implied by this toolchain release. Host architecture must match the selected archive.
         EOF
@@ -245,8 +245,44 @@ jobs:
       with:
         path: build-temp/loong28-inspection/downloads
         key: ${{ steps.oldworld-inputs.outputs.cache-primary-key }}
+    - name: Relocate and package the accepted old-world toolchain
+      run: |
+        set -o pipefail
+        bash scripts/linux-baseline/package-loongarch-oldworld.sh 2>&1 | tee build-temp/logs/loong-oldworld-packaging.log
+    - uses: actions/upload-artifact@v4
+      with:
+        name: oldworld-toolchain
+        compression-level: 0
+        path: Output/toolchains/
+        if-no-files-found: error
     - uses: actions/upload-artifact@v4
       if: always()
       with:
         name: diagnostics-baseline-loong-oldworld-228
         path: build-temp/logs/
+  publish-oldworld:
+    needs: loongarch-oldworld
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: oldworld-toolchain
+        path: toolchains
+    - name: Release the accepted old-world toolchain
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
+        COMMIT: ${{ github.sha }}
+        RUN_ID: ${{ github.run_id }}
+      run: |
+        cd toolchains
+        cat *.sha256 > SHA256SUMS
+        sha256sum -c SHA256SUMS
+        cat > notes.md <<'EOF'
+        LoongArch old-world glibc 2.28 cross toolchain: Clang 20.1.8, a real vendor old-world sysroot with GNU GCC 8 support files, and Clang-built private libstdc++ 13.3.0 with GNU symbol versions. Passed C++20/thread/format execution and private-runtime resolution in a real target chroot, then repeated compilation, dependency checks and execution after relocation. Tested host: Ubuntu 22.04 x86_64; private libffi6 included.
+
+        This toolchain is exclusively old-world ELF ABI 0x3 with /lib64/ld.so.1. It is not a new-world target and is not a Qt SDK acceptance result. Source pins, GNU and LLVM notices, and build scripts are included.
+        EOF
+        gh release create "toolchain-loong64-oldworld-228-$RUN_ID" --target "$COMMIT" --latest=false --title "LoongArch old-world glibc 2.28 toolchain ($RUN_ID)" --notes-file notes.md *.tar.xz SHA256SUMS

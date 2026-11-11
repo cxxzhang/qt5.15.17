@@ -39,7 +39,7 @@ write_driver clang
 write_driver clang++
 archive="$vendor_work/downloads/gcc-13.3.0.tar.xz"
 vendor_fetch gcc-13.3.0.tar.xz https://gcc.gnu.org/pub/gcc/releases/gcc-13.3.0/gcc-13.3.0.tar.xz 0845e9621c9543a13f484e94584a49ffc0129970e9914624235fc1d061a0c083
-if [[ ! -f "$prefix/runtime/.ready" ]]; then
+if [[ ! -f "$prefix/runtime/.symvers-gnu" ]]; then
   work="$(mktemp -d)"
   trap 'cp "$work/build/config.log" "$root/build-temp/logs/loong-oldworld-libstdcxx-config.log" 2>/dev/null || true; rm -rf "$work"' EXIT
   tar -xf "$archive" -C "$work"
@@ -65,7 +65,7 @@ PY
       --with-cross-host=x86_64-linux-gnu --prefix="$prefix/runtime" \
       --with-gxx-include-dir="$prefix/runtime/include/c++/13.3.0" \
       --disable-multilib --disable-libstdcxx-pch --disable-static --enable-shared \
-      --enable-libstdcxx-threads
+      --enable-libstdcxx-threads --enable-symvers=gnu
     grep -q '^#define _GLIBCXX_HAS_GTHREADS 1' config.h
     make -j4
     make install
@@ -73,7 +73,10 @@ PY
   )
   test -e "$prefix/runtime/lib" || ln -s loongarch64-linux-gnu/lib "$prefix/runtime/lib"
   touch "$prefix/runtime/.ready"
+  touch "$prefix/runtime/.symvers-gnu"
 fi
+readelf -V "$prefix/runtime/lib/libstdc++.so.6" >"$root/build-temp/logs/loong-oldworld-libstdcxx-versions.txt"
+grep -q 'GLIBCXX_3.4.32' "$root/build-temp/logs/loong-oldworld-libstdcxx-versions.txt"
 mkdir -p "$prefix/probe-sdk/bin" "$prefix/probe-sdk/lib"
 cp -L "$prefix/runtime/lib/libstdc++.so.6" "$prefix/probe-sdk/lib/"
 cp -L "$sysroot/lib/loongarch64-linux-gnu/libgcc_s.so.1" "$prefix/probe-sdk/lib/"
@@ -84,6 +87,7 @@ cat >"$prefix/probe.cpp" <<'CPP'
 #include <concepts>
 #include <coroutine>
 #include <exception>
+#include <format>
 #include <mutex>
 #include <ranges>
 #include <span>
@@ -106,7 +110,7 @@ int main() {
   std::mutex mutex;
   std::thread worker([&] { std::lock_guard lock(mutex); calculate(41, answer); });
   worker.join();
-  return answer != 42;
+  return answer != 42 || std::format("{} {:.1f}", answer, 1.5) != "42 1.5";
 }
 CPP
 "$prefix/bin/clang++" -std=c++20 -pthread "$prefix/probe.cpp" \
