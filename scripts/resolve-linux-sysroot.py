@@ -36,9 +36,9 @@ def paragraphs(text):
         elif line[0].isspace():
             if key:
                 fields[key] += " " + line.strip()
-        elif ": " in line:
-            key, value = line.split(": ", 1)
-            fields[key] = value
+        elif ":" in line:
+            key, value = line.split(":", 1)
+            fields[key] = value.lstrip()
 
 
 def dependency_names(clause):

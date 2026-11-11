@@ -69,7 +69,7 @@ PY
   (
     cd "$work/build"
     CC="$cross/bin/clang" CXX="$cross/bin/clang++" \
-    CFLAGS='-O2 -g -fPIC' CXXFLAGS='-O2 -g' \
+    CFLAGS='-O2 -g -fPIC' CXXFLAGS='-O2 -g -fsized-deallocation' \
     AR="$prefix/llvm/bin/llvm-ar" RANLIB="$prefix/llvm/bin/llvm-ranlib" \
     "$work/gcc-13.3.0/libstdc++-v3/configure" \
       --build=x86_64-linux-gnu --host="$triple" --target="$triple" \
