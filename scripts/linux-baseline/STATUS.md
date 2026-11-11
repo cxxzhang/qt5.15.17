@@ -41,23 +41,46 @@ implicitly generating new runtime calls when using old standard headers.
 New SDK jobs use system GNU runtimes, audit every ELF import/version and
 verify the actual loader provider, with negative tests for wrong providers.
 Qt itself uses C++11; the smoke consumer uses C++17 language features.
-The new four-variant native build has been dispatched at `a97010d`.
-Read the live CI result before claiming SDK acceptance.
+The initial low-runtime Qt builds exposed old-header assumptions in Qt
+type traits, a pointer comparator, HarfBuzz traits and vector mutation
+iterators. `Patches/0004-qtbase-clang-old-libstdcxx-traits.patch` preserves
+the runtime floor while fixing those compile-time uses. HarfBuzz now has
+an early translation-unit check before the full Qt build.
+ARM64 compiled Core/Network/Gui before the latest two iterator fixes;
+the complete SDK is still unaccepted. Native run `43028655734` at
+`5c0b62f` retries Release/Debug for both targets. Do not restart live jobs
+solely because observation takes time.
 
-## Cross targets still incomplete
+## All five low-runtime toolchains published; cross SDKs still incomplete
 
 LoongArch preparation now reuses each original sysroot's GNU 8 / GNU 12
 headers/runtimes instead of building libstdc++ 13. Old-world source patches
 retain ELF flags 0x3; new world remains 0x43. Latest probe fixes address the
 staging RPATH and avoid selecting a GDB Python script as the runtime ELF.
-Old-world graphics still require matching ICCCM/XKB-X11 libraries; recipes
-are pinned in `oldworld-graphics.lock.json`. Graphics source audits use the
-vendor compiler's private host-library environment.
+Old-world ICCCM, XCB-XKB and matching XKB-X11 libraries now pass their
+source/ELF gates. Run `43027862457` at `472b483` completed relocation,
+target execution and publication of the GNU 8 / glibc 2.28 bundle.
+Its LLVM host aliases resolve private libffi even in clean environments,
+while preserving multicall argv[0] and original executable payload bytes.
 
-A lower-runtime MIPS source preparation run `43015725721` is still live;
-do not restart it solely because observation takes time. Earlier GNU 13
-MIPS bundles remain in the cache release. Remaining graphics dependencies
-must also pass GNU symbol compatibility before publishing a replacement.
+Run `43015725721` finished the GNU 4.9.4 / glibc 2.17 MIPS preparation.
+Run `43020389433` reused that cache (GNU compilation was skipped), passed
+graphics GLIBC/GNU symbol audits and published the replacement bundle.
+Unused target Wayland-scanner/XML/ICU dependencies no longer raise its
+GNU floor; cross builds use the already published native host scanner.
+New-world run `43017704941` validated/published its original GNU 12 /
+glibc 2.36 bundle with the full graphical supplement. All five replacements
+are pinned in `toolchains.lock.json`; all older cache assets remain intact.
+
+MIPS SDK run `43025278752` and new-world run `43025273164` at `57bc296`
+were last observed live. A derived host link name adapts the native GNU
+support's /lib64 linker script to Ubuntu's layout without changing cached
+bytes. Baseline host GNU libraries are not globally injected into the
+separately downloaded dynamic cross LLVM process.
+
+Independent native verification now includes modern GCC and Clang C++17
+consumers on Ubuntu 22.04, in addition to the baseline old-system run.
+This new modern-consumer job has not passed against a complete new SDK yet.
 The main all-platform workflow remains unwired to the final five-target
 acceptance gate. Complete all Release/Debug SDKs, independent verification,
 then the Linux-first Windows/macOS chain before the authorized SDK release.

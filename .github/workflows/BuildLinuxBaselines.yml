@@ -38,6 +38,7 @@ jobs:
         import json, os
         entry = json.load(open('scripts/linux-baseline/toolchains.lock.json'))['targets'][os.environ['ARCH']]
         assert entry['tag'] == 'linux-toolchains-v1'
+        assert entry.get('gnu_runtime_policy') == 'baseline-system'
         with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:
             stream.write('sha256=' + entry['sha256'] + '\n')
         PY
@@ -107,6 +108,7 @@ jobs:
         with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
             for key, target in [('host', 'x64'), ('cross', os.environ['ARCH'])]:
                 assert entries[target]['tag'] == 'linux-toolchains-v1'
+                assert entries[target].get('gnu_runtime_policy') == 'baseline-system'
                 out.write(key + '=' + entries[target]['sha256'] + '\n')
         PY
     - uses: actions/cache/restore@v4

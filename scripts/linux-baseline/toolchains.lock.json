@@ -50,15 +50,17 @@
     "loong64-oldworld": {
       "schema": 1,
       "tag": "linux-toolchains-v1",
-      "filename": "toolchain-linux-loong64-oldworld-glibc228-80f0ff9b6365.tar.xz",
+      "filename": "toolchain-linux-loong64-oldworld-glibc228-a7fb1e0ab4c6.tar.xz",
       "original_filename": "toolchain-linux-loong64-oldworld-glibc228.tar.xz",
-      "sha256": "80f0ff9b6365f1856f2b9c0757c7fff7f8329f78f78a064ea5ffb0dcd80b9754",
-      "size": 296363680,
-      "asset_id": 735012578,
-      "api_url": "https://api.github.com/repos/cxxzhang/qt5.15.17/releases/assets/735012578",
-      "source_commit": "7c58b8b8ab3cfbc71fbca1b37b7638918dcd587f",
-      "source_run": "42995401423",
-      "source_repository": "cxxzhang/qt5.15.17"
+      "sha256": "a7fb1e0ab4c6c015dad9dd7d5c4d31a857f7782fe80aafc7b44777b47da36531",
+      "size": 337655884,
+      "asset_id": 735610883,
+      "api_url": "https://api.github.com/repos/cxxzhang/qt5.15.17/releases/assets/735610883",
+      "source_commit": "472b483affe6b3150dbedaeba1c5f48851b0c989",
+      "source_run": "43027862457",
+      "source_repository": "cxxzhang/qt5.15.17",
+      "gnu_runtime_policy": "baseline-system",
+      "gnu_runtime_version": "8"
     },
     "loong64-newworld": {
       "schema": 1,
