@@ -136,6 +136,31 @@ def uuids(path):
     return {arch: uuid.upper() for uuid, arch in records}
 
 
+def has_dwarf(path):
+    return '__debug_info' in subprocess.check_output(['otool', '-arch', 'all', '-l', str(path)], text=True)
+
+
+def strip_archive(path):
+    tool = shutil.which('llvm-strip')
+    if not tool:
+        prefix = subprocess.check_output(['brew', '--prefix', 'llvm@18'], text=True).strip()
+        tool = str(Path(prefix) / 'bin/llvm-strip')
+    require(Path(tool).is_file(), 'LLVM strip is required for static archive DWARF')
+    architectures = subprocess.check_output(['lipo', '-archs', str(path)], text=True).split()
+    if len(architectures) > 1:
+        with tempfile.TemporaryDirectory(prefix='qt-static-strip-') as temporary:
+            slices = []
+            for architecture in architectures:
+                thin = Path(temporary) / (architecture + '.a')
+                subprocess.check_call(['lipo', str(path), '-thin', architecture, '-output', str(thin)])
+                subprocess.check_call([tool, '--strip-debug', str(thin)])
+                slices.append(str(thin))
+            subprocess.check_call(['lipo', '-create', *slices, '-output', str(path)])
+    else:
+        subprocess.check_call([tool, '--strip-debug', str(path)])
+    require(not has_dwarf(path), 'Static archive DWARF was not removed: ' + str(path))
+
+
 def capture_macos(sdk):
     # Run while the native build objects referenced by the debug map still exist.
     for relative, binary in module().binaries(sdk).items():
@@ -170,7 +195,7 @@ def macos(sdk, runtime, symbols):
                 destination = debug / 'static' / relative
                 destination.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(original, destination)
-                subprocess.check_call(['strip', '-arch', 'all', '-S', str(binary)])
+                strip_archive(binary)
                 records.append(dict(binary=relative.as_posix(), binary_sha256=digest(binary),
                                     symbol=destination.relative_to(debug).as_posix(), symbol_sha256=digest(destination),
                                     kind='static archive with original DWARF'))
@@ -189,7 +214,7 @@ def macos(sdk, runtime, symbols):
             subprocess.check_call(['codesign', '--force', '--sign', '-', str(binary)],
                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             require(uuids(dsym) == uuids(binary), 'Stripping changed Mach-O UUID')
-            require('__debug_info' not in subprocess.check_output(['otool', '-arch', 'all', '-l', str(binary)], text=True),
+            require(not has_dwarf(binary),
                     'DWARF remains in delivered binary')
             records.append(dict(binary=relative.as_posix(), binary_sha256=digest(binary),
                                 symbol=dsym.relative_to(debug).as_posix(), symbol_sha256=digest(dsym),
@@ -250,7 +275,7 @@ def verify(sdk, symbols, source_run=None, source_commit=None):
                     require('__debug_info' in subprocess.check_output(['otool', '-l', str(symbol)], text=True),
                             'dSYM has no source debug information')
             if proof['platform'] == 'macos':
-                require('__debug_info' not in subprocess.check_output(['otool', '-arch', 'all', '-l', str(binary)], text=True),
+                require(not has_dwarf(binary),
                         'DWARF remains in binary SDK: ' + record['binary'])
             covered.add(record['binary'])
         if proof['platform'] == 'windows':
