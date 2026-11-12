@@ -10,7 +10,6 @@ import re
 import shutil
 import struct
 import subprocess
-import tarfile
 import tempfile
 import zipfile
 
@@ -171,7 +170,7 @@ def macos(sdk, runtime, symbols):
                 destination = debug / 'static' / relative
                 destination.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(original, destination)
-                subprocess.check_call(['strip', '-S', str(binary)])
+                subprocess.check_call(['strip', '-arch', 'all', '-S', str(binary)])
                 records.append(dict(binary=relative.as_posix(), binary_sha256=digest(binary),
                                     symbol=destination.relative_to(debug).as_posix(), symbol_sha256=digest(destination),
                                     kind='static archive with original DWARF'))
@@ -185,12 +184,12 @@ def macos(sdk, runtime, symbols):
                 shutil.copy2(binary, dsym)
                 kind = 'bootstrap symbol table (no source DWARF)'
             require(uuids(dsym) == uuids(binary), 'Mismatched dSYM: ' + str(relative))
-            subprocess.check_call(['strip', '-S', '-x', str(binary)])
+            subprocess.check_call(['strip', '-arch', 'all', '-S', '-x', str(binary)])
             # Re-sign modified arm64 binaries with an ad-hoc signature.
             subprocess.check_call(['codesign', '--force', '--sign', '-', str(binary)],
                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             require(uuids(dsym) == uuids(binary), 'Stripping changed Mach-O UUID')
-            require('__debug_info' not in subprocess.check_output(['otool', '-l', str(binary)], text=True),
+            require('__debug_info' not in subprocess.check_output(['otool', '-arch', 'all', '-l', str(binary)], text=True),
                     'DWARF remains in delivered binary')
             records.append(dict(binary=relative.as_posix(), binary_sha256=digest(binary),
                                 symbol=dsym.relative_to(debug).as_posix(), symbol_sha256=digest(dsym),
@@ -201,6 +200,7 @@ def macos(sdk, runtime, symbols):
         for source, output in ((stripped, runtime), (debug, symbols)):
             output.parent.mkdir(parents=True, exist_ok=True)
             subprocess.check_call(['tar', '-C', str(source), '-czf', str(output.resolve()), '.'])
+            subprocess.check_call(['gzip', '-t', str(output.resolve())])
     print('Packaged stripped macOS SDK and matching symbols:', runtime, symbols)
 
 
@@ -224,8 +224,8 @@ def verify(sdk, symbols, source_run=None, source_commit=None):
             with zipfile.ZipFile(symbols) as archive:
                 archive.extractall(root)
         else:
-            with tarfile.open(symbols) as archive:
-                archive.extractall(root, filter='data')
+            subprocess.check_call(['gzip', '-t', str(symbols)])
+            subprocess.check_call(['tar', '-xzf', str(symbols), '-C', str(root)])
         proof = json.loads((root / 'native-symbols.json').read_text())
         require(proof['source_run'] == (source_run or os.environ.get('GITHUB_RUN_ID'))
                 and proof['source_commit'] == (source_commit or os.environ.get('GITHUB_SHA')), 'Symbol provenance mismatch')
@@ -250,8 +250,8 @@ def verify(sdk, symbols, source_run=None, source_commit=None):
                     require('__debug_info' in subprocess.check_output(['otool', '-l', str(symbol)], text=True),
                             'dSYM has no source debug information')
             if proof['platform'] == 'macos':
-                require('__debug_info' not in subprocess.check_output(['otool', '-l', str(binary)], text=True),
-                        'DWARF remains in binary SDK')
+                require('__debug_info' not in subprocess.check_output(['otool', '-arch', 'all', '-l', str(binary)], text=True),
+                        'DWARF remains in binary SDK: ' + record['binary'])
             covered.add(record['binary'])
         if proof['platform'] == 'windows':
             require(not list(sdk.rglob('*.pdb')), 'PDBs remain in binary SDK')

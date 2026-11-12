@@ -9,6 +9,13 @@ printf 'int main() { return 0; }\n' > "$work/main.cpp"
 clang++ -g -O2 -c "$work/probe.cpp" -o "$work/probe.o"
 clang++ -g -dynamiclib "$work/probe.o" -o "$work/sdk/lib/libprobe.dylib"
 ar crs "$work/sdk/lib/libprobe.a" "$work/probe.o"
+for arch in x86_64 arm64; do
+  clang++ -g -O2 -arch "$arch" -c "$work/probe.cpp" -o "$work/probe-$arch.o"
+  ar crs "$work/libprobe-$arch.a" "$work/probe-$arch.o"
+  clang++ -g -arch "$arch" -dynamiclib "$work/probe-$arch.o" -o "$work/libprobe-$arch.dylib"
+done
+lipo -create "$work/libprobe-x86_64.a" "$work/libprobe-arm64.a" -output "$work/sdk/lib/libprobe-fat.a"
+lipo -create "$work/libprobe-x86_64.dylib" "$work/libprobe-arm64.dylib" -output "$work/sdk/lib/libprobe-fat.dylib"
 clang++ -g -O2 -c "$work/main.cpp" -o "$work/main.o"
 clang++ -g "$work/main.o" -o "$work/sdk/bin/probe"
 python3 "$root/scripts/native-symbols.py" capture-macos "$work/sdk"
