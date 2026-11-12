@@ -14,6 +14,7 @@ import time
 import urllib.request
 import urllib.error
 import zipfile
+import sys
 
 
 def api(path):
@@ -81,6 +82,7 @@ def inputs(commit, kind, job=None):
         else:
             script = 'onekey-build-' + job + '.sh' if job else None
             selected |= name == script if script else name.startswith('onekey-build-macos-')
+            selected |= name == 'scripts/native-symbols.py'
         if selected:
             result[name] = entry['sha']
     if not any(name == 'qtbase' for name in result):
@@ -110,12 +112,19 @@ def extract_windows_sdk(archive, destination, artifact):
     with zipfile.ZipFile(archive) as outer:
         safe_zip(outer)
         files = [i.filename for i in outer.infolist() if not i.is_dir()]
-        if files == [artifact]:
+        symbols = artifact.removesuffix('.zip') + '-symbols.zip'
+        if set(files) in ({artifact}, {artifact, symbols}):
             with tempfile.TemporaryDirectory(prefix='qt-prepacked-sdk-') as temporary:
                 outer.extractall(temporary)
                 with zipfile.ZipFile(Path(temporary, artifact)) as inner:
                     safe_zip(inner)
                     inner.extractall(destination)
+                if symbols in files:
+                    with zipfile.ZipFile(Path(temporary, symbols)) as debug:
+                        safe_zip(debug)
+                        for name in debug.namelist():
+                            if name.lower().endswith('.pdb'):
+                                debug.extract(name, destination)
         else:
             outer.extractall(destination)
 
@@ -177,10 +186,14 @@ def main():
             with zipfile.ZipFile(archive) as sdk:
                 safe_zip(sdk)
                 sdk.extractall(temp)
-                packages = list(Path(temp).glob('*.tar.gz'))
+                packages = [p for p in Path(temp).glob('*.tar.gz') if not p.name.endswith('-symbols.tar.gz')]
                 if len(packages) != 1:
                     raise ValueError('Expected the prepackaged macOS SDK')
                 subprocess.check_call(['tar', '-xzf', str(packages[0]), '-C', str(destination)])
+                symbols = packages[0].with_name(packages[0].name.removesuffix('.tar.gz') + '-symbols.tar.gz')
+                if symbols.is_file():
+                    subprocess.check_call([sys.executable, str(Path(__file__).with_name('native-symbols.py')),
+                                           'restore-macos', str(destination), str(symbols)])
         record = dict(source_run=args.run, source_commit=source['head_sha'], source_job=job['id'],
                       source_artifact=matches[0]['id'], packaging_commit=os.environ['GITHUB_SHA'],
                       compilation_inputs=original, policy='Unverified install; all current packaging and acceptance gates repeat')

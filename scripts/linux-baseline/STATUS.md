@@ -8,7 +8,7 @@ ceilings and twenty archive hashes are preserved in
 `evidence/linux-acceptance-20261112.json`; see `ACCEPTANCE.md`.
 
 Full-platform publication completed in run 43120765189 at
-af2a8ddb1d41f7cd35e549ee991f4f6d150e72d. Release
+aaf2a8ddb1d41f7cd35e549ee991f4f6d150e72d. Release
 qt5.15.17-43120765189 contains all 32 expected assets. All Linux,
 six Windows extracted consumers and four macOS consumers passed. The
 published tag, two manifests, checksums and all 32 GitHub asset digests

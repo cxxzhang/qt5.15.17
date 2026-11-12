@@ -10,6 +10,7 @@ import re
 import shutil
 import struct
 import zipfile
+import importlib.util
 
 
 def require(condition, message):
@@ -124,7 +125,7 @@ def bundle_runtime(sdk, root, target, proof):
     return dict(version=version, platform=platform, files=files)
 
 
-def package(sdk, source, target, variant, run, commit, output, runtime_root=None):
+def package(sdk, source, target, variant, run, commit, output, runtime_root=None, symbols=None):
     require(sdk.is_dir() and (sdk / 'bin/qmake.exe').is_file(), 'Not an installed Windows SDK')
     core = 'Qt5Core' + ('d' if variant == 'debug' else '') + '.dll'
     require((sdk / 'bin' / core).is_file(), 'Missing installed ' + core)
@@ -143,10 +144,17 @@ def package(sdk, source, target, variant, run, commit, output, runtime_root=None
                   checks=['bundled x86/x64 thunk objects', 'matching COFF machines',
                                                 'SDK-relative thunk mkspec', 'relative qmake configuration'])
     (sdk / 'share/ci-windows-packaging.json').write_text(json.dumps(record, indent=2) + '\n', encoding='utf-8')
+    if symbols:
+        spec = importlib.util.spec_from_file_location('native_symbols', Path(__file__).with_name('native-symbols.py'))
+        debug = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(debug)
+        debug.windows(sdk, symbols)
     output.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(output, 'w', zipfile.ZIP_DEFLATED, compresslevel=6, allowZip64=True) as archive:
         for path in sorted(sdk.rglob('*')):
             if path.is_file():
+                if symbols and path.suffix.lower() == '.pdb':
+                    continue
                 archive.write(path, path.relative_to(sdk).as_posix())
     print('Packaged portable Windows SDK:', output, digest(output))
     return record
@@ -162,5 +170,6 @@ if __name__ == '__main__':
     parser.add_argument('--commit', default=os.environ.get('GITHUB_SHA'), required='GITHUB_SHA' not in os.environ)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--runtime-root', type=Path)
+    parser.add_argument('--symbols', type=Path)
     args = parser.parse_args()
-    package(args.sdk, args.source_root, args.target, args.variant, args.run, args.commit, args.output, args.runtime_root)
+    package(args.sdk, args.source_root, args.target, args.variant, args.run, args.commit, args.output, args.runtime_root, args.symbols)

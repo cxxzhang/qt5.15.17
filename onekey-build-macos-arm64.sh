@@ -65,6 +65,7 @@ bash ./configure \
   -opensource \
   -release \
   -force-debug-info \
+  -no-strip \
   -nomake examples \
   -nomake tests \
   -openssl-linked \
@@ -83,3 +84,4 @@ bash ./configure \
   -L "$OPENSSL_LIBDIR"
 make -j"$(cpu_count)"
 make install
+python3 "$SCRIPT_DIR/scripts/native-symbols.py" capture-macos "$INSTALL_DIR"

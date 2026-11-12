@@ -23,6 +23,16 @@ def require(condition, message):
         raise ValueError(message)
 
 
+def symbols(packages, consumer, filename, expected):
+    expected.add(filename)
+    proof = consumer.get('symbols', {})
+    require(proof.get('archive') == filename and proof.get('sha256') == digest(packages / filename),
+            'Missing/mismatched native symbols archive: ' + filename)
+    require(isinstance(proof.get('binaries'), int) and proof['binaries'] > 0 and
+            {'complete binary coverage', 'binary and symbol hashes', 'matching debug identities'}
+            <= set(proof.get('checks', [])), 'Incomplete native symbols verification: ' + filename)
+
+
 def collect(packages, proofs, scope, run, commit):
     linux = json.loads((packages / 'linux-acceptance-manifest.json').read_text())
     require(linux['accepted'] is True and linux['source_run'] == str(run)
@@ -114,6 +124,7 @@ def collect(packages, proofs, scope, run, commit):
                 matches = list(proofs.rglob(proof_name))
                 require(len(matches) == 1, 'Expected one Windows consumer proof: ' + proof_name)
                 consumer = json.loads(matches[0].read_text())
+                symbols(packages, consumer, filename.removesuffix('.zip') + '-symbols.zip', expected)
                 require(consumer.get('accepted') is True and consumer.get('source_run') == str(run)
                         and consumer.get('source_commit') == commit and consumer.get('verifier_commit') == commit
                         and consumer.get('target_arch') == arch and consumer.get('variant') == ('debug' if debug else 'release'),
@@ -135,6 +146,7 @@ def collect(packages, proofs, scope, run, commit):
                 matches = list(proofs.rglob(name))
                 require(len(matches) == 1, 'Expected one macOS proof: ' + name)
                 proof = json.loads(matches[0].read_text())
+                symbols(packages, proof, filename.removesuffix('.tar.gz') + '-symbols.tar.gz', expected)
                 require(proof.get('accepted') is True and proof.get('source_run') == str(run)
                         and proof.get('source_commit') == commit, 'macOS proof provenance: ' + name)
                 require(proof.get('target') == target and proof.get('consumer_arch') == consumer

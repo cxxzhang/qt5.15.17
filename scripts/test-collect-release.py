@@ -296,6 +296,7 @@ class ReleaseGate(unittest.TestCase):
                         thunk_objects=objects, thunk_license=dict(path=license_path, sha256=hashlib.sha256(license_data).hexdigest()))))
                 self.write(self.proofs / ('verified-windows-' + arch + '-' + ('debug' if debug else 'release') + '.json'),
                            dict(accepted=True, target_arch=arch, variant='debug' if debug else 'release',
+                                symbols=self.symbol_fixture(path.name.removesuffix('.zip') + '-symbols.zip'),
                                 source_run='123', source_commit='abc', verifier_commit='abc', archive=path.name,
                                 sha256=gate.digest(path), checks=['standalone extracted SDK', 'relocated qmake prefix',
                                     'bundled thunk objects', 'C++17 qmake consumer', 'ordinary and wide string round trips',
@@ -307,6 +308,7 @@ class ReleaseGate(unittest.TestCase):
             for consumer in arches:
                 self.write(self.proofs / ('verified-macos-' + target + '-' + consumer + '.json'),
                            dict(accepted=True, source_run='123', source_commit='abc', target=target,
+                                symbols=self.symbol_fixture(path.name.removesuffix('.tar.gz') + '-symbols.tar.gz'),
                                 consumer_arch=consumer, architectures=arches, archive=path.name, sha256=gate.digest(path),
                                 checks=['extracted executable permissions', 'all Mach-O and static archive architectures',
                                         'advertised qmake architectures', 'default native qmake consumer',
@@ -316,11 +318,22 @@ class ReleaseGate(unittest.TestCase):
     def write(self, path, value):
         path.write_text(json.dumps(value))
 
+    def symbol_fixture(self, filename):
+        path = self.packages / filename
+        path.write_bytes(b'symbols fixture')
+        return dict(archive=filename, sha256=gate.digest(path), binaries=1,
+                    checks=['complete binary coverage', 'binary and symbol hashes', 'matching debug identities'])
+
     def run_gate(self):
         return gate.collect(self.packages, self.proofs, 'all', '123', 'abc')
 
     def test_complete_matrix(self):
-        self.assertEqual(len(self.run_gate()['assets']), 30)
+        self.assertEqual(len(self.run_gate()['assets']), 39)
+
+    def test_native_symbols_tampering(self):
+        (self.packages / 'qt5.15.17_macos_universal-symbols.tar.gz').write_bytes(b'wrong symbols')
+        with self.assertRaisesRegex(ValueError, 'native symbols archive'):
+            self.run_gate()
 
     def test_missing_windows_consumer(self):
         (self.proofs / 'verified-windows-arm64-debug.json').unlink()

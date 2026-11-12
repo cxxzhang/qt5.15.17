@@ -78,6 +78,10 @@ def verify(archive, target, variant, source_run, source_commit, source, logs):
         sdk.mkdir()
         work.mkdir()
         extract(archive, sdk)
+        symbol_spec = importlib.util.spec_from_file_location('native_symbols', source / 'scripts/native-symbols.py')
+        symbol_tools = importlib.util.module_from_spec(symbol_spec)
+        symbol_spec.loader.exec_module(symbol_tools)
+        symbol_proof = symbol_tools.verify(sdk, archive.with_name(archive.stem + '-symbols.zip'))
         packaging = json.loads((sdk / 'share/ci-windows-packaging.json').read_text(encoding='utf-8'))
         sdk_tools.require(packaging['target_arch'] == target and packaging['variant'] == variant
                           and packaging['source_run'] == str(source_run)
@@ -145,6 +149,7 @@ int main(int argc, char **argv) {
     proof = dict(accepted=True, target_arch=target, variant=variant, source_run=str(source_run),
                  source_commit=source_commit, verifier_commit=os.environ['GITHUB_SHA'], archive=archive.name,
                  sha256=sdk_tools.digest(archive), compiler=os.environ.get('VCToolsVersion'),
+                 symbols=symbol_proof,
                  checks=['standalone extracted SDK', 'relocated qmake prefix', 'bundled thunk objects',
                          'C++17 qmake consumer', 'ordinary and wide string round trips',
                          'offscreen GUI/QML/fonts/TLS runtime', 'consumer PE architecture',
