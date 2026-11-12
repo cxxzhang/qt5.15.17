@@ -1,0 +1,25 @@
+name: Check native symbol packaging
+on:
+  workflow_dispatch:
+  push:
+    paths:
+    - scripts/native-symbols.py
+    - scripts/test-native-symbols.py
+    - scripts/test-macos-symbols.sh
+    - .github/workflows/NativeSymbolsChecks.yml
+permissions:
+  contents: read
+jobs:
+  macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-15, macos-15-intel]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v4
+    - name: Check PDB readers and real thin/universal dSYM stripping
+      run: |
+        python3 -B scripts/test-native-symbols.py
+        bash scripts/test-macos-symbols.sh
