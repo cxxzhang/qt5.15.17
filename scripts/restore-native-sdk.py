@@ -82,7 +82,6 @@ def inputs(commit, kind, job=None):
         else:
             script = 'onekey-build-' + job + '.sh' if job else None
             selected |= name == script if script else name.startswith('onekey-build-macos-')
-            selected |= name == 'scripts/native-symbols.py'
         if selected:
             result[name] = entry['sha']
     if not any(name == 'qtbase' for name in result):

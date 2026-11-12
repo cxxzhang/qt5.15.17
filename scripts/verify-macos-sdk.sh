@@ -10,7 +10,9 @@ trap 'rm -rf "$work"' EXIT
 mkdir -p "$work/sdk" "$root/build-temp/logs"
 tar -xzf "$archive" -C "$work/sdk"
 python3 "$root/scripts/macos-sdk.py" audit "$work/sdk" "$@"
-python3 "$root/scripts/native-symbols.py" verify "$work/sdk" "${archive%.tar.gz}-symbols.tar.gz" > "$work/symbol-proof.json"
+python3 "$root/scripts/native-symbols.py" verify "$work/sdk" "${archive%.tar.gz}-symbols.tar.gz" \
+  --source-run "${QT_VERIFY_MAC_SOURCE_RUN:-$GITHUB_RUN_ID}" \
+  --source-commit "${QT_VERIFY_MAC_SOURCE_COMMIT:-$GITHUB_SHA}" > "$work/symbol-proof.json"
 test "$("$work/sdk/bin/qmake" -query QT_VERSION)" = 5.15.17
 CC=clang CXX=clang++ bash "$root/scripts/smoke-linux.sh" "$work/sdk" "$work/consumer"
 python3 - "$root" "$work/sdk" "$work/consumer/smoke" "$consumer_arch" "$work" "$@" <<'PY'

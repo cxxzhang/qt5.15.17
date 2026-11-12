@@ -140,6 +140,17 @@ class UniversalMetadata(unittest.TestCase):
 
 
 class NativeInputs(unittest.TestCase):
+    def test_symbol_verifier_change_retains_macos_compilation_identity(self):
+        tree = [dict(path='qtbase', sha='qt', type='commit'),
+                dict(path='onekey-build-macos-x64.sh', sha='compile-with-dwarf', type='blob'),
+                dict(path='scripts/native-symbols.py', sha='old-symbol-verifier', type='blob')]
+        with mock.patch.object(restore, 'api', return_value=dict(tree=tree)):
+            original = restore.inputs('sha', 'macos')
+            tree[-1]['sha'] = 'new-symbol-verifier'
+            self.assertEqual(original, restore.inputs('sha', 'macos'))
+            tree[1]['sha'] = 'changed-compilation'
+            self.assertNotEqual(original, restore.inputs('sha', 'macos'))
+
     def test_transient_api_failure_retried(self):
         error = restore.urllib.error.HTTPError('https://api.github.com/test', 502, 'temporary', None, None)
         with mock.patch.dict(os.environ, {'GITHUB_REPOSITORY': 'fixture/repo', 'GH_TOKEN': 'fixture'}), \

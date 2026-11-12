@@ -81,7 +81,8 @@ def verify(archive, target, variant, source_run, source_commit, source, logs):
         symbol_spec = importlib.util.spec_from_file_location('native_symbols', source / 'scripts/native-symbols.py')
         symbol_tools = importlib.util.module_from_spec(symbol_spec)
         symbol_spec.loader.exec_module(symbol_tools)
-        symbol_proof = symbol_tools.verify(sdk, archive.with_name(archive.stem + '-symbols.zip'))
+        symbol_proof = symbol_tools.verify(sdk, archive.with_name(archive.stem + '-symbols.zip'),
+                                          str(source_run), source_commit)
         packaging = json.loads((sdk / 'share/ci-windows-packaging.json').read_text(encoding='utf-8'))
         sdk_tools.require(packaging['target_arch'] == target and packaging['variant'] == variant
                           and packaging['source_run'] == str(source_run)

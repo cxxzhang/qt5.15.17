@@ -217,7 +217,7 @@ def restore_macos(sdk, symbols):
                 shutil.copy2(path, sdk / path.relative_to(root / 'bootstrap'))
 
 
-def verify(sdk, symbols):
+def verify(sdk, symbols, source_run=None, source_commit=None):
     with tempfile.TemporaryDirectory(prefix='qt-native-symbol-check-') as temporary:
         root = Path(temporary)
         if symbols.suffix == '.zip':
@@ -227,8 +227,8 @@ def verify(sdk, symbols):
             with tarfile.open(symbols) as archive:
                 archive.extractall(root, filter='data')
         proof = json.loads((root / 'native-symbols.json').read_text())
-        require(proof['source_run'] == os.environ.get('GITHUB_RUN_ID')
-                and proof['source_commit'] == os.environ.get('GITHUB_SHA'), 'Symbol provenance mismatch')
+        require(proof['source_run'] == (source_run or os.environ.get('GITHUB_RUN_ID'))
+                and proof['source_commit'] == (source_commit or os.environ.get('GITHUB_SHA')), 'Symbol provenance mismatch')
         require(proof['binaries'], 'Empty symbols manifest')
         for name, checksum in proof.get('files', {}).items():
             require(digest(root / name) == checksum, 'Symbol file hash mismatch: ' + name)
@@ -270,9 +270,11 @@ if __name__ == '__main__':
     parser.add_argument('sdk', type=Path)
     parser.add_argument('output', type=Path, nargs='?')
     parser.add_argument('symbols', type=Path, nargs='?')
+    parser.add_argument('--source-run')
+    parser.add_argument('--source-commit')
     args = parser.parse_args()
     if args.command == 'capture-macos': capture_macos(args.sdk)
     elif args.command == 'macos': macos(args.sdk, args.output, args.symbols)
     elif args.command == 'windows': windows(args.sdk, args.output)
     elif args.command == 'restore-macos': restore_macos(args.sdk, args.output)
-    else: print(json.dumps(verify(args.sdk, args.output)))
+    else: print(json.dumps(verify(args.sdk, args.output, args.source_run, args.source_commit)))
