@@ -32,3 +32,17 @@ For Windows, extract the symbol ZIP over the corresponding SDK, or add its
 extracted directory to the debugger's symbol search path. For macOS, add
 the matching `.dSYM` bundle from the symbol archive to LLDB's symbol files.
 Always use the symbol archive from the same release and architecture.
+
+Accepted publication: `qt5.15.17-43138931470`, source
+`3d88705141c792e2c15e7316cd3114de13d4a833`, published on 2026-11-12.
+All 41 GitHub asset digests matched the downloaded manifests and checksums.
+Six Windows consumers checked 125 PE/PDB pairs each. Four Mac consumers
+checked 139 Mach-O/static archive pairs each. See
+`evidence/native-symbols-publication-20261112.json`.
+
+Static archive DWARF is removed with LLVM strip. Universal archives are
+split into architecture slices, stripped separately and recombined. Both
+Mac hosts test the actual Bootstrap archive and link/run applications
+against stripped thin and universal static libraries. For source debugging
+of static Qt libraries in your own app, link the unstripped archives from
+`static/` in the symbol package, then generate your application's dSYM.

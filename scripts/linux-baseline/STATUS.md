@@ -13,6 +13,12 @@ qt5.15.17-43120765189 contains all 32 expected assets. All Linux,
 six Windows extracted consumers and four macOS consumers passed. The
 published tag, two manifests, checksums and all 32 GitHub asset digests
 were independently rechecked; see ../evidence/sdk-publication-20261112.json.
+Native symbol follow-up `qt5.15.17-43138931470` is also published and
+accepted: 41 assets, including three macOS and six Windows separate symbol
+packages. Mac binaries and static archives are stripped, PDBs are removed
+from Windows SDK ZIPs, and all debug identities/archive hashes are checked.
+See `../evidence/native-symbols-publication-20261112.json`.
+
 The sections below are historical investigation notes, not current status.
 
 ## Current requirements

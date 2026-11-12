@@ -1,0 +1,875 @@
+{
+  "accepted": true,
+  "source_run": "43138931470",
+  "source_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+  "release_id": 442422465,
+  "tag": "qt5.15.17-43138931470",
+  "published_at": "2026-11-12T02:28:03Z",
+  "asset_count": 41,
+  "verified_github_asset_digests": {
+    "linux-acceptance-manifest.json": "146ed2c38d1180e3c7bd17f828f2a9a28d6fe9392fbf6c190dc95955d04c154f",
+    "qt5.15.17_linux_arm64-symbols.tar.gz": "c3e8bae633f0104840e24464a4ea24ea6d460499fe5ab45b5d8002e0a05937f7",
+    "qt5.15.17_linux_arm64.tar.gz": "9f40bd6df95458df59546c1e7158da109c0784c0a80c0be5df2c9dae6aa19671",
+    "qt5.15.17_linux_arm64_debug-symbols.tar.gz": "961afde93a5d6aa133525e2b2377b60983b1120866a15d71a7bc5bcd856533d9",
+    "qt5.15.17_linux_arm64_debug.tar.gz": "6b505318fdf276382413769034ef3bc3ba9390cc4898615d2f8f77930def31d9",
+    "qt5.15.17_linux_loong64_newworld-symbols.tar.gz": "099eecd659e34e8bb779aecf5c0a9fc90b17697e7be241bac721ecc4ecfe542d",
+    "qt5.15.17_linux_loong64_newworld.tar.gz": "93362fff3bb34a5561820c6a39f5213a982152db180b4f3a19c85ad86c3b0f5c",
+    "qt5.15.17_linux_loong64_newworld_debug-symbols.tar.gz": "794240e6c3faaf1a7212b3c1ccf98de343cb6af787e3fe8a9ea3e43c6e07e85f",
+    "qt5.15.17_linux_loong64_newworld_debug.tar.gz": "d7bceb6a1126aacac7134c74c2acfeb6e723b331c63355e5e59a1e6266d27cca",
+    "qt5.15.17_linux_loong64_oldworld-symbols.tar.gz": "160f4b93e56de4f1985e3cf4e9f3fcead01b8b53309b969f1ffa4ae7b31d8219",
+    "qt5.15.17_linux_loong64_oldworld.tar.gz": "292d50cb16abb3b5a347a3cda823195aca64469550627805ed5a35d12d7c1f2b",
+    "qt5.15.17_linux_loong64_oldworld_debug-symbols.tar.gz": "d7df9529dc88bd945e8377d1d7c8b5cbfca0afe3d648cd447682a73f30ab1619",
+    "qt5.15.17_linux_loong64_oldworld_debug.tar.gz": "57fe80b0ca14b316ded180fcfbb365dbe294903b106b5dcb02ffc9c447b84b39",
+    "qt5.15.17_linux_mips64el-symbols.tar.gz": "2a6e3afe3647c63cf566c01ef4a1cdafa7c339de9a2defefa239868e355562b5",
+    "qt5.15.17_linux_mips64el.tar.gz": "213a491361ab24c1591a14ec2d62940612f653d5428d4fc326dc92411ce2adbd",
+    "qt5.15.17_linux_mips64el_debug-symbols.tar.gz": "bc0ac719391d22da6a238bcd5ddfa5498405f51b343b6de76da867e7582b888d",
+    "qt5.15.17_linux_mips64el_debug.tar.gz": "a441436ea041b08d0a2d65474a5214b193d7555f6f221dab42ac562f0a8b57fa",
+    "qt5.15.17_linux_x64-symbols.tar.gz": "c8c7401561c2a54e3ff50fc9c22418a7afaf156eccef17fba34a127d6a529f8c",
+    "qt5.15.17_linux_x64.tar.gz": "351f1c086bd737476496a3b6929ee82f76b4815cffbf32778e7ddc7dd2b2257a",
+    "qt5.15.17_linux_x64_debug-symbols.tar.gz": "80ea33ca443db2dd19f22a645bdcdd612d930937440c24adbcd82536c04b4cfe",
+    "qt5.15.17_linux_x64_debug.tar.gz": "f2887bf2bc678539499bd16f26932d36ef0c02b0042e2f481b92f2f777b6e643",
+    "qt5.15.17_macos_arm64-symbols.tar.gz": "a498fe4c55dbe74ced8269417613190b1e6222904feb09071d37afea840fc179",
+    "qt5.15.17_macos_arm64.tar.gz": "724b345620749a61fba9262afc5de16be8be07da6fd430d259962aec2a1e69a9",
+    "qt5.15.17_macos_universal-symbols.tar.gz": "2c993195e6e162a9501b73c9067e7b70084a255745bce219307224f0648cbd3c",
+    "qt5.15.17_macos_universal.tar.gz": "2f855541f393075ebec69af3efa02a03934005557540697eca95c32dd1548cbe",
+    "qt5.15.17_macos_x64-symbols.tar.gz": "7f09ead620b263d496d65ee8c7556d56084766c9e90c7a2959b6daf4724704b9",
+    "qt5.15.17_macos_x64.tar.gz": "f666bd8b879d62691909913e5fcb0b51fbc39e723e7f4c2ac02c581449deab56",
+    "qt5.15.17_windows_arm64-symbols.zip": "577dfedf12debe15dbb24ed7e5a20a2a1ada887849f2badab60c9ccb5f0582c0",
+    "qt5.15.17_windows_arm64.zip": "145c09ab0f3b23e530f225427cfe0a37c73399bbb61746ff27dad0de4032763b",
+    "qt5.15.17_windows_arm64_debug-symbols.zip": "f00f6726b0aadbae4ed520a5b3e51c787921c8bee4bbe58b08702cbe55f387ac",
+    "qt5.15.17_windows_arm64_debug.zip": "b64b3865ad324bd7281862b90691fbdfabd1213361dfb39e04af54169f893c6c",
+    "qt5.15.17_windows_x64-symbols.zip": "639a76bfa437595d17cf6c1a795d80ae04a495e19f4d90a3c106b28c209925c7",
+    "qt5.15.17_windows_x64.zip": "142448a8639e41dc6b9e7b45f0e0e5a2bada06070e0bc19e878cdd210782c252",
+    "qt5.15.17_windows_x64_debug-symbols.zip": "ca6ed195b616bc767867be10e5b23665dc41322be6853890248e5850fbcb25fb",
+    "qt5.15.17_windows_x64_debug.zip": "b9a2482d0da8e0da853eec5c5a9b556519c11a5a79ff83e064e5e55e3b89bda8",
+    "qt5.15.17_windows_x86-symbols.zip": "20ac88650e33adbe986bfa5f9dd46ef40b34a1dcdc1fd8ec1405e483d4e7fa04",
+    "qt5.15.17_windows_x86.zip": "2c1a356c02beeea6ec6c4cf055f3dd07c6c23dcb3b6a161cb226be6222d0496c",
+    "qt5.15.17_windows_x86_debug-symbols.zip": "6823a48e3039dac1a56f7190be4722107287505caf074eaf96be7c2710357487",
+    "qt5.15.17_windows_x86_debug.zip": "c39cf7633ef3ee8df4b8891dddcc154be4c4ae311f3efa8a0ad27c391e698a5d",
+    "release-acceptance-manifest.json": "b03e4c1f3aa8ece1be1935030cd7e5d9d574fcbcc390533254cde9d6d5500fc7",
+    "SHA256SUMS": "1d0877bbc714c1b03fe46b68c9315538354aaaa33ba35f8371d40bba37a367a6"
+  },
+  "successful_required_jobs": [
+    "linux / accepted",
+    "macos-arm64",
+    "macos-universal",
+    "macos-x64",
+    "release",
+    "release-gates",
+    "windows-arm64",
+    "windows-arm64-debug",
+    "windows-x64",
+    "windows-x64-debug",
+    "windows-x86",
+    "windows-x86-debug"
+  ],
+  "successful_consumer_jobs": [
+    "linux / verify (arm64, debug) / modern-consumers",
+    "linux / verify (arm64, debug) / verify",
+    "linux / verify (arm64, release) / modern-consumers",
+    "linux / verify (arm64, release) / verify",
+    "linux / verify (loong64-newworld, debug) / verify",
+    "linux / verify (loong64-newworld, release) / verify",
+    "linux / verify (loong64-oldworld, debug) / verify",
+    "linux / verify (loong64-oldworld, release) / verify",
+    "linux / verify (mips64el, debug) / verify",
+    "linux / verify (mips64el, release) / verify",
+    "linux / verify (x64, debug) / modern-consumers",
+    "linux / verify (x64, debug) / verify",
+    "linux / verify (x64, release) / modern-consumers",
+    "linux / verify (x64, release) / verify",
+    "verify-macos (arm64, arm64, arm64, macos-15)",
+    "verify-macos (universal, arm64, x86_64 arm64, macos-15)",
+    "verify-macos (universal, x86_64, x86_64 arm64, macos-15-intel)",
+    "verify-macos (x64, x86_64, x86_64, macos-15-intel)",
+    "verify-windows (arm64, debug) / verify",
+    "verify-windows (arm64, release) / verify",
+    "verify-windows (x64, debug) / verify",
+    "verify-windows (x64, release) / verify",
+    "verify-windows (x86, debug) / verify",
+    "verify-windows (x86, release) / verify"
+  ],
+  "proof_sha256": {
+    "release-api.json": "d2bbd7e36ef72ecdec3f89c1f892162f3423d9e3000487f3d69a8e9e588f9948",
+    "run-api.json": "69286bf072aa48442ae63a840d0bed57eb9e254efc1a6844df7b10a62eab60e1",
+    "jobs-api.json": "e269b1b866f1cf8bad4e177ccb248e9473b40100634e095b0197842431c2f5dd",
+    "tag-api.json": "e4c9cc8725614fd5228e1acbac99c0b8c1b96a8baab96b66524e32d9b5c00e74",
+    "release-acceptance-manifest.json": "b03e4c1f3aa8ece1be1935030cd7e5d9d574fcbcc390533254cde9d6d5500fc7",
+    "linux-acceptance-manifest.json": "146ed2c38d1180e3c7bd17f828f2a9a28d6fe9392fbf6c190dc95955d04c154f",
+    "SHA256SUMS": "1d0877bbc714c1b03fe46b68c9315538354aaaa33ba35f8371d40bba37a367a6"
+  },
+  "native_consumer_proofs": [
+    {
+      "accepted": true,
+      "target": "arm64",
+      "consumer_arch": "arm64",
+      "architectures": [
+        "arm64"
+      ],
+      "source_run": "43138931470",
+      "source_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+      "verifier_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+      "archive": "qt5.15.17_macos_arm64.tar.gz",
+      "sha256": "724b345620749a61fba9262afc5de16be8be07da6fd430d259962aec2a1e69a9",
+      "symbols": {
+        "archive": "qt5.15.17_macos_arm64-symbols.tar.gz",
+        "sha256": "a498fe4c55dbe74ced8269417613190b1e6222904feb09071d37afea840fc179",
+        "binaries": 139,
+        "checks": [
+          "complete binary coverage",
+          "binary and symbol hashes",
+          "matching debug identities"
+        ]
+      },
+      "checks": [
+        "extracted executable permissions",
+        "all Mach-O and static archive architectures",
+        "advertised qmake architectures",
+        "default native qmake consumer",
+        "qmake C++17 consumer",
+        "offscreen GUI/QML/fonts/TLS execution"
+      ],
+      "build_provenance": {
+        "ci-native-source.json": {
+          "source_run": "43135533985",
+          "source_commit": "963df90b7f01416fea1cd81c805dd7628281fe7a",
+          "source_job": 130912582965,
+          "source_artifact": 13907448404,
+          "packaging_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+          "compilation_inputs": {
+            ".gitmodules": "4be4cc9ec06ce63ab913aca299cb51fe2899a1a2",
+            "configure": "89b394299a414209f480e044b3cf2e5a3efa16d9",
+            "configure.bat": "500d627fdeaf6bab1ccef7a9c98e3a17c1d7d7d6",
+            "onekey-build-macos-arm64.sh": "6184f2c89d2f96fee3436d92960c325408c71031",
+            "openssl/openssl-1.1.1w.tar.gz": "9547637cf0621e052a5f3490564018b82f97c6fe",
+            "qt.pro": "81553664e1b3aece403f47b56404454337a70e08",
+            "qtactiveqt": "df401a62879521f3fd47097205a440d5b173b524",
+            "qtbase": "5e8b3ee0ae8cabf3c1a84d4568ff5f9f2bb09544",
+            "qtdeclarative": "de625ea60fa8eb030c3348710a96b37f2281ae0f",
+            "qtimageformats": "a8700e758525336c1331165efb68a3f24dd7a6e7",
+            "qtsvg": "a9e1b4199654547e633730522d1b18168eb3e63a",
+            "qttools": "1db38dc7d01e2b0567fc6d92c7aa58bfe69ce9c3",
+            "qttranslations": "fd567a42c1b566f22f339db758d29925fd2a8c60",
+            "qtwayland": "26d0b4202b9d81527138ce614573e0bc3b528b9d",
+            "qtwebsockets": "b595a445da86a2aa85d9559b413ccc12cc62144c",
+            "@native-job-configuration": "55e86df5c82008db76b3fdde1e70e0fdbc142aa1d005a09a0aca53aabc6b08e9"
+          },
+          "policy": "Unverified install; all current packaging and acceptance gates repeat",
+          "previous": {
+            "source_run": "43126854406",
+            "source_commit": "0794159e1d8a512439df98e6601fd0d9190acabf",
+            "source_job": 130883412226,
+            "source_artifact": 13904184330,
+            "packaging_commit": "963df90b7f01416fea1cd81c805dd7628281fe7a",
+            "compilation_inputs": {
+              ".gitmodules": "4be4cc9ec06ce63ab913aca299cb51fe2899a1a2",
+              "configure": "89b394299a414209f480e044b3cf2e5a3efa16d9",
+              "configure.bat": "500d627fdeaf6bab1ccef7a9c98e3a17c1d7d7d6",
+              "onekey-build-macos-arm64.sh": "6184f2c89d2f96fee3436d92960c325408c71031",
+              "openssl/openssl-1.1.1w.tar.gz": "9547637cf0621e052a5f3490564018b82f97c6fe",
+              "qt.pro": "81553664e1b3aece403f47b56404454337a70e08",
+              "qtactiveqt": "df401a62879521f3fd47097205a440d5b173b524",
+              "qtbase": "5e8b3ee0ae8cabf3c1a84d4568ff5f9f2bb09544",
+              "qtdeclarative": "de625ea60fa8eb030c3348710a96b37f2281ae0f",
+              "qtimageformats": "a8700e758525336c1331165efb68a3f24dd7a6e7",
+              "qtsvg": "a9e1b4199654547e633730522d1b18168eb3e63a",
+              "qttools": "1db38dc7d01e2b0567fc6d92c7aa58bfe69ce9c3",
+              "qttranslations": "fd567a42c1b566f22f339db758d29925fd2a8c60",
+              "qtwayland": "26d0b4202b9d81527138ce614573e0bc3b528b9d",
+              "qtwebsockets": "b595a445da86a2aa85d9559b413ccc12cc62144c",
+              "@native-job-configuration": "55e86df5c82008db76b3fdde1e70e0fdbc142aa1d005a09a0aca53aabc6b08e9"
+            },
+            "policy": "Unverified install; all current packaging and acceptance gates repeat"
+          }
+        }
+      }
+    },
+    {
+      "accepted": true,
+      "target": "universal",
+      "consumer_arch": "arm64",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ],
+      "source_run": "43138931470",
+      "source_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+      "verifier_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+      "archive": "qt5.15.17_macos_universal.tar.gz",
+      "sha256": "2f855541f393075ebec69af3efa02a03934005557540697eca95c32dd1548cbe",
+      "symbols": {
+        "archive": "qt5.15.17_macos_universal-symbols.tar.gz",
+        "sha256": "2c993195e6e162a9501b73c9067e7b70084a255745bce219307224f0648cbd3c",
+        "binaries": 139,
+        "checks": [
+          "complete binary coverage",
+          "binary and symbol hashes",
+          "matching debug identities"
+        ]
+      },
+      "checks": [
+        "extracted executable permissions",
+        "all Mach-O and static archive architectures",
+        "advertised qmake architectures",
+        "default native qmake consumer",
+        "qmake C++17 consumer",
+        "offscreen GUI/QML/fonts/TLS execution",
+        "explicit dual-architecture consumer"
+      ],
+      "build_provenance": {
+        "ci-native-source.json": {
+          "source_run": "43135533985",
+          "source_commit": "963df90b7f01416fea1cd81c805dd7628281fe7a",
+          "source_job": 130912582965,
+          "source_artifact": 13907448404,
+          "packaging_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+          "compilation_inputs": {
+            ".gitmodules": "4be4cc9ec06ce63ab913aca299cb51fe2899a1a2",
+            "configure": "89b394299a414209f480e044b3cf2e5a3efa16d9",
+            "configure.bat": "500d627fdeaf6bab1ccef7a9c98e3a17c1d7d7d6",
+            "onekey-build-macos-arm64.sh": "6184f2c89d2f96fee3436d92960c325408c71031",
+            "openssl/openssl-1.1.1w.tar.gz": "9547637cf0621e052a5f3490564018b82f97c6fe",
+            "qt.pro": "81553664e1b3aece403f47b56404454337a70e08",
+            "qtactiveqt": "df401a62879521f3fd47097205a440d5b173b524",
+            "qtbase": "5e8b3ee0ae8cabf3c1a84d4568ff5f9f2bb09544",
+            "qtdeclarative": "de625ea60fa8eb030c3348710a96b37f2281ae0f",
+            "qtimageformats": "a8700e758525336c1331165efb68a3f24dd7a6e7",
+            "qtsvg": "a9e1b4199654547e633730522d1b18168eb3e63a",
+            "qttools": "1db38dc7d01e2b0567fc6d92c7aa58bfe69ce9c3",
+            "qttranslations": "fd567a42c1b566f22f339db758d29925fd2a8c60",
+            "qtwayland": "26d0b4202b9d81527138ce614573e0bc3b528b9d",
+            "qtwebsockets": "b595a445da86a2aa85d9559b413ccc12cc62144c",
+            "@native-job-configuration": "55e86df5c82008db76b3fdde1e70e0fdbc142aa1d005a09a0aca53aabc6b08e9"
+          },
+          "policy": "Unverified install; all current packaging and acceptance gates repeat",
+          "previous": {
+            "source_run": "43126854406",
+            "source_commit": "0794159e1d8a512439df98e6601fd0d9190acabf",
+            "source_job": 130883412226,
+            "source_artifact": 13904184330,
+            "packaging_commit": "963df90b7f01416fea1cd81c805dd7628281fe7a",
+            "compilation_inputs": {
+              ".gitmodules": "4be4cc9ec06ce63ab913aca299cb51fe2899a1a2",
+              "configure": "89b394299a414209f480e044b3cf2e5a3efa16d9",
+              "configure.bat": "500d627fdeaf6bab1ccef7a9c98e3a17c1d7d7d6",
+              "onekey-build-macos-arm64.sh": "6184f2c89d2f96fee3436d92960c325408c71031",
+              "openssl/openssl-1.1.1w.tar.gz": "9547637cf0621e052a5f3490564018b82f97c6fe",
+              "qt.pro": "81553664e1b3aece403f47b56404454337a70e08",
+              "qtactiveqt": "df401a62879521f3fd47097205a440d5b173b524",
+              "qtbase": "5e8b3ee0ae8cabf3c1a84d4568ff5f9f2bb09544",
+              "qtdeclarative": "de625ea60fa8eb030c3348710a96b37f2281ae0f",
+              "qtimageformats": "a8700e758525336c1331165efb68a3f24dd7a6e7",
+              "qtsvg": "a9e1b4199654547e633730522d1b18168eb3e63a",
+              "qttools": "1db38dc7d01e2b0567fc6d92c7aa58bfe69ce9c3",
+              "qttranslations": "fd567a42c1b566f22f339db758d29925fd2a8c60",
+              "qtwayland": "26d0b4202b9d81527138ce614573e0bc3b528b9d",
+              "qtwebsockets": "b595a445da86a2aa85d9559b413ccc12cc62144c",
+              "@native-job-configuration": "55e86df5c82008db76b3fdde1e70e0fdbc142aa1d005a09a0aca53aabc6b08e9"
+            },
+            "policy": "Unverified install; all current packaging and acceptance gates repeat"
+          }
+        },
+        "ci-universal-sources.json": {
+          "x86_64": {
+            "source_run": "43135533985",
+            "source_commit": "963df90b7f01416fea1cd81c805dd7628281fe7a",
+            "source_job": 130912583068,
+            "source_artifact": 13907538509,
+            "packaging_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+            "compilation_inputs": {
+              ".gitmodules": "4be4cc9ec06ce63ab913aca299cb51fe2899a1a2",
+              "configure": "89b394299a414209f480e044b3cf2e5a3efa16d9",
+              "configure.bat": "500d627fdeaf6bab1ccef7a9c98e3a17c1d7d7d6",
+              "onekey-build-macos-x64.sh": "5dde004e09c5b83b72a6dab8b691724b34cfc81a",
+              "openssl/openssl-1.1.1w.tar.gz": "9547637cf0621e052a5f3490564018b82f97c6fe",
+              "qt.pro": "81553664e1b3aece403f47b56404454337a70e08",
+              "qtactiveqt": "df401a62879521f3fd47097205a440d5b173b524",
+              "qtbase": "5e8b3ee0ae8cabf3c1a84d4568ff5f9f2bb09544",
+              "qtdeclarative": "de625ea60fa8eb030c3348710a96b37f2281ae0f",
+              "qtimageformats": "a8700e758525336c1331165efb68a3f24dd7a6e7",
+              "qtsvg": "a9e1b4199654547e633730522d1b18168eb3e63a",
+              "qttools": "1db38dc7d01e2b0567fc6d92c7aa58bfe69ce9c3",
+              "qttranslations": "fd567a42c1b566f22f339db758d29925fd2a8c60",
+              "qtwayland": "26d0b4202b9d81527138ce614573e0bc3b528b9d",
+              "qtwebsockets": "b595a445da86a2aa85d9559b413ccc12cc62144c",
+              "@native-job-configuration": "b833da2cc65fbfc4c52d6551d1a0f4d1299e91cf8867641a319d5d8d250e40b6"
+            },
+            "policy": "Unverified install; all current packaging and acceptance gates repeat",
+            "previous": {
+              "source_run": "43126854406",
+              "source_commit": "0794159e1d8a512439df98e6601fd0d9190acabf",
+              "source_job": 130883411971,
+              "source_artifact": 13906926172,
+              "packaging_commit": "963df90b7f01416fea1cd81c805dd7628281fe7a",
+              "compilation_inputs": {
+                ".gitmodules": "4be4cc9ec06ce63ab913aca299cb51fe2899a1a2",
+                "configure": "89b394299a414209f480e044b3cf2e5a3efa16d9",
+                "configure.bat": "500d627fdeaf6bab1ccef7a9c98e3a17c1d7d7d6",
+                "onekey-build-macos-x64.sh": "5dde004e09c5b83b72a6dab8b691724b34cfc81a",
+                "openssl/openssl-1.1.1w.tar.gz": "9547637cf0621e052a5f3490564018b82f97c6fe",
+                "qt.pro": "81553664e1b3aece403f47b56404454337a70e08",
+                "qtactiveqt": "df401a62879521f3fd47097205a440d5b173b524",
+                "qtbase": "5e8b3ee0ae8cabf3c1a84d4568ff5f9f2bb09544",
+                "qtdeclarative": "de625ea60fa8eb030c3348710a96b37f2281ae0f",
+                "qtimageformats": "a8700e758525336c1331165efb68a3f24dd7a6e7",
+                "qtsvg": "a9e1b4199654547e633730522d1b18168eb3e63a",
+                "qttools": "1db38dc7d01e2b0567fc6d92c7aa58bfe69ce9c3",
+                "qttranslations": "fd567a42c1b566f22f339db758d29925fd2a8c60",
+                "qtwayland": "26d0b4202b9d81527138ce614573e0bc3b528b9d",
+                "qtwebsockets": "b595a445da86a2aa85d9559b413ccc12cc62144c",
+                "@native-job-configuration": "b833da2cc65fbfc4c52d6551d1a0f4d1299e91cf8867641a319d5d8d250e40b6"
+              },
+              "policy": "Unverified install; all current packaging and acceptance gates repeat"
+            }
+          },
+          "arm64": {
+            "source_run": "43135533985",
+            "source_commit": "963df90b7f01416fea1cd81c805dd7628281fe7a",
+            "source_job": 130912582965,
+            "source_artifact": 13907448404,
+            "packaging_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+            "compilation_inputs": {
+              ".gitmodules": "4be4cc9ec06ce63ab913aca299cb51fe2899a1a2",
+              "configure": "89b394299a414209f480e044b3cf2e5a3efa16d9",
+              "configure.bat": "500d627fdeaf6bab1ccef7a9c98e3a17c1d7d7d6",
+              "onekey-build-macos-arm64.sh": "6184f2c89d2f96fee3436d92960c325408c71031",
+              "openssl/openssl-1.1.1w.tar.gz": "9547637cf0621e052a5f3490564018b82f97c6fe",
+              "qt.pro": "81553664e1b3aece403f47b56404454337a70e08",
+              "qtactiveqt": "df401a62879521f3fd47097205a440d5b173b524",
+              "qtbase": "5e8b3ee0ae8cabf3c1a84d4568ff5f9f2bb09544",
+              "qtdeclarative": "de625ea60fa8eb030c3348710a96b37f2281ae0f",
+              "qtimageformats": "a8700e758525336c1331165efb68a3f24dd7a6e7",
+              "qtsvg": "a9e1b4199654547e633730522d1b18168eb3e63a",
+              "qttools": "1db38dc7d01e2b0567fc6d92c7aa58bfe69ce9c3",
+              "qttranslations": "fd567a42c1b566f22f339db758d29925fd2a8c60",
+              "qtwayland": "26d0b4202b9d81527138ce614573e0bc3b528b9d",
+              "qtwebsockets": "b595a445da86a2aa85d9559b413ccc12cc62144c",
+              "@native-job-configuration": "55e86df5c82008db76b3fdde1e70e0fdbc142aa1d005a09a0aca53aabc6b08e9"
+            },
+            "policy": "Unverified install; all current packaging and acceptance gates repeat",
+            "previous": {
+              "source_run": "43126854406",
+              "source_commit": "0794159e1d8a512439df98e6601fd0d9190acabf",
+              "source_job": 130883412226,
+              "source_artifact": 13904184330,
+              "packaging_commit": "963df90b7f01416fea1cd81c805dd7628281fe7a",
+              "compilation_inputs": {
+                ".gitmodules": "4be4cc9ec06ce63ab913aca299cb51fe2899a1a2",
+                "configure": "89b394299a414209f480e044b3cf2e5a3efa16d9",
+                "configure.bat": "500d627fdeaf6bab1ccef7a9c98e3a17c1d7d7d6",
+                "onekey-build-macos-arm64.sh": "6184f2c89d2f96fee3436d92960c325408c71031",
+                "openssl/openssl-1.1.1w.tar.gz": "9547637cf0621e052a5f3490564018b82f97c6fe",
+                "qt.pro": "81553664e1b3aece403f47b56404454337a70e08",
+                "qtactiveqt": "df401a62879521f3fd47097205a440d5b173b524",
+                "qtbase": "5e8b3ee0ae8cabf3c1a84d4568ff5f9f2bb09544",
+                "qtdeclarative": "de625ea60fa8eb030c3348710a96b37f2281ae0f",
+                "qtimageformats": "a8700e758525336c1331165efb68a3f24dd7a6e7",
+                "qtsvg": "a9e1b4199654547e633730522d1b18168eb3e63a",
+                "qttools": "1db38dc7d01e2b0567fc6d92c7aa58bfe69ce9c3",
+                "qttranslations": "fd567a42c1b566f22f339db758d29925fd2a8c60",
+                "qtwayland": "26d0b4202b9d81527138ce614573e0bc3b528b9d",
+                "qtwebsockets": "b595a445da86a2aa85d9559b413ccc12cc62144c",
+                "@native-job-configuration": "55e86df5c82008db76b3fdde1e70e0fdbc142aa1d005a09a0aca53aabc6b08e9"
+              },
+              "policy": "Unverified install; all current packaging and acceptance gates repeat"
+            }
+          }
+        }
+      }
+    },
+    {
+      "accepted": true,
+      "target": "universal",
+      "consumer_arch": "x86_64",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ],
+      "source_run": "43138931470",
+      "source_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+      "verifier_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+      "archive": "qt5.15.17_macos_universal.tar.gz",
+      "sha256": "2f855541f393075ebec69af3efa02a03934005557540697eca95c32dd1548cbe",
+      "symbols": {
+        "archive": "qt5.15.17_macos_universal-symbols.tar.gz",
+        "sha256": "2c993195e6e162a9501b73c9067e7b70084a255745bce219307224f0648cbd3c",
+        "binaries": 139,
+        "checks": [
+          "complete binary coverage",
+          "binary and symbol hashes",
+          "matching debug identities"
+        ]
+      },
+      "checks": [
+        "extracted executable permissions",
+        "all Mach-O and static archive architectures",
+        "advertised qmake architectures",
+        "default native qmake consumer",
+        "qmake C++17 consumer",
+        "offscreen GUI/QML/fonts/TLS execution",
+        "explicit dual-architecture consumer"
+      ],
+      "build_provenance": {
+        "ci-native-source.json": {
+          "source_run": "43135533985",
+          "source_commit": "963df90b7f01416fea1cd81c805dd7628281fe7a",
+          "source_job": 130912582965,
+          "source_artifact": 13907448404,
+          "packaging_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+          "compilation_inputs": {
+            ".gitmodules": "4be4cc9ec06ce63ab913aca299cb51fe2899a1a2",
+            "configure": "89b394299a414209f480e044b3cf2e5a3efa16d9",
+            "configure.bat": "500d627fdeaf6bab1ccef7a9c98e3a17c1d7d7d6",
+            "onekey-build-macos-arm64.sh": "6184f2c89d2f96fee3436d92960c325408c71031",
+            "openssl/openssl-1.1.1w.tar.gz": "9547637cf0621e052a5f3490564018b82f97c6fe",
+            "qt.pro": "81553664e1b3aece403f47b56404454337a70e08",
+            "qtactiveqt": "df401a62879521f3fd47097205a440d5b173b524",
+            "qtbase": "5e8b3ee0ae8cabf3c1a84d4568ff5f9f2bb09544",
+            "qtdeclarative": "de625ea60fa8eb030c3348710a96b37f2281ae0f",
+            "qtimageformats": "a8700e758525336c1331165efb68a3f24dd7a6e7",
+            "qtsvg": "a9e1b4199654547e633730522d1b18168eb3e63a",
+            "qttools": "1db38dc7d01e2b0567fc6d92c7aa58bfe69ce9c3",
+            "qttranslations": "fd567a42c1b566f22f339db758d29925fd2a8c60",
+            "qtwayland": "26d0b4202b9d81527138ce614573e0bc3b528b9d",
+            "qtwebsockets": "b595a445da86a2aa85d9559b413ccc12cc62144c",
+            "@native-job-configuration": "55e86df5c82008db76b3fdde1e70e0fdbc142aa1d005a09a0aca53aabc6b08e9"
+          },
+          "policy": "Unverified install; all current packaging and acceptance gates repeat",
+          "previous": {
+            "source_run": "43126854406",
+            "source_commit": "0794159e1d8a512439df98e6601fd0d9190acabf",
+            "source_job": 130883412226,
+            "source_artifact": 13904184330,
+            "packaging_commit": "963df90b7f01416fea1cd81c805dd7628281fe7a",
+            "compilation_inputs": {
+              ".gitmodules": "4be4cc9ec06ce63ab913aca299cb51fe2899a1a2",
+              "configure": "89b394299a414209f480e044b3cf2e5a3efa16d9",
+              "configure.bat": "500d627fdeaf6bab1ccef7a9c98e3a17c1d7d7d6",
+              "onekey-build-macos-arm64.sh": "6184f2c89d2f96fee3436d92960c325408c71031",
+              "openssl/openssl-1.1.1w.tar.gz": "9547637cf0621e052a5f3490564018b82f97c6fe",
+              "qt.pro": "81553664e1b3aece403f47b56404454337a70e08",
+              "qtactiveqt": "df401a62879521f3fd47097205a440d5b173b524",
+              "qtbase": "5e8b3ee0ae8cabf3c1a84d4568ff5f9f2bb09544",
+              "qtdeclarative": "de625ea60fa8eb030c3348710a96b37f2281ae0f",
+              "qtimageformats": "a8700e758525336c1331165efb68a3f24dd7a6e7",
+              "qtsvg": "a9e1b4199654547e633730522d1b18168eb3e63a",
+              "qttools": "1db38dc7d01e2b0567fc6d92c7aa58bfe69ce9c3",
+              "qttranslations": "fd567a42c1b566f22f339db758d29925fd2a8c60",
+              "qtwayland": "26d0b4202b9d81527138ce614573e0bc3b528b9d",
+              "qtwebsockets": "b595a445da86a2aa85d9559b413ccc12cc62144c",
+              "@native-job-configuration": "55e86df5c82008db76b3fdde1e70e0fdbc142aa1d005a09a0aca53aabc6b08e9"
+            },
+            "policy": "Unverified install; all current packaging and acceptance gates repeat"
+          }
+        },
+        "ci-universal-sources.json": {
+          "x86_64": {
+            "source_run": "43135533985",
+            "source_commit": "963df90b7f01416fea1cd81c805dd7628281fe7a",
+            "source_job": 130912583068,
+            "source_artifact": 13907538509,
+            "packaging_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+            "compilation_inputs": {
+              ".gitmodules": "4be4cc9ec06ce63ab913aca299cb51fe2899a1a2",
+              "configure": "89b394299a414209f480e044b3cf2e5a3efa16d9",
+              "configure.bat": "500d627fdeaf6bab1ccef7a9c98e3a17c1d7d7d6",
+              "onekey-build-macos-x64.sh": "5dde004e09c5b83b72a6dab8b691724b34cfc81a",
+              "openssl/openssl-1.1.1w.tar.gz": "9547637cf0621e052a5f3490564018b82f97c6fe",
+              "qt.pro": "81553664e1b3aece403f47b56404454337a70e08",
+              "qtactiveqt": "df401a62879521f3fd47097205a440d5b173b524",
+              "qtbase": "5e8b3ee0ae8cabf3c1a84d4568ff5f9f2bb09544",
+              "qtdeclarative": "de625ea60fa8eb030c3348710a96b37f2281ae0f",
+              "qtimageformats": "a8700e758525336c1331165efb68a3f24dd7a6e7",
+              "qtsvg": "a9e1b4199654547e633730522d1b18168eb3e63a",
+              "qttools": "1db38dc7d01e2b0567fc6d92c7aa58bfe69ce9c3",
+              "qttranslations": "fd567a42c1b566f22f339db758d29925fd2a8c60",
+              "qtwayland": "26d0b4202b9d81527138ce614573e0bc3b528b9d",
+              "qtwebsockets": "b595a445da86a2aa85d9559b413ccc12cc62144c",
+              "@native-job-configuration": "b833da2cc65fbfc4c52d6551d1a0f4d1299e91cf8867641a319d5d8d250e40b6"
+            },
+            "policy": "Unverified install; all current packaging and acceptance gates repeat",
+            "previous": {
+              "source_run": "43126854406",
+              "source_commit": "0794159e1d8a512439df98e6601fd0d9190acabf",
+              "source_job": 130883411971,
+              "source_artifact": 13906926172,
+              "packaging_commit": "963df90b7f01416fea1cd81c805dd7628281fe7a",
+              "compilation_inputs": {
+                ".gitmodules": "4be4cc9ec06ce63ab913aca299cb51fe2899a1a2",
+                "configure": "89b394299a414209f480e044b3cf2e5a3efa16d9",
+                "configure.bat": "500d627fdeaf6bab1ccef7a9c98e3a17c1d7d7d6",
+                "onekey-build-macos-x64.sh": "5dde004e09c5b83b72a6dab8b691724b34cfc81a",
+                "openssl/openssl-1.1.1w.tar.gz": "9547637cf0621e052a5f3490564018b82f97c6fe",
+                "qt.pro": "81553664e1b3aece403f47b56404454337a70e08",
+                "qtactiveqt": "df401a62879521f3fd47097205a440d5b173b524",
+                "qtbase": "5e8b3ee0ae8cabf3c1a84d4568ff5f9f2bb09544",
+                "qtdeclarative": "de625ea60fa8eb030c3348710a96b37f2281ae0f",
+                "qtimageformats": "a8700e758525336c1331165efb68a3f24dd7a6e7",
+                "qtsvg": "a9e1b4199654547e633730522d1b18168eb3e63a",
+                "qttools": "1db38dc7d01e2b0567fc6d92c7aa58bfe69ce9c3",
+                "qttranslations": "fd567a42c1b566f22f339db758d29925fd2a8c60",
+                "qtwayland": "26d0b4202b9d81527138ce614573e0bc3b528b9d",
+                "qtwebsockets": "b595a445da86a2aa85d9559b413ccc12cc62144c",
+                "@native-job-configuration": "b833da2cc65fbfc4c52d6551d1a0f4d1299e91cf8867641a319d5d8d250e40b6"
+              },
+              "policy": "Unverified install; all current packaging and acceptance gates repeat"
+            }
+          },
+          "arm64": {
+            "source_run": "43135533985",
+            "source_commit": "963df90b7f01416fea1cd81c805dd7628281fe7a",
+            "source_job": 130912582965,
+            "source_artifact": 13907448404,
+            "packaging_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+            "compilation_inputs": {
+              ".gitmodules": "4be4cc9ec06ce63ab913aca299cb51fe2899a1a2",
+              "configure": "89b394299a414209f480e044b3cf2e5a3efa16d9",
+              "configure.bat": "500d627fdeaf6bab1ccef7a9c98e3a17c1d7d7d6",
+              "onekey-build-macos-arm64.sh": "6184f2c89d2f96fee3436d92960c325408c71031",
+              "openssl/openssl-1.1.1w.tar.gz": "9547637cf0621e052a5f3490564018b82f97c6fe",
+              "qt.pro": "81553664e1b3aece403f47b56404454337a70e08",
+              "qtactiveqt": "df401a62879521f3fd47097205a440d5b173b524",
+              "qtbase": "5e8b3ee0ae8cabf3c1a84d4568ff5f9f2bb09544",
+              "qtdeclarative": "de625ea60fa8eb030c3348710a96b37f2281ae0f",
+              "qtimageformats": "a8700e758525336c1331165efb68a3f24dd7a6e7",
+              "qtsvg": "a9e1b4199654547e633730522d1b18168eb3e63a",
+              "qttools": "1db38dc7d01e2b0567fc6d92c7aa58bfe69ce9c3",
+              "qttranslations": "fd567a42c1b566f22f339db758d29925fd2a8c60",
+              "qtwayland": "26d0b4202b9d81527138ce614573e0bc3b528b9d",
+              "qtwebsockets": "b595a445da86a2aa85d9559b413ccc12cc62144c",
+              "@native-job-configuration": "55e86df5c82008db76b3fdde1e70e0fdbc142aa1d005a09a0aca53aabc6b08e9"
+            },
+            "policy": "Unverified install; all current packaging and acceptance gates repeat",
+            "previous": {
+              "source_run": "43126854406",
+              "source_commit": "0794159e1d8a512439df98e6601fd0d9190acabf",
+              "source_job": 130883412226,
+              "source_artifact": 13904184330,
+              "packaging_commit": "963df90b7f01416fea1cd81c805dd7628281fe7a",
+              "compilation_inputs": {
+                ".gitmodules": "4be4cc9ec06ce63ab913aca299cb51fe2899a1a2",
+                "configure": "89b394299a414209f480e044b3cf2e5a3efa16d9",
+                "configure.bat": "500d627fdeaf6bab1ccef7a9c98e3a17c1d7d7d6",
+                "onekey-build-macos-arm64.sh": "6184f2c89d2f96fee3436d92960c325408c71031",
+                "openssl/openssl-1.1.1w.tar.gz": "9547637cf0621e052a5f3490564018b82f97c6fe",
+                "qt.pro": "81553664e1b3aece403f47b56404454337a70e08",
+                "qtactiveqt": "df401a62879521f3fd47097205a440d5b173b524",
+                "qtbase": "5e8b3ee0ae8cabf3c1a84d4568ff5f9f2bb09544",
+                "qtdeclarative": "de625ea60fa8eb030c3348710a96b37f2281ae0f",
+                "qtimageformats": "a8700e758525336c1331165efb68a3f24dd7a6e7",
+                "qtsvg": "a9e1b4199654547e633730522d1b18168eb3e63a",
+                "qttools": "1db38dc7d01e2b0567fc6d92c7aa58bfe69ce9c3",
+                "qttranslations": "fd567a42c1b566f22f339db758d29925fd2a8c60",
+                "qtwayland": "26d0b4202b9d81527138ce614573e0bc3b528b9d",
+                "qtwebsockets": "b595a445da86a2aa85d9559b413ccc12cc62144c",
+                "@native-job-configuration": "55e86df5c82008db76b3fdde1e70e0fdbc142aa1d005a09a0aca53aabc6b08e9"
+              },
+              "policy": "Unverified install; all current packaging and acceptance gates repeat"
+            }
+          }
+        }
+      }
+    },
+    {
+      "accepted": true,
+      "target": "x64",
+      "consumer_arch": "x86_64",
+      "architectures": [
+        "x86_64"
+      ],
+      "source_run": "43138931470",
+      "source_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+      "verifier_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+      "archive": "qt5.15.17_macos_x64.tar.gz",
+      "sha256": "f666bd8b879d62691909913e5fcb0b51fbc39e723e7f4c2ac02c581449deab56",
+      "symbols": {
+        "archive": "qt5.15.17_macos_x64-symbols.tar.gz",
+        "sha256": "7f09ead620b263d496d65ee8c7556d56084766c9e90c7a2959b6daf4724704b9",
+        "binaries": 139,
+        "checks": [
+          "complete binary coverage",
+          "binary and symbol hashes",
+          "matching debug identities"
+        ]
+      },
+      "checks": [
+        "extracted executable permissions",
+        "all Mach-O and static archive architectures",
+        "advertised qmake architectures",
+        "default native qmake consumer",
+        "qmake C++17 consumer",
+        "offscreen GUI/QML/fonts/TLS execution"
+      ],
+      "build_provenance": {
+        "ci-native-source.json": {
+          "source_run": "43135533985",
+          "source_commit": "963df90b7f01416fea1cd81c805dd7628281fe7a",
+          "source_job": 130912583068,
+          "source_artifact": 13907538509,
+          "packaging_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+          "compilation_inputs": {
+            ".gitmodules": "4be4cc9ec06ce63ab913aca299cb51fe2899a1a2",
+            "configure": "89b394299a414209f480e044b3cf2e5a3efa16d9",
+            "configure.bat": "500d627fdeaf6bab1ccef7a9c98e3a17c1d7d7d6",
+            "onekey-build-macos-x64.sh": "5dde004e09c5b83b72a6dab8b691724b34cfc81a",
+            "openssl/openssl-1.1.1w.tar.gz": "9547637cf0621e052a5f3490564018b82f97c6fe",
+            "qt.pro": "81553664e1b3aece403f47b56404454337a70e08",
+            "qtactiveqt": "df401a62879521f3fd47097205a440d5b173b524",
+            "qtbase": "5e8b3ee0ae8cabf3c1a84d4568ff5f9f2bb09544",
+            "qtdeclarative": "de625ea60fa8eb030c3348710a96b37f2281ae0f",
+            "qtimageformats": "a8700e758525336c1331165efb68a3f24dd7a6e7",
+            "qtsvg": "a9e1b4199654547e633730522d1b18168eb3e63a",
+            "qttools": "1db38dc7d01e2b0567fc6d92c7aa58bfe69ce9c3",
+            "qttranslations": "fd567a42c1b566f22f339db758d29925fd2a8c60",
+            "qtwayland": "26d0b4202b9d81527138ce614573e0bc3b528b9d",
+            "qtwebsockets": "b595a445da86a2aa85d9559b413ccc12cc62144c",
+            "@native-job-configuration": "b833da2cc65fbfc4c52d6551d1a0f4d1299e91cf8867641a319d5d8d250e40b6"
+          },
+          "policy": "Unverified install; all current packaging and acceptance gates repeat",
+          "previous": {
+            "source_run": "43126854406",
+            "source_commit": "0794159e1d8a512439df98e6601fd0d9190acabf",
+            "source_job": 130883411971,
+            "source_artifact": 13906926172,
+            "packaging_commit": "963df90b7f01416fea1cd81c805dd7628281fe7a",
+            "compilation_inputs": {
+              ".gitmodules": "4be4cc9ec06ce63ab913aca299cb51fe2899a1a2",
+              "configure": "89b394299a414209f480e044b3cf2e5a3efa16d9",
+              "configure.bat": "500d627fdeaf6bab1ccef7a9c98e3a17c1d7d7d6",
+              "onekey-build-macos-x64.sh": "5dde004e09c5b83b72a6dab8b691724b34cfc81a",
+              "openssl/openssl-1.1.1w.tar.gz": "9547637cf0621e052a5f3490564018b82f97c6fe",
+              "qt.pro": "81553664e1b3aece403f47b56404454337a70e08",
+              "qtactiveqt": "df401a62879521f3fd47097205a440d5b173b524",
+              "qtbase": "5e8b3ee0ae8cabf3c1a84d4568ff5f9f2bb09544",
+              "qtdeclarative": "de625ea60fa8eb030c3348710a96b37f2281ae0f",
+              "qtimageformats": "a8700e758525336c1331165efb68a3f24dd7a6e7",
+              "qtsvg": "a9e1b4199654547e633730522d1b18168eb3e63a",
+              "qttools": "1db38dc7d01e2b0567fc6d92c7aa58bfe69ce9c3",
+              "qttranslations": "fd567a42c1b566f22f339db758d29925fd2a8c60",
+              "qtwayland": "26d0b4202b9d81527138ce614573e0bc3b528b9d",
+              "qtwebsockets": "b595a445da86a2aa85d9559b413ccc12cc62144c",
+              "@native-job-configuration": "b833da2cc65fbfc4c52d6551d1a0f4d1299e91cf8867641a319d5d8d250e40b6"
+            },
+            "policy": "Unverified install; all current packaging and acceptance gates repeat"
+          }
+        }
+      }
+    },
+    {
+      "accepted": true,
+      "target_arch": "arm64",
+      "variant": "debug",
+      "source_run": "43138931470",
+      "source_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+      "verifier_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+      "archive": "qt5.15.17_windows_arm64_debug.zip",
+      "sha256": "b64b3865ad324bd7281862b90691fbdfabd1213361dfb39e04af54169f893c6c",
+      "compiler": "14.44.35207",
+      "symbols": {
+        "archive": "qt5.15.17_windows_arm64_debug-symbols.zip",
+        "sha256": "f00f6726b0aadbae4ed520a5b3e51c787921c8bee4bbe58b08702cbe55f387ac",
+        "binaries": 125,
+        "checks": [
+          "complete binary coverage",
+          "binary and symbol hashes",
+          "matching debug identities"
+        ]
+      },
+      "checks": [
+        "standalone extracted SDK",
+        "relocated qmake prefix",
+        "bundled thunk objects",
+        "C++17 qmake consumer",
+        "ordinary and wide string round trips",
+        "offscreen GUI/QML/fonts/TLS runtime",
+        "consumer PE architecture",
+        "matching bundled VC-LTL consumer runtime",
+        "qmake static UiTools consumer"
+      ]
+    },
+    {
+      "accepted": true,
+      "target_arch": "arm64",
+      "variant": "release",
+      "source_run": "43138931470",
+      "source_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+      "verifier_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+      "archive": "qt5.15.17_windows_arm64.zip",
+      "sha256": "145c09ab0f3b23e530f225427cfe0a37c73399bbb61746ff27dad0de4032763b",
+      "compiler": "14.44.35207",
+      "symbols": {
+        "archive": "qt5.15.17_windows_arm64-symbols.zip",
+        "sha256": "577dfedf12debe15dbb24ed7e5a20a2a1ada887849f2badab60c9ccb5f0582c0",
+        "binaries": 125,
+        "checks": [
+          "complete binary coverage",
+          "binary and symbol hashes",
+          "matching debug identities"
+        ]
+      },
+      "checks": [
+        "standalone extracted SDK",
+        "relocated qmake prefix",
+        "bundled thunk objects",
+        "C++17 qmake consumer",
+        "ordinary and wide string round trips",
+        "offscreen GUI/QML/fonts/TLS runtime",
+        "consumer PE architecture",
+        "matching bundled VC-LTL consumer runtime",
+        "qmake static UiTools consumer"
+      ]
+    },
+    {
+      "accepted": true,
+      "target_arch": "x64",
+      "variant": "debug",
+      "source_run": "43138931470",
+      "source_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+      "verifier_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+      "archive": "qt5.15.17_windows_x64_debug.zip",
+      "sha256": "b9a2482d0da8e0da853eec5c5a9b556519c11a5a79ff83e064e5e55e3b89bda8",
+      "compiler": "14.44.35207",
+      "symbols": {
+        "archive": "qt5.15.17_windows_x64_debug-symbols.zip",
+        "sha256": "ca6ed195b616bc767867be10e5b23665dc41322be6853890248e5850fbcb25fb",
+        "binaries": 125,
+        "checks": [
+          "complete binary coverage",
+          "binary and symbol hashes",
+          "matching debug identities"
+        ]
+      },
+      "checks": [
+        "standalone extracted SDK",
+        "relocated qmake prefix",
+        "bundled thunk objects",
+        "C++17 qmake consumer",
+        "ordinary and wide string round trips",
+        "offscreen GUI/QML/fonts/TLS runtime",
+        "consumer PE architecture",
+        "matching bundled VC-LTL consumer runtime",
+        "qmake static UiTools consumer"
+      ]
+    },
+    {
+      "accepted": true,
+      "target_arch": "x64",
+      "variant": "release",
+      "source_run": "43138931470",
+      "source_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+      "verifier_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+      "archive": "qt5.15.17_windows_x64.zip",
+      "sha256": "142448a8639e41dc6b9e7b45f0e0e5a2bada06070e0bc19e878cdd210782c252",
+      "compiler": "14.44.35207",
+      "symbols": {
+        "archive": "qt5.15.17_windows_x64-symbols.zip",
+        "sha256": "639a76bfa437595d17cf6c1a795d80ae04a495e19f4d90a3c106b28c209925c7",
+        "binaries": 125,
+        "checks": [
+          "complete binary coverage",
+          "binary and symbol hashes",
+          "matching debug identities"
+        ]
+      },
+      "checks": [
+        "standalone extracted SDK",
+        "relocated qmake prefix",
+        "bundled thunk objects",
+        "C++17 qmake consumer",
+        "ordinary and wide string round trips",
+        "offscreen GUI/QML/fonts/TLS runtime",
+        "consumer PE architecture",
+        "matching bundled VC-LTL consumer runtime",
+        "qmake static UiTools consumer"
+      ]
+    },
+    {
+      "accepted": true,
+      "target_arch": "x86",
+      "variant": "debug",
+      "source_run": "43138931470",
+      "source_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+      "verifier_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+      "archive": "qt5.15.17_windows_x86_debug.zip",
+      "sha256": "c39cf7633ef3ee8df4b8891dddcc154be4c4ae311f3efa8a0ad27c391e698a5d",
+      "compiler": "14.44.35207",
+      "symbols": {
+        "archive": "qt5.15.17_windows_x86_debug-symbols.zip",
+        "sha256": "6823a48e3039dac1a56f7190be4722107287505caf074eaf96be7c2710357487",
+        "binaries": 125,
+        "checks": [
+          "complete binary coverage",
+          "binary and symbol hashes",
+          "matching debug identities"
+        ]
+      },
+      "checks": [
+        "standalone extracted SDK",
+        "relocated qmake prefix",
+        "bundled thunk objects",
+        "C++17 qmake consumer",
+        "ordinary and wide string round trips",
+        "offscreen GUI/QML/fonts/TLS runtime",
+        "consumer PE architecture",
+        "matching bundled VC-LTL consumer runtime",
+        "qmake static UiTools consumer"
+      ]
+    },
+    {
+      "accepted": true,
+      "target_arch": "x86",
+      "variant": "release",
+      "source_run": "43138931470",
+      "source_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+      "verifier_commit": "3d88705141c792e2c15e7316cd3114de13d4a833",
+      "archive": "qt5.15.17_windows_x86.zip",
+      "sha256": "2c1a356c02beeea6ec6c4cf055f3dd07c6c23dcb3b6a161cb226be6222d0496c",
+      "compiler": "14.44.35207",
+      "symbols": {
+        "archive": "qt5.15.17_windows_x86-symbols.zip",
+        "sha256": "20ac88650e33adbe986bfa5f9dd46ef40b34a1dcdc1fd8ec1405e483d4e7fa04",
+        "binaries": 125,
+        "checks": [
+          "complete binary coverage",
+          "binary and symbol hashes",
+          "matching debug identities"
+        ]
+      },
+      "checks": [
+        "standalone extracted SDK",
+        "relocated qmake prefix",
+        "bundled thunk objects",
+        "C++17 qmake consumer",
+        "ordinary and wide string round trips",
+        "offscreen GUI/QML/fonts/TLS runtime",
+        "consumer PE architecture",
+        "matching bundled VC-LTL consumer runtime",
+        "qmake static UiTools consumer"
+      ]
+    }
+  ],
+  "asset_layout": {
+    "linux_sdk_archives": 10,
+    "linux_symbol_archives": 10,
+    "windows_sdk_archives": 6,
+    "windows_pdb_archives": 6,
+    "macos_sdk_archives": 3,
+    "macos_symbol_archives": 3,
+    "manifests_and_checksums": 3
+  },
+  "additional_real_regression_run": "43140653980",
+  "regressions": [
+    "actual Qt5Bootstrap archive with DWARF",
+    "thin and universal static archive consumers link and run on both Mac hosts",
+    "all-architecture DWARF absence",
+    "native gzip CRC integrity",
+    "separate binary/symbol hash and UUID or PDB GUID/age identity checks"
+  ],
+  "local_unit_tests": {
+    "release_gate": 33,
+    "native_symbol_parser": 3,
+    "linux_gate": 7
+  },
+  "reused_compilation_run": "43135533985",
+  "native_symbol_packager_sha": "adb23b7d24fef07c1126085da218af422bb03ef2"
+}
